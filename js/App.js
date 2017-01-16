@@ -6,7 +6,7 @@
     var canvas, renderer;
 
     var camera;
-    var scene;
+    var scene1, scene2;
 
 
 
@@ -26,6 +26,12 @@
     }
 
 
+    function render () {
+        requestAnimationFrame( render );
+
+        renderer.render( scene1, camera );
+    }
+
 
 
     window.onload = function() {
@@ -42,15 +48,17 @@
         camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
         camera.position.z = 100;
 
+        var orbit = new THREE.OrbitControls( camera, renderer.domElement );
 
-        scene = new THREE.Scene();
+
+        scene1 = new THREE.Scene();
 
         var ambient = new THREE.AmbientLight( 0x444444 );
-        scene.add( ambient );
+        scene1.add( ambient );
 
         var directionalLight = new THREE.DirectionalLight( 0xffeedd );
         directionalLight.position.set( 1, 1, 1 ).normalize();
-        scene.add( directionalLight );
+        scene1.add( directionalLight );
 
 
         // test
@@ -58,10 +66,40 @@
         var geometry  = new THREE.SphereGeometry( 10, 6, 6 );
         var material = new THREE.MeshPhongMaterial( { color: 0xffaa00, shading: THREE.FlatShading } );
         // var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+
+
+        var mesh = new THREE.Object3D();
+
+        // mesh.add( new THREE.LineSegments(
+
+        //     geometry,
+
+        //     new THREE.LineBasicMaterial( {
+        //         color: 0xffffff,
+        //         transparent: true,
+        //         opacity: 0.5
+        //     } )
+
+        // ) );
+
+        // mesh.add( new THREE.Mesh(
+
+        //     geometry,
+
+        //     new THREE.MeshPhongMaterial( {
+        //         color: 0x156289,
+        //         emissive: 0x072534,
+        //         side: THREE.DoubleSide,
+        //         shading: THREE.FlatShading
+        //     } )
+
+        // ) );
+
         var mesh = new THREE.Mesh( geometry, material );
-        scene.add(mesh);
+        scene1.add(mesh);
 
 
-        renderer.render(scene, camera);
+        // renderer.render(scene1, camera);
+        render();
     };
 })();
