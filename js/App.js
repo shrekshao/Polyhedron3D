@@ -46,24 +46,29 @@
 
 
         camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
-        camera.position.z = 100;
+        camera.position.z = 10;
 
         var orbit = new THREE.OrbitControls( camera, renderer.domElement );
 
 
         scene1 = new THREE.Scene();
+        scene2 = new THREE.Scene();
 
         var ambient = new THREE.AmbientLight( 0x444444 );
         scene1.add( ambient );
 
+        scene2.add( ambient.clone() );
+
         var directionalLight = new THREE.DirectionalLight( 0xffeedd );
         directionalLight.position.set( 1, 1, 1 ).normalize();
         scene1.add( directionalLight );
+        
+        scene2.add( directionalLight.clone() );
 
 
         // test
         // var geometry  = new THREE.IcosahedronGeometry( 200, 1 );
-        var geometry  = new THREE.SphereGeometry( 10, 6, 6 );
+        var geometry  = new THREE.SphereGeometry( 1.5, 6, 6 );
         var material = new THREE.MeshPhongMaterial( { color: 0xffaa00, shading: THREE.FlatShading } );
         // var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 
@@ -98,6 +103,13 @@
         var mesh = new THREE.Mesh( geometry, material );
         scene1.add(mesh);
 
+
+        var mesh2 = new THREE.Mesh( 
+            new THREE.BoxGeometry( 2, 2, 2 ), 
+            new THREE.MeshPhongMaterial( { color: 0x156289, shading: THREE.FlatShading } )
+        );
+
+        scene2.add( mesh2 );
 
         // renderer.render(scene1, camera);
         render();
