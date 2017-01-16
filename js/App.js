@@ -10,7 +10,26 @@
 
 
 
+    var views = [
+        {
+            left: 0,
+            bottom: 0,
+            width: 0.5,
+            height: 1.0,
 
+            background: new THREE.Color().setRGB( 0.5, 0.5, 0.7 )
+        },
+
+        {
+            left: 0.5,
+            bottom: 0,
+            width: 0.5,
+            height: 1.0,
+
+            // background: new THREE.Color().setRGB( 0.7, 0.7, 0.7 )
+            background: new THREE.Color().setRGB( 0.5, 0.5, 0.7 )
+        }
+    ];
 
 
     function onWindowResize() {
@@ -28,8 +47,42 @@
 
     function render () {
         requestAnimationFrame( render );
+        // renderer.render( scene1, camera );
 
-        renderer.render( scene1, camera );
+        
+
+
+        var view;
+        for ( var ii = 0; ii < views.length; ++ii ) {
+            view = views[ii];
+
+            var left   = Math.floor( window.innerWidth  * view.left );
+            var bottom = Math.floor( window.innerHeight * view.bottom );
+            var width  = Math.floor( window.innerWidth  * view.width );
+            var height = Math.floor( window.innerHeight * view.height );
+            renderer.setViewport( left, bottom, width, height );
+            renderer.setScissor( left, bottom, width, height );
+            renderer.setScissorTest( true );
+            renderer.setClearColor( view.background );
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+
+
+            // tmp hard code
+            if (ii === 0) {
+                // renderer.clear();
+                renderer.render( scene1, camera );
+                // renderer.autoClear = false;
+            } else {
+                // renderer.clearDepth();
+                renderer.render( scene2, camera );
+                // renderer.autoClear = true;
+            }
+            
+        }
+
+        // renderer.autoClear = true;
+
     }
 
 
