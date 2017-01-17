@@ -10,6 +10,8 @@
 
     var gui, cfg;
 
+    var polyhedralDiagram;
+
     var views = [
         {
             left: 0,
@@ -46,7 +48,24 @@
             reader.onload = function (e) {
                 // console.log( e.target.result );
                 var diagramJson = JSON.parse( e.target.result );
-                console.log(diagramJson);
+                // console.log(diagramJson);
+
+                polyhedralDiagram = new PolyhedralDiagram(diagramJson);
+
+                var material = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 1, linewidth: 3 } );
+
+                var mesh = new THREE.Line( 
+                    polyhedralDiagram.geometry, 
+                    material
+                );
+                scene2.add(mesh);
+                
+                // var mesh2 = new THREE.Mesh( 
+                //     // new THREE.BoxGeometry( 2, 2, 2 ), 
+                //     new THREE.IcosahedronGeometry(1.5, 0), 
+                //     new THREE.MeshPhongMaterial( { color: 0x156289, shading: THREE.FlatShading } )
+                // );
+                // scene2.add(mesh2);
             };
         }
     }
@@ -206,13 +225,16 @@
         var mesh = new THREE.Mesh( geometry, material );
         scene1.add(mesh);
 
+        
+
 
         var mesh2 = new THREE.Mesh( 
-            new THREE.BoxGeometry( 2, 2, 2 ), 
+            // new THREE.BoxGeometry( 2, 2, 2 ), 
+            new THREE.IcosahedronGeometry(1.5, 0), 
             new THREE.MeshPhongMaterial( { color: 0x156289, shading: THREE.FlatShading } )
         );
 
-        scene2.add( mesh2 );
+        // scene2.add( mesh2 );
 
         // renderer.render(scene1, camera);
         render();
