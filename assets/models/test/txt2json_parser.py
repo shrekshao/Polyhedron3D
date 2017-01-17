@@ -54,7 +54,8 @@ class Txt2JsonParser:
         f_edge_ex = open(filename_edge_ex)
         for line in f_edge_ex:
             edge = line.strip().split('\t')
-            edges[edge[0]]['external'] = True
+            for e in edge:
+                edges[e]['external'] = True
 
         f_edge_ex.close()
 

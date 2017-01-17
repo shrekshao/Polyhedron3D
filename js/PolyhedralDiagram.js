@@ -39,6 +39,13 @@ var PolyhedralDiagram = function (json) {
         vertex = json.form.edges[edge].vertex;
 
         geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+
+        if (json.form.edges[edge].external) {
+            geometry.colors.push( new THREE.Color(0xff0000), new THREE.Color(0xff0000)  );
+        } else {
+            geometry.colors.push( new THREE.Color(0xffffff), new THREE.Color(0xffffff)  );
+        }
+        
     }
 
     // geometry.translate(-center.x, -center.y, -center.z);

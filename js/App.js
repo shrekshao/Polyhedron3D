@@ -52,7 +52,12 @@
 
                 polyhedralDiagram = new PolyhedralDiagram(diagramJson);
 
-                var material = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 1, linewidth: 3 } );
+                var material = new THREE.LineBasicMaterial( { 
+                    color: 0xffffff, 
+                    opacity: 1, 
+                    linewidth: 3, 
+                    vertexColors: THREE.VertexColors
+                } );
 
                 var mesh = new THREE.Line( 
                     polyhedralDiagram.geometry, 
@@ -190,7 +195,7 @@
 
         // test
         // var geometry  = new THREE.IcosahedronGeometry( 200, 1 );
-        var geometry  = new THREE.SphereGeometry( 1.5, 6, 6 );
+        var geometry  = new THREE.SphereGeometry( 1, 6, 6 );
         var material = new THREE.MeshPhongMaterial( { color: 0xffaa00, shading: THREE.FlatShading } );
         // var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 
