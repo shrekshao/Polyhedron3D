@@ -59,7 +59,8 @@
 
 	</style>-->
 
-
+	
+	<script src="js/lib/dat.gui.min.js"></script>
 	<script src="js/lib/three.js"></script>
 	<!--<script src="js/lib/three.min.js"></script>-->
 	<!--<script src="js/lib/utils/loaders/OBJLoader.js"></script>-->
@@ -68,8 +69,10 @@
 </head>
 
 <body>
-
 	<canvas id="webgl-canvas" style="position:fixed; top:0;left:0"></canvas>
+
+	<input type="file" id="files" name="files" style="visibility:hidden"/>
+	<output id="list"></output>
 </body>
 
 </html>

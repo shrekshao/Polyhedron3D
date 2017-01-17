@@ -8,7 +8,7 @@
     var camera;
     var scene1, scene2;
 
-
+    var gui, cfg;
 
     var views = [
         {
@@ -30,6 +30,40 @@
             background: new THREE.Color().setRGB( 0.5, 0.5, 0.7 )
         }
     ];
+
+
+
+    function handleFileSelect(e) {
+        var files = e.target.files; // FileList object
+
+        // files is a FileList of File objects. List some properties.
+        console.log('load json file');
+        var reader = new FileReader();
+
+
+        for (var i = 0, f; f = files[i]; i++) {
+            reader.readAsText(f, "UTF-8");
+            reader.onload = function (e) {
+                // console.log( e.target.result );
+                var diagramJson = JSON.parse( e.target.result );
+                console.log(diagramJson);
+            };
+        }
+    }
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     function onWindowResize() {
@@ -88,6 +122,22 @@
 
 
     window.onload = function() {
+
+        document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
+        gui = new dat.GUI();
+        cfg = {
+            load_json: function () {
+                // console.log('load json file');
+                document.getElementById("files").click()
+            }
+        }
+
+        gui.add(cfg, 'load_json');
+
+
+
+
         canvas = document.getElementById( 'webgl-canvas' );
         
         renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true } );
