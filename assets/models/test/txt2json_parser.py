@@ -39,6 +39,7 @@ class Txt2JsonParser:
             e = edges[edge[0]] = {}
             e['vertex'] = edge[1:]
             # e['external'] = False
+            # print edge[0], e['vertex']
 
         # print edges
         f_edge_vertex.close()
@@ -102,15 +103,27 @@ class Txt2JsonParser:
 if __name__ == "__main__":
     parser = Txt2JsonParser()
 
-    parser.readFormVertex("form_diagram/form_vertex.txt")
-    parser.readFormEdge("form_diagram/form_edge_vertex.txt", \
-                        "form_diagram/form_edge_to_force_face.txt", \
-                        "form_diagram/form_edge_ex.txt")
+    # parser.readFormVertex("form_diagram/form_vertex.txt")
+    # parser.readFormEdge("form_diagram/form_edge_vertex.txt", \
+    #                     "form_diagram/form_edge_to_force_face.txt", \
+    #                     "form_diagram/form_edge_ex.txt")
     
-    parser.readForceVertex("force_diagram/force_vertex.txt")
-    parser.readForceEdge("force_diagram/force_edge_vertex.txt")
-    parser.readForceFace("force_diagram/force_face_edge.txt")
+    # parser.readForceVertex("force_diagram/force_vertex.txt")
+    # parser.readForceEdge("force_diagram/force_edge_vertex.txt")
+    # parser.readForceFace("force_diagram/force_face_edge.txt")
 
-    with open('test.json', 'w') as out:
+    # with open('test.json', 'w') as out:
+    #     json.dump(parser.diagramJson.json, out)
+
+    parser.readFormVertex("test_2/form_v.txt")
+    parser.readFormEdge("test_2/form_e_v.txt", \
+                        "test_2/form_e_to_force_f.txt", \
+                        "test_2/form_e_ex.txt")
+    
+    parser.readForceVertex("test_2/force_v.txt")
+    parser.readForceEdge("test_2/force_e_v.txt")
+    parser.readForceFace("test_2/force_f_e.txt")
+
+    with open('test2.json', 'w') as out:
         json.dump(parser.diagramJson.json, out)
     

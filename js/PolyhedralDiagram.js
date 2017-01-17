@@ -12,7 +12,7 @@ var PolyhedralDiagram = function (json) {
     var v;
 
     // var center = new THREE.Vector3();
-    var numVertices = 0;
+    // var numVertices = 0;
     
     for (v in json.form.vertices) {
         vec3[v] = new THREE.Vector3 ( 
@@ -38,7 +38,10 @@ var PolyhedralDiagram = function (json) {
     for (edge in json.form.edges) {
         vertex = json.form.edges[edge].vertex;
 
-        geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+        console.log(edge, vertex);
+
+        // geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+        geometry.vertices.push( vec3[json.form.edges[edge].vertex[0]].clone(), vec3[json.form.edges[edge].vertex[1]].clone() );
 
         if (json.form.edges[edge].external) {
             geometry.colors.push( new THREE.Color(0xff0000), new THREE.Color(0xff0000)  );

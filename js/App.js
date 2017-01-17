@@ -59,7 +59,7 @@
                     vertexColors: THREE.VertexColors
                 } );
 
-                var mesh = new THREE.Line( 
+                var mesh = new THREE.LineSegments( 
                     polyhedralDiagram.geometry, 
                     material
                 );
