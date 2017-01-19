@@ -8,7 +8,38 @@ var PolyhedralDiagram = function (json) {
 
     this.diagram = {
         form: {},
-        force: {}
+        force: {},
+
+        materials: {
+            lineBasic: new THREE.LineBasicMaterial( { 
+                color: 0xffffff, 
+                opacity: 1, 
+                transparent: false,
+                linewidth: 3
+            } ),
+
+            lineExternal: new THREE.LineBasicMaterial( { 
+                color: 0xff0000, 
+                opacity: 1, 
+                transparent: false,
+                linewidth: 3
+            } ),
+
+            forceFace: new THREE.MeshBasicMaterial( { 
+                color: 0xffaa00, 
+                shading: THREE.FlatShading,
+                opacity: 0.9,
+                transparent: true,
+                side: THREE.DoubleSide
+            })
+            // forceFace: new THREE.MeshPhongMaterial( { 
+            //     color: 0xffaa00, 
+            //     shading: THREE.FlatShading,
+            //     opacity: 0.9,
+            //     transparent: true,
+            //     side: THREE.DoubleSide
+            // })
+        }
     };
 
     this.buildFormDiagram();
@@ -22,11 +53,11 @@ PolyhedralDiagram.prototype.constructor = PolyhedralDiagram;
 PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var json = this.json;
 
-    var geometry = this.formGeometry = new THREE.Geometry();
-    var exEdges = this.formExEdges = new THREE.Geometry();
+    var geometry = this.diagram.form.edges = new THREE.Geometry();
+    var exEdges = this.diagram.form.exEdges = new THREE.Geometry();
     // var exForces = this.exForces = new THREE.Geometry();
 
-    var exForces = this.formExForces = new THREE.Object3D();
+    var exForces = this.diagram.form.exForceArrows = new THREE.Object3D();
 
     var vec3 = {};
     var v;
@@ -91,6 +122,20 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     exForces.translateX( offset.x );
     exForces.translateY( offset.y );
     exForces.translateZ( offset.z );
+
+
+    // build mesh
+    this.diagram.form.meshEdges = new THREE.LineSegments( 
+        geometry, 
+        this.diagram.materials.lineBasic
+    );
+
+    this.diagram.form.meshExEdges = new THREE.LineSegments(
+        exEdges,
+        this.diagram.materials.lineExternal
+    );
+
+    
 }
 
 
@@ -100,7 +145,7 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
     var vec3 = {};
     var v;
 
-    var geometry = this.forceGeometry = new THREE.Geometry();
+    var geometry = this.diagram.force.geometry = new THREE.Geometry();
 
 
     var vid2vid = {};
@@ -128,7 +173,7 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
 
 
     // edges
-    var edgeGeometry = this.forceEdgeGeometry = new THREE.Geometry();
+    var edgeGeometry = this.diagram.force.edges = new THREE.Geometry();
     var edge, vertex, arrow;
     for (edge in json.force.edges) {
         vertex = json.force.edges[edge];
@@ -137,11 +182,6 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
     }
 
     edgeGeometry.translate( offset.x, offset.y, offset.z );
-
-
-
-
-
 
     var faces = {};
 
@@ -164,8 +204,23 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
         
     }
 
+    // normal should read from txt files... (order)
     geometry.computeFaceNormals();
     geometry.computeVertexNormals();
+
+
+
+
+    // build mesh
+    this.diagram.force.meshEdges = new THREE.LineSegments( 
+        edgeGeometry, 
+        this.diagram.materials.lineBasic
+    );
+
+    this.diagram.force.meshFaces = new THREE.Mesh(
+        geometry,
+        this.diagram.materials.forceFace
+    );
 
 
 }

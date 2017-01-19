@@ -52,56 +52,64 @@
 
                 polyhedralDiagram = new PolyhedralDiagram(diagramJson);
 
-                var material = new THREE.LineBasicMaterial( { 
-                    color: 0xffffff, 
-                    opacity: 1, 
-                    linewidth: 3
-                } );
+                // var material = new THREE.LineBasicMaterial( { 
+                //     color: 0xffffff, 
+                //     opacity: 1, 
+                //     linewidth: 3
+                // } );
 
-                var mesh = new THREE.LineSegments( 
-                    polyhedralDiagram.formGeometry, 
-                    material
-                );
-
-                scene2.add(mesh);
-
-                var materialExEdges = new THREE.LineBasicMaterial( { 
-                    color: 0xff0000, 
-                    opacity: 1, 
-                    linewidth: 3
-                } );
-
-                var meshExEdges = new THREE.LineSegments( 
-                    polyhedralDiagram.formExEdges, 
-                    materialExEdges
-                );
-                
-                scene2.add(meshExEdges);
-
-                scene2.add(polyhedralDiagram.formExForces);
-                
-                // var mesh2 = new THREE.Mesh( 
-                //     // new THREE.BoxGeometry( 2, 2, 2 ), 
-                //     new THREE.IcosahedronGeometry(1.5, 0), 
-                //     new THREE.MeshPhongMaterial( { color: 0x156289, shading: THREE.FlatShading } )
+                // var mesh = new THREE.LineSegments( 
+                //     polyhedralDiagram.formGeometry, 
+                //     material
                 // );
-                // scene2.add(mesh2);
+
+                // scene2.add(mesh);
+
+                // var materialExEdges = new THREE.LineBasicMaterial( { 
+                //     color: 0xff0000, 
+                //     opacity: 1, 
+                //     linewidth: 3
+                // } );
+
+                // var meshExEdges = new THREE.LineSegments( 
+                //     polyhedralDiagram.formExEdges, 
+                //     materialExEdges
+                // );
+                
+                // scene2.add(meshExEdges);
+
+                // scene2.add(polyhedralDiagram.formExForces);
+                
+                // // var mesh2 = new THREE.Mesh( 
+                // //     // new THREE.BoxGeometry( 2, 2, 2 ), 
+                // //     new THREE.IcosahedronGeometry(1.5, 0), 
+                // //     new THREE.MeshPhongMaterial( { color: 0x156289, shading: THREE.FlatShading } )
+                // // );
+                // // scene2.add(mesh2);
 
 
-                var materialForceFace = new THREE.MeshPhongMaterial( { 
-                        color: 0xffaa00, 
-                        shading: THREE.FlatShading,
-                        opacity: 0.3,
-                        transparent: true,
-                        side: THREE.DoubleSide
-                });
+                // var materialForceFace = new THREE.MeshPhongMaterial( { 
+                //         color: 0xffaa00, 
+                //         shading: THREE.FlatShading,
+                //         opacity: 0.3,
+                //         transparent: true,
+                //         side: THREE.DoubleSide
+                // });
 
-                var meshForceFace = new THREE.Mesh( polyhedralDiagram.forceGeometry, materialForceFace );
-                scene1.add( meshForceFace );
+                // var meshForceFace = new THREE.Mesh( polyhedralDiagram.forceGeometry, materialForceFace );
+                // scene1.add( meshForceFace );
 
 
-                var meshForceEdge = new THREE.LineSegments( polyhedralDiagram.forceEdgeGeometry, material );
-                scene1.add( meshForceEdge );
+                // var meshForceEdge = new THREE.LineSegments( polyhedralDiagram.forceEdgeGeometry, material );
+                // scene1.add( meshForceEdge );
+
+
+                scene2.add( polyhedralDiagram.diagram.form.meshEdges );
+                scene2.add( polyhedralDiagram.diagram.form.meshExEdges );
+                scene2.add( polyhedralDiagram.diagram.form.exForceArrows );
+
+                scene1.add( polyhedralDiagram.diagram.force.meshEdges );
+                scene1.add( polyhedralDiagram.diagram.force.meshFaces );
             };
         }
     }
