@@ -98,6 +98,10 @@
 
                 var meshForceFace = new THREE.Mesh( polyhedralDiagram.forceGeometry, materialForceFace );
                 scene1.add( meshForceFace );
+
+
+                var meshForceEdge = new THREE.LineSegments( polyhedralDiagram.forceEdgeGeometry, material );
+                scene1.add( meshForceEdge );
             };
         }
     }

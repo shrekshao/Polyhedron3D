@@ -122,20 +122,41 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
 
 
 
+    // edges
+    var edgeGeometry = this.forceEdgeGeometry = new THREE.Geometry();
+    var edge, vertex, arrow;
+    for (edge in json.force.edges) {
+        vertex = json.force.edges[edge];
+
+        edgeGeometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+    }
+
+    edgeGeometry.translate( offset.x, offset.y, offset.z );
+
+
+
+
+
+
     var faces = {};
 
     var f;
-    var face3;
+    var face3, face4;
     var face_v;
     for (f in json.force.faces_v) {
         face_v = json.force.faces_v[f];
 
         if (face_v.length === 3) {
             face3 = new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[1]], vid2vid[face_v[2]] );
+            geometry.faces.push( face3 );
+        } else if (face_v.length === 4) {
+            // face3 = new THREE.Face4( vid2vid[face_v[0]], vid2vid[face_v[1]], vid2vid[face_v[2]], vid2vid[face_v[3]] );
+            // geometry.faces.push( face4 );
+            console.log(face_v);
         }
         
 
-        geometry.faces.push( face3 );
+        
     }
 
     geometry.computeFaceNormals();
