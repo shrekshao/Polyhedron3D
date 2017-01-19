@@ -55,15 +55,30 @@
                 var material = new THREE.LineBasicMaterial( { 
                     color: 0xffffff, 
                     opacity: 1, 
-                    linewidth: 3, 
-                    vertexColors: THREE.VertexColors
+                    linewidth: 3
                 } );
 
                 var mesh = new THREE.LineSegments( 
                     polyhedralDiagram.geometry, 
                     material
                 );
+
                 scene2.add(mesh);
+
+                var materialExEdges = new THREE.LineBasicMaterial( { 
+                    color: 0xff0000, 
+                    opacity: 1, 
+                    linewidth: 3
+                } );
+
+                var meshExEdges = new THREE.LineSegments( 
+                    polyhedralDiagram.exEdges, 
+                    materialExEdges
+                );
+                
+                scene2.add(meshExEdges);
+
+                scene2.add(polyhedralDiagram.exForces);
                 
                 // var mesh2 = new THREE.Mesh( 
                 //     // new THREE.BoxGeometry( 2, 2, 2 ), 
@@ -173,7 +188,7 @@
 
 
         camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
-        camera.position.z = 10;
+        camera.position.z = 100;
 
         var orbit = new THREE.OrbitControls( camera, renderer.domElement );
 
@@ -194,8 +209,7 @@
 
 
         // test
-        // var geometry  = new THREE.IcosahedronGeometry( 200, 1 );
-        var geometry  = new THREE.SphereGeometry( 1, 6, 6 );
+        var geometry  = new THREE.IcosahedronGeometry( 15, 0 );
         var material = new THREE.MeshPhongMaterial( { color: 0xffaa00, shading: THREE.FlatShading } );
         // var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 
@@ -233,11 +247,11 @@
         
 
 
-        var mesh2 = new THREE.Mesh( 
-            // new THREE.BoxGeometry( 2, 2, 2 ), 
-            new THREE.IcosahedronGeometry(1.5, 0), 
-            new THREE.MeshPhongMaterial( { color: 0x156289, shading: THREE.FlatShading } )
-        );
+        // var mesh2 = new THREE.Mesh( 
+        //     // new THREE.BoxGeometry( 2, 2, 2 ), 
+        //     new THREE.IcosahedronGeometry(1.5, 0), 
+        //     new THREE.MeshPhongMaterial( { color: 0x156289, shading: THREE.FlatShading } )
+        // );
 
         // scene2.add( mesh2 );
 

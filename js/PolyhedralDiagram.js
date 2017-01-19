@@ -7,12 +7,14 @@ var PolyhedralDiagram = function (json) {
     this.json = json;
 
     var geometry = this.geometry = new THREE.Geometry();
+    var exEdges = this.exEdges = new THREE.Geometry();
+    // var exForces = this.exForces = new THREE.Geometry();
+
+    var exForces = this.exForces = new THREE.Object3D();
 
     var vec3 = {};
     var v;
 
-    // var center = new THREE.Vector3();
-    // var numVertices = 0;
     
     for (v in json.form.vertices) {
         vec3[v] = new THREE.Vector3 ( 
@@ -22,43 +24,60 @@ var PolyhedralDiagram = function (json) {
         );
 
         // geometry.vertices.push(vec3[v]);
-        // center.add(vec3[v]);
-        // numVertices++;
+
     }
 
-    // console.log(vec3);
-    // center.multiplyScalar( 1 / numVertices );
-    // console.log(center);
 
 
 
     var lines = {};
 
-    var edge, vertex;
+    var tmpVec3 = new THREE.Vector3();
+    var arrowLen;
+    var edge, vertex, arrow;
     for (edge in json.form.edges) {
         vertex = json.form.edges[edge].vertex;
 
-        console.log(edge, vertex);
+        // console.log(edge, vertex);
 
         // geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
-        geometry.vertices.push( vec3[json.form.edges[edge].vertex[0]].clone(), vec3[json.form.edges[edge].vertex[1]].clone() );
+
+        // if (json.form.edges[edge].external) {
+        //     geometry.colors.push( new THREE.Color(0xff0000), new THREE.Color(0xff0000)  );
+        // } else if (json.form.edges[edge].ex_force) {
+        //     geometry.colors.push( new THREE.Color(0xffff00), new THREE.Color(0x00ff00)  );
+        // } else {
+        //     geometry.colors.push( new THREE.Color(0xffffff), new THREE.Color(0xffffff)  );
+        // }
+
 
         if (json.form.edges[edge].external) {
-            geometry.colors.push( new THREE.Color(0xff0000), new THREE.Color(0xff0000)  );
+            exEdges.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+        } else if (json.form.edges[edge].ex_force) {
+            tmpVec3.copy( vec3[vertex[1]] );
+            tmpVec3.sub( vec3[vertex[0]] );
+            arrowLen = tmpVec3.length();
+            tmpVec3.multiplyScalar( 1 / arrowLen );
+            exForces.add( new THREE.ArrowHelper( tmpVec3, vec3[vertex[0]], arrowLen ) );
         } else {
-            geometry.colors.push( new THREE.Color(0xffffff), new THREE.Color(0xffffff)  );
+            geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
         }
         
     }
 
-    // geometry.translate(-center.x, -center.y, -center.z);
-    geometry.normalize();
+    // geometry.center();
+    // exEdges.center();
 
-    // geometry.vertices.push( new THREE.Vector3(-1, -1, -1), new THREE.Vector3(-1, -1, 1) ); 
-    // geometry.vertices.push( new THREE.Vector3(-1, -1, 1), new THREE.Vector3(-1, 1, 1) ); 
-    // geometry.vertices.push( new THREE.Vector3(-1, 1, 1), new THREE.Vector3(1, 1, 1) ); 
-    // geometry.vertices.push( new THREE.Vector3(-1, -1, -1), new THREE.Vector3(1, -1, -1) ); 
-    // geometry.vertices.push( new THREE.Vector3(1, -1, -1), new THREE.Vector3(1, -1, 1) ); 
+    geometry.computeBoundingBox();
+    var offset = geometry.boundingBox.getCenter().negate();
+    geometry.translate( offset.x, offset.y, offset.z );
+
+    exEdges.translate( offset.x, offset.y, offset.z );
+
+    exForces.translateX( offset.x );
+    exForces.translateY( offset.y );
+    exForces.translateZ( offset.z );
+
 };
 
 PolyhedralDiagram.prototype.constructor = PolyhedralDiagram;

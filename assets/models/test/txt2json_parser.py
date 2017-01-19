@@ -1,4 +1,5 @@
 import json
+from sets import Set
 
 class DiagramJson:
     def __init__(self):
@@ -44,6 +45,8 @@ class Txt2JsonParser:
         # print edges
         f_edge_vertex.close()
 
+        
+
 
         f_edge_to_force_face = open(filename_edge_to_force_face)
         for line in f_edge_to_force_face:
@@ -52,13 +55,34 @@ class Txt2JsonParser:
 
         f_edge_to_force_face.close()
 
+        
+        vertex_ex_set = Set()
+
         f_edge_ex = open(filename_edge_ex)
         for line in f_edge_ex:
             edge = line.strip().split('\t')
             for e in edge:
                 edges[e]['external'] = True
 
+                vertex_ex_set.add(edges[e]['vertex'][0])
+                vertex_ex_set.add(edges[e]['vertex'][1])
+
         f_edge_ex.close()
+
+
+
+        # label external force edge
+        for e in edges:
+            is_ex_vertex_0 = edges[e]['vertex'][0] in vertex_ex_set
+            is_ex_vertex_1 = edges[e]['vertex'][1] in vertex_ex_set
+            if is_ex_vertex_0 != is_ex_vertex_1:
+                # print edges[e]['vertex'][0], ':', is_ex_vertex_0, ' , ', edges[e]['vertex'][1], ':', is_ex_vertex_1
+                # force vector: from v0 to v1
+                edges[e]['ex_force'] = True
+
+
+
+
 
         # print edges
         # print self.diagramJson.json
