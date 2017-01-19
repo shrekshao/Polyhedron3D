@@ -28,7 +28,7 @@ var PolyhedralDiagram = function (json) {
             forceFace: new THREE.MeshBasicMaterial( { 
                 color: 0xffaa00, 
                 shading: THREE.FlatShading,
-                opacity: 0.9,
+                opacity: 0.5,
                 transparent: true,
                 side: THREE.DoubleSide
             })

@@ -110,6 +110,17 @@
 
                 scene1.add( polyhedralDiagram.diagram.force.meshEdges );
                 scene1.add( polyhedralDiagram.diagram.force.meshFaces );
+
+                // polyhedralDiagram.diagram.force.meshFaces.visible = false;
+
+                var visible = gui.addFolder('toggle-visibility');
+
+                visible.add( polyhedralDiagram.diagram.form.meshEdges, 'visible' ).name('form-edges');
+                visible.add( polyhedralDiagram.diagram.form.meshExEdges, 'visible' ).name('form-ex-edges');
+                visible.add( polyhedralDiagram.diagram.form.exForceArrows, 'visible' ).name('form-ex-forces');
+
+                visible.add( polyhedralDiagram.diagram.force.meshEdges, 'visible' ).name('force-edges');
+                visible.add( polyhedralDiagram.diagram.force.meshFaces, 'visible' ).name('force-faces');
             };
         }
     }
