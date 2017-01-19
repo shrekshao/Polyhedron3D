@@ -111,31 +111,39 @@ class Txt2JsonParser:
         f_edge_vertex.close()
         # print self.diagramJson.json
 
-    def readForceFace(self, filename_face_edge):
+    def readForceFaceEdge(self, filename_face_edge):
         f_face_edge = open(filename_face_edge)
         edges = self.diagramJson.json['force']['edges']
         faces_e = self.diagramJson.json['force']['faces_e']
-        faces_v = self.diagramJson.json['force']['faces_v']
+        # faces_v = self.diagramJson.json['force']['faces_v']
         for line in f_face_edge:
             face = line.strip().split('\t')
             faces_e[face[0]] = face[1:]
 
-            cur_face_vertex = Set()
-            for e in face[1:]:
-                # extend vertex array
-                # cur_face_vertex.extend(edges[e])
-                for v in edges[e]:
-                    cur_face_vertex.add(v)
+            # # convert face edge to face vertex
+            # cur_face_vertex = Set()
+            # for e in face[1:]:
+            #     # extend vertex array
+            #     # cur_face_vertex.extend(edges[e])
+            #     for v in edges[e]:
+            #         cur_face_vertex.add(v)
             
-            faces_v[face[0]] = list(cur_face_vertex)
+            # faces_v[face[0]] = list(cur_face_vertex)
             # print faces_v[face[0]]
-
-                
-
-            
 
         f_face_edge.close()
         # print self.diagramJson.json
+
+    def readForceFaceVertex(self, filename_face_vertex):
+        f_face_vertex = open(filename_face_vertex)
+        # fan shape order
+        faces_v = self.diagramJson.json['force']['faces_v']
+        for line in f_face_vertex:
+            face = line.strip().split('\t')
+            faces_v[face[0]] = face[1:]
+
+        f_face_vertex.close()
+
 
 
 
@@ -144,27 +152,28 @@ class Txt2JsonParser:
 if __name__ == "__main__":
     parser = Txt2JsonParser()
 
-    parser.readFormVertex("form_diagram/form_vertex.txt")
-    parser.readFormEdge("form_diagram/form_edge_vertex.txt", \
-                        "form_diagram/form_edge_to_force_face.txt", \
-                        "form_diagram/form_edge_ex.txt")
+    # parser.readFormVertex("form_diagram/form_vertex.txt")
+    # parser.readFormEdge("form_diagram/form_edge_vertex.txt", \
+    #                     "form_diagram/form_edge_to_force_face.txt", \
+    #                     "form_diagram/form_edge_ex.txt")
     
-    parser.readForceVertex("force_diagram/force_vertex.txt")
-    parser.readForceEdge("force_diagram/force_edge_vertex.txt")
-    parser.readForceFace("force_diagram/force_face_edge.txt")
+    # parser.readForceVertex("force_diagram/force_vertex.txt")
+    # parser.readForceEdge("force_diagram/force_edge_vertex.txt")
+    # parser.readForceFace("force_diagram/force_face_edge.txt")
 
-    with open('test.json', 'w') as out:
-        json.dump(parser.diagramJson.json, out)
-
-    # parser.readFormVertex("test_2/form_v.txt")
-    # parser.readFormEdge("test_2/form_e_v.txt", \
-    #                     "test_2/form_e_to_force_f.txt", \
-    #                     "test_2/form_e_ex.txt")
-    
-    # parser.readForceVertex("test_2/force_v.txt")
-    # parser.readForceEdge("test_2/force_e_v.txt")
-    # parser.readForceFace("test_2/force_f_e.txt")
-
-    # with open('test2.json', 'w') as out:
+    # with open('test.json', 'w') as out:
     #     json.dump(parser.diagramJson.json, out)
+
+    parser.readFormVertex("test_2/form_v.txt")
+    parser.readFormEdge("test_2/form_e_v.txt", \
+                        "test_2/form_e_to_force_f.txt", \
+                        "test_2/form_e_ex.txt")
+    
+    parser.readForceVertex("test_2/force_v.txt")
+    parser.readForceEdge("test_2/force_e_v.txt")
+    # parser.readForceFaceEdge("test_2/force_f_e.txt")
+    parser.readForceFaceVertex("test_2/force_f_v.txt")
+
+    with open('test2.json', 'w') as out:
+        json.dump(parser.diagramJson.json, out)
     
