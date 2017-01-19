@@ -59,7 +59,7 @@
                 } );
 
                 var mesh = new THREE.LineSegments( 
-                    polyhedralDiagram.geometry, 
+                    polyhedralDiagram.formGeometry, 
                     material
                 );
 
@@ -72,13 +72,13 @@
                 } );
 
                 var meshExEdges = new THREE.LineSegments( 
-                    polyhedralDiagram.exEdges, 
+                    polyhedralDiagram.formExEdges, 
                     materialExEdges
                 );
                 
                 scene2.add(meshExEdges);
 
-                scene2.add(polyhedralDiagram.exForces);
+                scene2.add(polyhedralDiagram.formExForces);
                 
                 // var mesh2 = new THREE.Mesh( 
                 //     // new THREE.BoxGeometry( 2, 2, 2 ), 
@@ -86,6 +86,18 @@
                 //     new THREE.MeshPhongMaterial( { color: 0x156289, shading: THREE.FlatShading } )
                 // );
                 // scene2.add(mesh2);
+
+
+                var materialForceFace = new THREE.MeshPhongMaterial( { 
+                        color: 0xffaa00, 
+                        shading: THREE.FlatShading,
+                        opacity: 0.3,
+                        transparent: true,
+                        side: THREE.DoubleSide
+                });
+
+                var meshForceFace = new THREE.Mesh( polyhedralDiagram.forceGeometry, materialForceFace );
+                scene1.add( meshForceFace );
             };
         }
     }
@@ -216,33 +228,8 @@
 
         var mesh = new THREE.Object3D();
 
-        // mesh.add( new THREE.LineSegments(
-
-        //     geometry,
-
-        //     new THREE.LineBasicMaterial( {
-        //         color: 0xffffff,
-        //         transparent: true,
-        //         opacity: 0.5
-        //     } )
-
-        // ) );
-
-        // mesh.add( new THREE.Mesh(
-
-        //     geometry,
-
-        //     new THREE.MeshPhongMaterial( {
-        //         color: 0x156289,
-        //         emissive: 0x072534,
-        //         side: THREE.DoubleSide,
-        //         shading: THREE.FlatShading
-        //     } )
-
-        // ) );
-
         var mesh = new THREE.Mesh( geometry, material );
-        scene1.add(mesh);
+        // scene1.add(mesh);
 
         
 

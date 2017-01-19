@@ -6,11 +6,22 @@ var PolyhedralDiagram = function (json) {
 
     this.json = json;
 
-    var geometry = this.geometry = new THREE.Geometry();
-    var exEdges = this.exEdges = new THREE.Geometry();
+    this.buildFormDiagram();
+    this.buildForceDiagram();
+
+};
+
+PolyhedralDiagram.prototype.constructor = PolyhedralDiagram;
+
+
+PolyhedralDiagram.prototype.buildFormDiagram = function() {
+    var json = this.json;
+
+    var geometry = this.formGeometry = new THREE.Geometry();
+    var exEdges = this.formExEdges = new THREE.Geometry();
     // var exForces = this.exForces = new THREE.Geometry();
 
-    var exForces = this.exForces = new THREE.Object3D();
+    var exForces = this.formExForces = new THREE.Object3D();
 
     var vec3 = {};
     var v;
@@ -26,8 +37,6 @@ var PolyhedralDiagram = function (json) {
         // geometry.vertices.push(vec3[v]);
 
     }
-
-
 
 
     var lines = {};
@@ -77,7 +86,60 @@ var PolyhedralDiagram = function (json) {
     exForces.translateX( offset.x );
     exForces.translateY( offset.y );
     exForces.translateZ( offset.z );
+}
 
-};
 
-PolyhedralDiagram.prototype.constructor = PolyhedralDiagram;
+PolyhedralDiagram.prototype.buildForceDiagram = function() {
+    var json = this.json;
+
+    var vec3 = {};
+    var v;
+
+    var geometry = this.forceGeometry = new THREE.Geometry();
+
+
+    var vid2vid = {};
+
+    var c = 0;
+    for (v in json.force.vertices) {
+        vec3[v] = new THREE.Vector3 ( 
+            json.force.vertices[v][0],
+            json.force.vertices[v][1],
+            json.force.vertices[v][2]
+        );
+
+        geometry.vertices.push(vec3[v].clone());
+
+        // if (!vid2vid[v]) {
+            vid2vid[v] = c++;
+        // }
+        
+    }
+
+    geometry.computeBoundingBox();
+    var offset = geometry.boundingBox.getCenter().negate();
+    geometry.translate( offset.x, offset.y, offset.z );
+
+
+
+    var faces = {};
+
+    var f;
+    var face3;
+    var face_v;
+    for (f in json.force.faces_v) {
+        face_v = json.force.faces_v[f];
+
+        if (face_v.length === 3) {
+            face3 = new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[1]], vid2vid[face_v[2]] );
+        }
+        
+
+        geometry.faces.push( face3 );
+    }
+
+    geometry.computeFaceNormals();
+    geometry.computeVertexNormals();
+
+
+}

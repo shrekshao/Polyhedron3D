@@ -12,7 +12,8 @@ class DiagramJson:
             'force': {
                 'vertices': {},
                 'edges': {},
-                'faces': {},
+                'faces_e': {},
+                'faces_v': {},
                 'cells': {}
             }
         }
@@ -112,10 +113,26 @@ class Txt2JsonParser:
 
     def readForceFace(self, filename_face_edge):
         f_face_edge = open(filename_face_edge)
-        faces = self.diagramJson.json['force']['faces']
+        edges = self.diagramJson.json['force']['edges']
+        faces_e = self.diagramJson.json['force']['faces_e']
+        faces_v = self.diagramJson.json['force']['faces_v']
         for line in f_face_edge:
             face = line.strip().split('\t')
-            faces[face[0]] = face[1:]
+            faces_e[face[0]] = face[1:]
+
+            cur_face_vertex = Set()
+            for e in face[1:]:
+                # extend vertex array
+                # cur_face_vertex.extend(edges[e])
+                for v in edges[e]:
+                    cur_face_vertex.add(v)
+            
+            faces_v[face[0]] = list(cur_face_vertex)
+            print faces_v[face[0]]
+
+                
+
+            
 
         f_face_edge.close()
         # print self.diagramJson.json
