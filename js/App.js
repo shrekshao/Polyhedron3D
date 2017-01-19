@@ -5,6 +5,9 @@
 
     var canvas, renderer;
 
+    var raycaster, mouse;
+    var INTERSECTED, currentColor;
+
     var camera;
     var scene1, scene2;
 
@@ -156,12 +159,50 @@
 
     }
 
+    function onMouseMove( event ) {
+
+        event.preventDefault();
+        mouse.x = ( event.clientX / window.innerWidth*2 ) * 2 - 1;
+        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+        // mouse.x = event.clientX;
+        // mouse.y = event.clientY;
+
+    }
+
+
 
     function render () {
         requestAnimationFrame( render );
         // renderer.render( scene1, camera );
 
+
+        // for scene1
+        // mouse.x = ( mouse.x / window.innerWidth * 2 ) * 2 - 1;
+        // mouse.y = - ( mouse.y / window.innerHeight ) * 2 + 1;
+
+        raycaster.setFromCamera( mouse, camera );
+        var intersects;
+        if ( polyhedralDiagram ) {
+            intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces.children );
+            // var intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces );
+            // var intersects = raycaster.intersectObjects( scene1.children );
+            if ( intersects.length > 0 ) {
+                if ( INTERSECTED != intersects[ 0 ].object ) {
+                    if (INTERSECTED) INTERSECTED.material.opacity = 0.05;
+
+                    INTERSECTED = intersects[0].object;
+                    INTERSECTED.material.opacity = 1.0;
+                    console.log(intersects[0].object.diagramName);
+                }
+                
+            } else {
+                if (INTERSECTED) INTERSECTED.material.opacity = 0.05;
+                INTERSECTED = null;
+            }
+        }
         
+
 
 
         var view;
@@ -217,6 +258,9 @@
 
 
         canvas = document.getElementById( 'webgl-canvas' );
+
+        raycaster = new THREE.Raycaster();
+        mouse = new THREE.Vector2();
         
         renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true } );
         renderer.setPixelRatio(window.devicePixelRatio);
@@ -224,6 +268,8 @@
         // console.log(renderer.sortObjects);
 
         window.addEventListener('resize', onWindowResize, false);
+
+        canvas.addEventListener('mousemove',  onMouseMove, false);
 
 
 

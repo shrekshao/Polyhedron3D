@@ -203,8 +203,10 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
     var f;
     var face3;
     var face_v;
-
+    
     var face_geometry;
+    var face_mesh;
+
     for (f in json.force.faces_v) {
         face_v = json.force.faces_v[f];
 
@@ -227,7 +229,10 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
                     3
                 )
             );
-            this.diagram.force.objects.faces.add( new THREE.Mesh( face_geometry, this.diagram.materials.forceFace ) );
+
+            face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace );
+            face_mesh.diagramName = f;
+            this.diagram.force.objects.faces.add( face_mesh );
 
         } else if (face_v.length === 4) {
             geometry.faces.push( new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[1]], vid2vid[face_v[2]] ) );
@@ -251,7 +256,10 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
                     3
                 )
             );
-            this.diagram.force.objects.faces.add( new THREE.Mesh( face_geometry, this.diagram.materials.forceFace ) );
+
+            face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace.clone() );
+            face_mesh.diagramName = f;
+            this.diagram.force.objects.faces.add( face_mesh );
         }
 
 
