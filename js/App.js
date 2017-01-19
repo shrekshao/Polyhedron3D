@@ -109,18 +109,22 @@
                 scene2.add( polyhedralDiagram.diagram.form.exForceArrows );
 
                 scene1.add( polyhedralDiagram.diagram.force.meshEdges );
-                scene1.add( polyhedralDiagram.diagram.force.meshFaces );
+                // scene1.add( polyhedralDiagram.diagram.force.meshFaces );
+                scene1.add( polyhedralDiagram.diagram.force.objects.faces );
 
-                // polyhedralDiagram.diagram.force.meshFaces.visible = false;
 
-                var visible = gui.addFolder('toggle-visibility');
+                var visible = gui.addFolder( 'toggle-visibility' );
 
                 visible.add( polyhedralDiagram.diagram.form.meshEdges, 'visible' ).name('form-edges');
                 visible.add( polyhedralDiagram.diagram.form.meshExEdges, 'visible' ).name('form-ex-edges');
                 visible.add( polyhedralDiagram.diagram.form.exForceArrows, 'visible' ).name('form-ex-forces');
 
                 visible.add( polyhedralDiagram.diagram.force.meshEdges, 'visible' ).name('force-edges');
-                visible.add( polyhedralDiagram.diagram.force.meshFaces, 'visible' ).name('force-faces');
+                // visible.add( polyhedralDiagram.diagram.force.meshFaces, 'visible' ).name('force-faces');
+                visible.add( polyhedralDiagram.diagram.force.objects.faces, 'visible' ).name('force-faces');
+
+                var materials = gui.addFolder( 'materials' );
+                materials.add( polyhedralDiagram.diagram.materials.forceFace, 'opacity', 0.0, 1.0 );
             };
         }
     }
@@ -217,6 +221,7 @@
         renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true } );
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
+        // console.log(renderer.sortObjects);
 
         window.addEventListener('resize', onWindowResize, false);
 

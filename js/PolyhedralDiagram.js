@@ -7,8 +7,17 @@ var PolyhedralDiagram = function (json) {
     this.json = json;
 
     this.diagram = {
-        form: {},
-        force: {},
+        form: {
+            // geometries: {},
+            // objects: {}
+        },
+        force: {
+            // geometries: {},
+            objects: {
+                faces: new THREE.Object3D(),
+                edges: new THREE.Object3D()
+            }
+        },
 
         materials: {
             lineBasic: new THREE.LineBasicMaterial( { 
@@ -28,9 +37,13 @@ var PolyhedralDiagram = function (json) {
             forceFace: new THREE.MeshBasicMaterial( { 
                 color: 0xffaa00, 
                 shading: THREE.FlatShading,
-                opacity: 0.5,
+                opacity: 0.05,
                 transparent: true,
-                side: THREE.DoubleSide
+                side: THREE.DoubleSide,
+
+                // blending: THREE.CustomBlending,
+
+                depthWrite: false
             })
             // forceFace: new THREE.MeshPhongMaterial( { 
             //     color: 0xffaa00, 
@@ -183,23 +196,65 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
 
     edgeGeometry.translate( offset.x, offset.y, offset.z );
 
+
+    // face
     var faces = {};
 
     var f;
     var face3;
     var face_v;
+
+    var face_geometry;
     for (f in json.force.faces_v) {
         face_v = json.force.faces_v[f];
 
         if (face_v.length === 3) {
             face3 = new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[1]], vid2vid[face_v[2]] );
             geometry.faces.push( face3 );
+
+
+
+            // separate mesh for each face
+            face_geometry = new THREE.BufferGeometry();
+            face_geometry.addAttribute(
+                'position', 
+                new THREE.BufferAttribute(
+                    new Float32Array([ 
+                        geometry.vertices[ vid2vid[face_v[0]] ].x, geometry.vertices[ vid2vid[face_v[0]] ].y, geometry.vertices[ vid2vid[face_v[0]] ].z,
+                        geometry.vertices[ vid2vid[face_v[1]] ].x, geometry.vertices[ vid2vid[face_v[1]] ].y, geometry.vertices[ vid2vid[face_v[1]] ].z,
+                        geometry.vertices[ vid2vid[face_v[2]] ].x, geometry.vertices[ vid2vid[face_v[2]] ].y, geometry.vertices[ vid2vid[face_v[2]] ].z
+                    ]),
+                    3
+                )
+            );
+            this.diagram.force.objects.faces.add( new THREE.Mesh( face_geometry, this.diagram.materials.forceFace ) );
+
         } else if (face_v.length === 4) {
             geometry.faces.push( new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[1]], vid2vid[face_v[2]] ) );
             geometry.faces.push( new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[2]], vid2vid[face_v[3]] ) );
             console.log(face_v);
+
+
+             // separate mesh for each face
+            face_geometry = new THREE.BufferGeometry();
+            face_geometry.addAttribute(
+                'position', 
+                new THREE.BufferAttribute(
+                    new Float32Array([ 
+                        geometry.vertices[ vid2vid[face_v[0]] ].x, geometry.vertices[ vid2vid[face_v[0]] ].y, geometry.vertices[ vid2vid[face_v[0]] ].z,
+                        geometry.vertices[ vid2vid[face_v[1]] ].x, geometry.vertices[ vid2vid[face_v[1]] ].y, geometry.vertices[ vid2vid[face_v[1]] ].z,
+                        geometry.vertices[ vid2vid[face_v[2]] ].x, geometry.vertices[ vid2vid[face_v[2]] ].y, geometry.vertices[ vid2vid[face_v[2]] ].z,
+                        geometry.vertices[ vid2vid[face_v[0]] ].x, geometry.vertices[ vid2vid[face_v[0]] ].y, geometry.vertices[ vid2vid[face_v[0]] ].z,
+                        geometry.vertices[ vid2vid[face_v[2]] ].x, geometry.vertices[ vid2vid[face_v[2]] ].y, geometry.vertices[ vid2vid[face_v[2]] ].z,
+                        geometry.vertices[ vid2vid[face_v[3]] ].x, geometry.vertices[ vid2vid[face_v[3]] ].y, geometry.vertices[ vid2vid[face_v[3]] ].z
+                    ]),
+                    3
+                )
+            );
+            this.diagram.force.objects.faces.add( new THREE.Mesh( face_geometry, this.diagram.materials.forceFace ) );
         }
-        
+
+
 
         
     }
