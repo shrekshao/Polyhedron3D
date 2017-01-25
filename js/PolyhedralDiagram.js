@@ -51,6 +51,11 @@ var PolyhedralDiagram = function (json) {
                 // linewidth: 3
             } ),
 
+            vertex: new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 0.5
+            }),
+
             forceFace: new THREE.MeshBasicMaterial( { 
                 color: 0xffaa00, 
                 shading: THREE.FlatShading,
@@ -116,6 +121,9 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var edge, vertex, arrow;
     var edgesId = [];
     var exEdgesId = [];
+    var verticesId = [];
+    var exVerticesId = [];
+
     for (edge in json.form.edges) {
         vertex = json.form.edges[edge].vertex;
 
@@ -135,6 +143,8 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
         if (json.form.edges[edge].external) {
             exEdges.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
             exEdgesId.push( edge );
+
+            exVerticesId.push( vertex[0], vertex[1] );
         } else if (json.form.edges[edge].ex_force) {
             tmpVec3.copy( vec3[vertex[1]] );
             tmpVec3.sub( vec3[vertex[0]] );
@@ -146,7 +156,11 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
         } else {
             geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
             edgesId.push( edge );
+
+            verticesId.push( vertex[0], vertex[1] );
         }
+
+        
         
     }
 
@@ -179,12 +193,18 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     // build separate meshes
     var edgesParent = this.diagram.form.objects.edges;
     var exEdgesParent = this.diagram.form.objects.exEdges;
+    var verticesParent = this.diagram.form.objects.vertices;
 
     var i, j;
     var curMesh;
     var curEdgeGeometry;
     var curMaterial = this.diagram.materials.lineBasic;
     var len = geometry.vertices.length;
+
+    
+    var vertexAdded = {};
+
+    // edges
     for ( i = 0, j = 0; i < len; i += 2, j ++ ) {
         curEdgeGeometry = new THREE.Geometry();
         curEdgeGeometry.vertices.push( geometry.vertices[i].clone(), geometry.vertices[i+1].clone() );
@@ -196,6 +216,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
 
     curMaterial = this.diagram.materials.lineExternal;
     len = exEdges.vertices.length;
+    // exEdges
     for ( i = 0, j = 0; i < len; i += 2, j ++ ) {
         curEdgeGeometry = new THREE.Geometry();
         curEdgeGeometry.vertices.push( exEdges.vertices[i].clone(), exEdges.vertices[i+1].clone() );
@@ -203,6 +224,55 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
         curMesh.diagramId = exEdgesId[j];
         curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
         exEdgesParent.add( curMesh );
+    }
+
+    curMaterial = this.diagram.materials.vertex;
+    len = geometry.vertices.length;
+    var curVertexGeometry;
+    var curVertexMesh;
+    for ( i = 0 ; i < len; i ++ ) {
+        if (!vertexAdded[verticesId[i]]) {
+            vertexAdded[verticesId[i]] = true;
+
+            curVertexGeometry = new THREE.BufferGeometry()
+            curVertexGeometry.addAttribute(
+                'position', 
+                new THREE.BufferAttribute(
+                    new Float32Array([ 
+                        geometry.vertices[ i ].x, geometry.vertices[ i ].y, geometry.vertices[ i ].z
+                    ]),
+                    3
+                )
+            );
+
+            curVertexMesh = new THREE.Points( curVertexGeometry.clone(), curMaterial.clone() );
+            // curVertexMesh.position = geometry.vertices[i].clone();
+            
+            verticesParent.add( curVertexMesh );
+        }
+    }
+
+    len = exEdges.vertices.length;
+    for ( i = 0 ; i < len; i ++ ) {
+        if (!vertexAdded[exVerticesId[i]]) {
+            vertexAdded[exVerticesId[i]] = true;
+
+            curVertexGeometry = new THREE.BufferGeometry()
+            curVertexGeometry.addAttribute(
+                'position', 
+                new THREE.BufferAttribute(
+                    new Float32Array([ 
+                        exEdges.vertices[ i ].x, exEdges.vertices[ i ].y, exEdges.vertices[ i ].z
+                    ]),
+                    3
+                )
+            );
+
+            curVertexMesh = new THREE.Points( curVertexGeometry.clone(), curMaterial.clone() );
+            // curVertexMesh.position = geometry.vertices[i].clone();
+            
+            verticesParent.add( curVertexMesh );
+        }
     }
     
 }
@@ -278,9 +348,9 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
                 'position', 
                 new THREE.BufferAttribute(
                     new Float32Array([ 
-                        geometry.vertices[ vid2vid[face_v[0]] ].x, geometry.vertices[ vid2vid[face_v[0]] ].y, geometry.vertices[ vid2vid[face_v[0]] ].z,
-                        geometry.vertices[ vid2vid[face_v[1]] ].x, geometry.vertices[ vid2vid[face_v[1]] ].y, geometry.vertices[ vid2vid[face_v[1]] ].z,
-                        geometry.vertices[ vid2vid[face_v[2]] ].x, geometry.vertices[ vid2vid[face_v[2]] ].y, geometry.vertices[ vid2vid[face_v[2]] ].z
+                        geometry.vertices[ vid2vid[ face_v[0]] ].x, geometry.vertices[ vid2vid[ face_v[0]] ].y, geometry.vertices[ vid2vid[ face_v[0]] ].z,
+                        geometry.vertices[ vid2vid[ face_v[1]] ].x, geometry.vertices[ vid2vid[ face_v[1]] ].y, geometry.vertices[ vid2vid[ face_v[1]] ].z,
+                        geometry.vertices[ vid2vid[ face_v[2]] ].x, geometry.vertices[ vid2vid[ face_v[2]] ].y, geometry.vertices[ vid2vid[ face_v[2]] ].z
                     ]),
                     3
                 )
@@ -302,12 +372,12 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
                 'position', 
                 new THREE.BufferAttribute(
                     new Float32Array([ 
-                        geometry.vertices[ vid2vid[face_v[0]] ].x, geometry.vertices[ vid2vid[face_v[0]] ].y, geometry.vertices[ vid2vid[face_v[0]] ].z,
-                        geometry.vertices[ vid2vid[face_v[1]] ].x, geometry.vertices[ vid2vid[face_v[1]] ].y, geometry.vertices[ vid2vid[face_v[1]] ].z,
-                        geometry.vertices[ vid2vid[face_v[2]] ].x, geometry.vertices[ vid2vid[face_v[2]] ].y, geometry.vertices[ vid2vid[face_v[2]] ].z,
-                        geometry.vertices[ vid2vid[face_v[0]] ].x, geometry.vertices[ vid2vid[face_v[0]] ].y, geometry.vertices[ vid2vid[face_v[0]] ].z,
-                        geometry.vertices[ vid2vid[face_v[2]] ].x, geometry.vertices[ vid2vid[face_v[2]] ].y, geometry.vertices[ vid2vid[face_v[2]] ].z,
-                        geometry.vertices[ vid2vid[face_v[3]] ].x, geometry.vertices[ vid2vid[face_v[3]] ].y, geometry.vertices[ vid2vid[face_v[3]] ].z
+                        geometry.vertices[ vid2vid[ face_v[0]] ].x, geometry.vertices[ vid2vid[ face_v[0]] ].y, geometry.vertices[ vid2vid[ face_v[0]] ].z,
+                        geometry.vertices[ vid2vid[ face_v[1]] ].x, geometry.vertices[ vid2vid[ face_v[1]] ].y, geometry.vertices[ vid2vid[ face_v[1]] ].z,
+                        geometry.vertices[ vid2vid[ face_v[2]] ].x, geometry.vertices[ vid2vid[ face_v[2]] ].y, geometry.vertices[ vid2vid[ face_v[2]] ].z,
+                        geometry.vertices[ vid2vid[ face_v[0]] ].x, geometry.vertices[ vid2vid[ face_v[0]] ].y, geometry.vertices[ vid2vid[ face_v[0]] ].z,
+                        geometry.vertices[ vid2vid[ face_v[2]] ].x, geometry.vertices[ vid2vid[ face_v[2]] ].y, geometry.vertices[ vid2vid[ face_v[2]] ].z,
+                        geometry.vertices[ vid2vid[ face_v[3]] ].x, geometry.vertices[ vid2vid[ face_v[3]] ].y, geometry.vertices[ vid2vid[ face_v[3]] ].z
                     ]),
                     3
                 )

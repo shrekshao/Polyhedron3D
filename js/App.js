@@ -116,6 +116,7 @@
                 scene2.add( polyhedralDiagram.diagram.form.objects.edges );
                 scene2.add( polyhedralDiagram.diagram.form.objects.exEdges );
                 scene2.add( polyhedralDiagram.diagram.form.objects.exForceArrows );
+                scene2.add( polyhedralDiagram.diagram.form.objects.vertices );
 
                 scene1.add( polyhedralDiagram.diagram.force.meshEdges );
                 // scene1.add( polyhedralDiagram.diagram.force.meshFaces );
@@ -124,6 +125,7 @@
 
                 var visible = gui.addFolder( 'toggle-visibility' );
 
+                visible.add( polyhedralDiagram.diagram.form.objects.vertices, 'visible' ).name('form-vertices');
                 visible.add( polyhedralDiagram.diagram.form.objects.edges, 'visible' ).name('form-edges');
                 visible.add( polyhedralDiagram.diagram.form.objects.exEdges, 'visible' ).name('form-ex-edges');
                 visible.add( polyhedralDiagram.diagram.form.objects.exForceArrows, 'visible' ).name('form-ex-forces');
@@ -224,7 +226,12 @@
         //     }
         // }
 
-        raycaster.setFromCamera( mouseScene2, camera );
+        if ( mouseScene2.x > -1 ) {
+            raycaster.setFromCamera( mouseScene2, camera );
+        }
+        
+        
+        
         if ( polyhedralDiagram ) {
             // intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.form.objects.edges.children );
             intersects = raycaster.intersectObjects( scene2.children, true );
@@ -335,6 +342,7 @@
 
         raycaster = new THREE.Raycaster();
         raycaster.linePrecision = 0.1;
+        raycaster.params.Points.threshold = 0.1;
 
         mouseScene1 = new THREE.Vector2();
         mouseScene2 = new THREE.Vector2();
