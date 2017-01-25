@@ -169,13 +169,14 @@
 
         event.preventDefault();
 
-        var tmp = ( event.clientX / window.innerWidth * 2 ) * 2;
+        // var tmp = ( event.clientX / window.innerWidth * 2 ) * 2;
 
-        mouseScene1.x = tmp - 1;
+        // mouseScene1.x = tmp - 1;
+        mouseScene1.x = ( event.clientX / window.innerWidth * 2 ) * 2 - 1;
         mouseScene1.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-        mouseScene2.x = ( event.clientX / window.innerWidth * 2 ) * 2 - 1;
-        mouseScene2.y = tmp;
+        mouseScene2.x = mouseScene1.x - 2;
+        mouseScene2.y = mouseScene1.y;
 
     }
 
@@ -187,27 +188,64 @@
 
         // ray caster temp test
 
-        raycaster.setFromCamera( mouseScene1, camera );
+        
         var intersects;
+
+        // raycaster.setFromCamera( mouseScene1, camera );
+        // if ( polyhedralDiagram ) {
+        //     intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces.children );
+        //     // var intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces );
+        //     // var intersects = raycaster.intersectObjects( scene1.children );
+        //     if ( intersects.length > 0 ) {
+        //         if ( INTERSECTED != intersects[ 0 ].object ) {
+        //             if (INTERSECTED) INTERSECTED.material.opacity = 0.05;
+
+        //             INTERSECTED = intersects[0].object;
+        //             INTERSECTED.material.opacity = 1.0;
+        //             console.log(intersects[0].object.diagramId);
+        //         }
+                
+        //     } else {
+        //         if (INTERSECTED) INTERSECTED.material.opacity = 0.05;
+        //         INTERSECTED = null;
+        //     }
+        // }
+
+        raycaster.setFromCamera( mouseScene2, camera );
         if ( polyhedralDiagram ) {
-            intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces.children );
+            intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.form.objects.edges.children );
             // var intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces );
             // var intersects = raycaster.intersectObjects( scene1.children );
             if ( intersects.length > 0 ) {
                 if ( INTERSECTED != intersects[ 0 ].object ) {
-                    if (INTERSECTED) INTERSECTED.material.opacity = 0.05;
+                    if (INTERSECTED) {
+                        INTERSECTED.material.color.setHex( 0xffffff );
+                        // INTERSECTED.material.needsUpdate = true;
+                    }
 
                     INTERSECTED = intersects[0].object;
-                    INTERSECTED.material.opacity = 1.0;
+                    INTERSECTED.material.lineWidth = 20.0;
+                    INTERSECTED.material.color.setHex( 0x00ff00 );
+                    // INTERSECTED.material.needsUpdate = true;
                     console.log(intersects[0].object.diagramId);
                 }
                 
             } else {
-                if (INTERSECTED) INTERSECTED.material.opacity = 0.05;
+                if (INTERSECTED) {
+                    INTERSECTED.material.color.setHex( 0xffffff );
+                    // INTERSECTED.material.needsUpdate = true;
+                }
                 INTERSECTED = null;
             }
         }
         
+
+
+
+
+
+
+
 
 
 
@@ -266,6 +304,8 @@
         canvas = document.getElementById( 'webgl-canvas' );
 
         raycaster = new THREE.Raycaster();
+        raycaster.linePrecision = 0.1;
+
         mouseScene1 = new THREE.Vector2();
         mouseScene2 = new THREE.Vector2();
         

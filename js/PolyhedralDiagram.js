@@ -38,15 +38,15 @@ var PolyhedralDiagram = function (json) {
             lineBasic: new THREE.LineBasicMaterial( { 
                 color: 0xffffff, 
                 opacity: 1, 
-                transparent: false,
-                linewidth: 3
+                transparent: false
+                // linewidth: 3     // ANGLE limitation
             } ),
 
             lineExternal: new THREE.LineBasicMaterial( { 
                 color: 0xff0000, 
                 opacity: 1, 
-                transparent: false,
-                linewidth: 3
+                transparent: false
+                // linewidth: 3
             } ),
 
             forceFace: new THREE.MeshBasicMaterial( { 
@@ -189,6 +189,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
         curEdgeGeometry.vertices.push( geometry.vertices[i].clone(), geometry.vertices[i+1].clone() );
         curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
         curMesh.diagramId = edgesId[j];
+        curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
         edgesParent.add( curMesh );
     }
 
@@ -199,6 +200,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
         curEdgeGeometry.vertices.push( exEdges.vertices[i].clone(), exEdges.vertices[i+1].clone() );
         curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
         curMesh.diagramId = exEdgesId[j];
+        curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
         exEdgesParent.add( curMesh );
     }
     
