@@ -10,12 +10,27 @@ var PolyhedralDiagram = function (json) {
         form: {
             // geometries: {},
             // objects: {}
+            objects: {
+                vertices: new THREE.Object3D(),
+                edges: new THREE.Object3D(),
+                exEdges: new THREE.Object3D(),
+                exForceArrows: new THREE.Object3D()
+            },
+
+            maps: {
+                edgeId2Object: {}
+            }
         },
         force: {
             // geometries: {},
             objects: {
                 faces: new THREE.Object3D(),
                 edges: new THREE.Object3D()
+            },
+
+            maps: {
+                faceId2Object: {},
+                edgeId2Object: {}
             }
         },
 
@@ -66,11 +81,16 @@ PolyhedralDiagram.prototype.constructor = PolyhedralDiagram;
 PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var json = this.json;
 
-    var geometry = this.diagram.form.edges = new THREE.Geometry();
-    var exEdges = this.diagram.form.exEdges = new THREE.Geometry();
+    // var geometry = this.diagram.form.edges = new THREE.Geometry();
+    // var exEdges = this.diagram.form.exEdges = new THREE.Geometry();
+    // // var exForces = this.exForces = new THREE.Geometry();
+
+    var geometry = new THREE.Geometry();
+    var exEdges = new THREE.Geometry();
     // var exForces = this.exForces = new THREE.Geometry();
 
-    var exForces = this.diagram.form.exForceArrows = new THREE.Object3D();
+    // var exForces = this.diagram.form.exForceArrows = new THREE.Object3D();
+    var exForces = this.diagram.form.objects.exForceArrows;
 
     var vec3 = {};
     var v;
@@ -93,6 +113,8 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var tmpVec3 = new THREE.Vector3();
     var arrowLen;
     var edge, vertex, arrow;
+    var edgesId = [];
+    var exEdgesId = [];
     for (edge in json.form.edges) {
         vertex = json.form.edges[edge].vertex;
 
@@ -111,14 +133,18 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
 
         if (json.form.edges[edge].external) {
             exEdges.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+            exEdgesId.push( edge );
         } else if (json.form.edges[edge].ex_force) {
             tmpVec3.copy( vec3[vertex[1]] );
             tmpVec3.sub( vec3[vertex[0]] );
             arrowLen = tmpVec3.length();
             tmpVec3.multiplyScalar( 1 / arrowLen );
-            exForces.add( new THREE.ArrowHelper( tmpVec3, vec3[vertex[0]], arrowLen ) );
+            arrow = new THREE.ArrowHelper( tmpVec3, vec3[vertex[0]], arrowLen );
+            arrow.diagramId = edge;
+            exForces.add( arrow );
         } else {
             geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+            edgesId.push( edge );
         }
         
     }
@@ -137,17 +163,44 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     exForces.translateZ( offset.z );
 
 
-    // build mesh
-    this.diagram.form.meshEdges = new THREE.LineSegments( 
-        geometry, 
-        this.diagram.materials.lineBasic
-    );
+    // // build mesh
+    // this.diagram.form.meshEdges = new THREE.LineSegments( 
+    //     geometry, 
+    //     this.diagram.materials.lineBasic
+    // );
 
-    this.diagram.form.meshExEdges = new THREE.LineSegments(
-        exEdges,
-        this.diagram.materials.lineExternal
-    );
+    // this.diagram.form.meshExEdges = new THREE.LineSegments(
+    //     exEdges,
+    //     this.diagram.materials.lineExternal
+    // );
 
+
+    // build separate meshes
+    var edgesParent = this.diagram.form.objects.edges;
+    var exEdgesParent = this.diagram.form.objects.exEdges;
+
+    var i, j;
+    var curMesh;
+    var curEdgeGeometry;
+    var curMaterial = this.diagram.materials.lineBasic;
+    var len = geometry.vertices.length;
+    for ( i = 0, j = 0; i < len; i += 2, j ++ ) {
+        curEdgeGeometry = new THREE.Geometry();
+        curEdgeGeometry.vertices.push( geometry.vertices[i].clone(), geometry.vertices[i+1].clone() );
+        curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
+        curMesh.diagramId = edgesId[j];
+        edgesParent.add( curMesh );
+    }
+
+    curMaterial = this.diagram.materials.lineExternal;
+    len = exEdges.vertices.length;
+    for ( i = 0, j = 0; i < len; i += 2, j ++ ) {
+        curEdgeGeometry = new THREE.Geometry();
+        curEdgeGeometry.vertices.push( exEdges.vertices[i].clone(), exEdges.vertices[i+1].clone() );
+        curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
+        curMesh.diagramId = exEdgesId[j];
+        exEdgesParent.add( curMesh );
+    }
     
 }
 
@@ -230,9 +283,9 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
                 )
             );
 
-            face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace );
-            face_mesh.diagramName = f;
-            this.diagram.force.objects.faces.add( face_mesh );
+            // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace );
+            // face_mesh.diagramId = f;
+            // this.diagram.force.objects.faces.add( face_mesh );
 
         } else if (face_v.length === 4) {
             geometry.faces.push( new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[1]], vid2vid[face_v[2]] ) );
@@ -257,12 +310,16 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
                 )
             );
 
-            face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace.clone() );
-            face_mesh.diagramName = f;
-            this.diagram.force.objects.faces.add( face_mesh );
+            // // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace );
+            // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace.clone() );
+            // face_mesh.diagramId = f;
+            // this.diagram.force.objects.faces.add( face_mesh );
         }
 
-
+        face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace.clone() );
+        face_mesh.diagramId = f;
+        this.diagram.force.objects.faces.add( face_mesh );
+        this.diagram.force.maps.faceId2Object[f] = face_mesh;
 
         
     }

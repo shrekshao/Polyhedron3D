@@ -107,9 +107,15 @@
                 // scene1.add( meshForceEdge );
 
 
-                scene2.add( polyhedralDiagram.diagram.form.meshEdges );
-                scene2.add( polyhedralDiagram.diagram.form.meshExEdges );
-                scene2.add( polyhedralDiagram.diagram.form.exForceArrows );
+
+
+
+                // scene2.add( polyhedralDiagram.diagram.form.meshEdges );
+                // scene2.add( polyhedralDiagram.diagram.form.meshExEdges );
+                // scene2.add( polyhedralDiagram.diagram.form.exForceArrows );
+                scene2.add( polyhedralDiagram.diagram.form.objects.edges );
+                scene2.add( polyhedralDiagram.diagram.form.objects.exEdges );
+                scene2.add( polyhedralDiagram.diagram.form.objects.exForceArrows );
 
                 scene1.add( polyhedralDiagram.diagram.force.meshEdges );
                 // scene1.add( polyhedralDiagram.diagram.force.meshFaces );
@@ -118,16 +124,16 @@
 
                 var visible = gui.addFolder( 'toggle-visibility' );
 
-                visible.add( polyhedralDiagram.diagram.form.meshEdges, 'visible' ).name('form-edges');
-                visible.add( polyhedralDiagram.diagram.form.meshExEdges, 'visible' ).name('form-ex-edges');
-                visible.add( polyhedralDiagram.diagram.form.exForceArrows, 'visible' ).name('form-ex-forces');
+                visible.add( polyhedralDiagram.diagram.form.objects.edges, 'visible' ).name('form-edges');
+                visible.add( polyhedralDiagram.diagram.form.objects.exEdges, 'visible' ).name('form-ex-edges');
+                visible.add( polyhedralDiagram.diagram.form.objects.exForceArrows, 'visible' ).name('form-ex-forces');
 
                 visible.add( polyhedralDiagram.diagram.force.meshEdges, 'visible' ).name('force-edges');
                 // visible.add( polyhedralDiagram.diagram.force.meshFaces, 'visible' ).name('force-faces');
                 visible.add( polyhedralDiagram.diagram.force.objects.faces, 'visible' ).name('force-faces');
 
-                var materials = gui.addFolder( 'materials' );
-                materials.add( polyhedralDiagram.diagram.materials.forceFace, 'opacity', 0.0, 1.0 );
+                // var materials = gui.addFolder( 'materials' );
+                // materials.add( polyhedralDiagram.diagram.materials.forceFace, 'opacity', 0.0, 1.0 );
             };
         }
     }
@@ -180,6 +186,9 @@
         // for scene1
         // mouse.x = ( mouse.x / window.innerWidth * 2 ) * 2 - 1;
         // mouse.y = - ( mouse.y / window.innerHeight ) * 2 + 1;
+
+
+        // ray caster temp test
 
         raycaster.setFromCamera( mouse, camera );
         var intersects;
