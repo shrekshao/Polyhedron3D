@@ -5,7 +5,7 @@
 
     var canvas, renderer;
 
-    var raycaster, mouse;
+    var raycaster, mouseScene1, mouseScene2;
     var INTERSECTED, currentColor;
 
     var camera;
@@ -168,11 +168,14 @@
     function onMouseMove( event ) {
 
         event.preventDefault();
-        mouse.x = ( event.clientX / window.innerWidth*2 ) * 2 - 1;
-        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-        // mouse.x = event.clientX;
-        // mouse.y = event.clientY;
+        var tmp = ( event.clientX / window.innerWidth * 2 ) * 2;
+
+        mouseScene1.x = tmp - 1;
+        mouseScene1.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+        mouseScene2.x = ( event.clientX / window.innerWidth * 2 ) * 2 - 1;
+        mouseScene2.y = tmp;
 
     }
 
@@ -180,17 +183,11 @@
 
     function render () {
         requestAnimationFrame( render );
-        // renderer.render( scene1, camera );
-
-
-        // for scene1
-        // mouse.x = ( mouse.x / window.innerWidth * 2 ) * 2 - 1;
-        // mouse.y = - ( mouse.y / window.innerHeight ) * 2 + 1;
 
 
         // ray caster temp test
 
-        raycaster.setFromCamera( mouse, camera );
+        raycaster.setFromCamera( mouseScene1, camera );
         var intersects;
         if ( polyhedralDiagram ) {
             intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces.children );
@@ -202,7 +199,7 @@
 
                     INTERSECTED = intersects[0].object;
                     INTERSECTED.material.opacity = 1.0;
-                    console.log(intersects[0].object.diagramName);
+                    console.log(intersects[0].object.diagramId);
                 }
                 
             } else {
@@ -269,7 +266,8 @@
         canvas = document.getElementById( 'webgl-canvas' );
 
         raycaster = new THREE.Raycaster();
-        mouse = new THREE.Vector2();
+        mouseScene1 = new THREE.Vector2();
+        mouseScene2 = new THREE.Vector2();
         
         renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true } );
         renderer.setPixelRatio(window.devicePixelRatio);
