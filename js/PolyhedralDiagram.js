@@ -10,6 +10,8 @@ var PolyhedralDiagram = function (json) {
         form: {
             // geometries: {},
             // objects: {}
+            // parentObjects: new THREE.Object3D(),
+
             objects: {
                 vertices: new THREE.Object3D(),
                 edges: new THREE.Object3D(),
@@ -81,15 +83,14 @@ PolyhedralDiagram.prototype.constructor = PolyhedralDiagram;
 PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var json = this.json;
 
-    // var geometry = this.diagram.form.edges = new THREE.Geometry();
-    // var exEdges = this.diagram.form.exEdges = new THREE.Geometry();
-    // // var exForces = this.exForces = new THREE.Geometry();
+
+    // for (var o in this.diagram.form.obejcts) {
+    //     this.diagram.form.parentObjects.add( this.diagram.form.obejcts[o] );
+    // }
+
 
     var geometry = new THREE.Geometry();
     var exEdges = new THREE.Geometry();
-    // var exForces = this.exForces = new THREE.Geometry();
-
-    // var exForces = this.diagram.form.exForceArrows = new THREE.Object3D();
     var exForces = this.diagram.form.objects.exForceArrows;
 
     var vec3 = {};
