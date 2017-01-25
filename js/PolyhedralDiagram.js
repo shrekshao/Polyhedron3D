@@ -56,6 +56,12 @@ var PolyhedralDiagram = function (json) {
                 size: 0.5
             }),
 
+            vertexIcosahedron: new THREE.MeshBasicMaterial( { 
+                color: 0xffffff, 
+                // shading: THREE.FlatShading,
+                transparent: false,
+            }),
+
             forceFace: new THREE.MeshBasicMaterial( { 
                 color: 0xffaa00, 
                 shading: THREE.FlatShading,
@@ -232,10 +238,13 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     // single point geometry won't work for picking
 
     
+    var vertexIcosahedronGeometry = new THREE.IcosahedronGeometry(0.2, 0);
+
     var verticesArray = [];
 
 
-    curMaterial = this.diagram.materials.vertex;
+    // curMaterial = this.diagram.materials.vertex;
+    curMaterial = this.diagram.materials.vertexIcosahedron;
     len = geometry.vertices.length;
     var curVertexGeometry;
     var curVertexMesh;
@@ -259,7 +268,19 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
             // verticesParent.add( curVertexMesh );
 
 
-            verticesArray.push( geometry.vertices[ i ].x, geometry.vertices[ i ].y, geometry.vertices[ i ].z );
+            // -------------------------------
+            curVertexGeometry = vertexIcosahedronGeometry.clone();
+            // curVertexGeometry.position = new THREE.Vector3(geometry.vertices[ i ].x, geometry.vertices[ i ].y, geometry.vertices[ i ].z);
+            curVertexGeometry.translate( geometry.vertices[ i ].x, geometry.vertices[ i ].y, geometry.vertices[ i ].z );
+            curVertexMesh = new THREE.Mesh( curVertexGeometry.clone(), curMaterial.clone() );
+            verticesParent.add( curVertexMesh );
+
+
+            // --------------------------------------------
+            // buffer
+            // verticesArray.push( geometry.vertices[ i ].x, geometry.vertices[ i ].y, geometry.vertices[ i ].z );
+
+
         }
     }
 
@@ -283,21 +304,36 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
             
             // verticesParent.add( curVertexMesh );
 
-            verticesArray.push( exEdges.vertices[ i ].x, exEdges.vertices[ i ].y, exEdges.vertices[ i ].z );
+            // -------------------------------
+            curVertexGeometry = vertexIcosahedronGeometry.clone();
+            // curVertexGeometry.position = new THREE.Vector3(exEdges.vertices[ i ].x, exEdges.vertices[ i ].y, exEdges.vertices[ i ].z);
+            curVertexGeometry.translate( exEdges.vertices[ i ].x, exEdges.vertices[ i ].y, exEdges.vertices[ i ].z );
+            curVertexMesh = new THREE.Mesh( curVertexGeometry.clone(), curMaterial.clone() );
+            verticesParent.add( curVertexMesh );
+
+
+            // --------------------------------------------
+            // buffer
+            // verticesArray.push( exEdges.vertices[ i ].x, exEdges.vertices[ i ].y, exEdges.vertices[ i ].z );
         }
     }
 
-    var verticesBufferGeometry = new THREE.BufferGeometry();
-    verticesBufferGeometry.addAttribute(
-        'position', 
-        new THREE.BufferAttribute(
-            new Float32Array(verticesArray), 3
-        )
-    );
 
-    var verticesMesh = new THREE.Points( verticesBufferGeometry, this.diagram.materials.vertex );
 
-    verticesParent.add(verticesMesh);
+
+    // points in one mesh
+
+    // var verticesBufferGeometry = new THREE.BufferGeometry();
+    // verticesBufferGeometry.addAttribute(
+    //     'position', 
+    //     new THREE.BufferAttribute(
+    //         new Float32Array(verticesArray), 3
+    //     )
+    // );
+
+    // var verticesMesh = new THREE.Points( verticesBufferGeometry, this.diagram.materials.vertex );
+
+    // verticesParent.add(verticesMesh);
 }
 
 
