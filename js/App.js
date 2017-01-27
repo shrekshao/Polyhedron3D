@@ -8,6 +8,7 @@
     var raycaster, mouseScene1, mouseScene2;
     var mousePositionDirty = false;
     var INTERSECTED, currentColor, highlightObjectColor, highlightObjectOpacity;
+    var clicked = false, pickingClickSelected = false;
 
     var camera;
     var scene1, scene2;
@@ -171,6 +172,11 @@
 
     }
 
+    function onMouseClick( event ) {
+        console.log('clicked');
+        clicked = true;
+    }
+
 
     
     function releaseHighlightedFace( formEdge ) {
@@ -180,6 +186,7 @@
         if (f) {
             var forceFace = polyhedralDiagram.diagram.force.maps.faceId2Object[f];
             forceFace.material.color.setHex( highlightObjectColor );
+            // console.log( forceFace.material.opacity );
             forceFace.material.opacity = highlightObjectOpacity;
         }
     }
@@ -194,6 +201,7 @@
                 forceFace = polyhedralDiagram.diagram.force.maps.faceId2Object[ farray[f] ];
                 if (forceFace) {
                     forceFace.material.color.setHex( highlightObjectColor );
+                    // console.log( forceFace.material.opacity );
                     forceFace.material.opacity = highlightObjectOpacity;
                 }
             }
@@ -211,26 +219,17 @@
 
 
 
-    function render () {
-        requestAnimationFrame( render );
-
-
-        // ray caster temp test
-
-
-        if (mousePositionDirty) {
+    function doRayCast() {
+        if ( mousePositionDirty ) {
 
             mousePositionDirty = false;
         
             var intersects;
 
-
             if ( mouseScene2.x > -1 ) {
                 raycaster.setFromCamera( mouseScene2, camera );
             }
-            
-            
-            
+
             if ( polyhedralDiagram ) {
                 // intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.form.objects.edges.children );
                 intersects = raycaster.intersectObjects( scene2.children, true );
@@ -296,9 +295,51 @@
             }
         }
 
+    }
 
 
 
+
+    function pick() {
+
+        if (clicked) {
+            // try click select
+            doRayCast();
+
+            if (INTERSECTED) {
+                pickingClickSelected = true;
+            } else {
+                // release
+                pickingClickSelected = false;
+            }
+
+        } else if (!pickingClickSelected) {
+            // hovering highlight
+            doRayCast();
+        }
+
+
+        clicked = false;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function render () {
+        requestAnimationFrame( render );
+
+
+        // ray caster temp test
+        pick();
 
 
         var view;
@@ -355,6 +396,7 @@
         window.addEventListener('resize', onWindowResize, false);
 
         canvas.addEventListener('mousemove',  onMouseMove, false);
+        canvas.addEventListener('click',  onMouseClick, false);
 
 
 
