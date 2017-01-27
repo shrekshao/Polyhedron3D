@@ -184,18 +184,6 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     exForces.translateZ( offset.z );
 
 
-    // // build mesh
-    // this.diagram.form.meshEdges = new THREE.LineSegments( 
-    //     geometry, 
-    //     this.diagram.materials.lineBasic
-    // );
-
-    // this.diagram.form.meshExEdges = new THREE.LineSegments(
-    //     exEdges,
-    //     this.diagram.materials.lineExternal
-    // );
-
-
     // build separate meshes
     var edgesParent = this.diagram.form.objects.edges;
     var exEdgesParent = this.diagram.form.objects.exEdges;
@@ -238,7 +226,8 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     // single point geometry won't work for picking
 
     
-    var vertexIcosahedronGeometry = new THREE.IcosahedronGeometry(0.2, 0);
+    var vertexShapeGeometry = new THREE.IcosahedronGeometry(0.2, 0);
+    // var vertexShapeGeometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
 
     var verticesArray = [];
 
@@ -269,7 +258,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
 
 
             // -------------------------------
-            curVertexGeometry = vertexIcosahedronGeometry.clone();
+            curVertexGeometry = vertexShapeGeometry.clone();
             // curVertexGeometry.position = new THREE.Vector3(geometry.vertices[ i ].x, geometry.vertices[ i ].y, geometry.vertices[ i ].z);
             curVertexGeometry.translate( geometry.vertices[ i ].x, geometry.vertices[ i ].y, geometry.vertices[ i ].z );
             curVertexMesh = new THREE.Mesh( curVertexGeometry.clone(), curMaterial.clone() );
@@ -305,7 +294,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
             // verticesParent.add( curVertexMesh );
 
             // -------------------------------
-            curVertexGeometry = vertexIcosahedronGeometry.clone();
+            curVertexGeometry = vertexShapeGeometry.clone();
             // curVertexGeometry.position = new THREE.Vector3(exEdges.vertices[ i ].x, exEdges.vertices[ i ].y, exEdges.vertices[ i ].z);
             curVertexGeometry.translate( exEdges.vertices[ i ].x, exEdges.vertices[ i ].y, exEdges.vertices[ i ].z );
             curVertexMesh = new THREE.Mesh( curVertexGeometry.clone(), curMaterial.clone() );

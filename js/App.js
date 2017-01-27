@@ -6,6 +6,7 @@
     var canvas, renderer;
 
     var raycaster, mouseScene1, mouseScene2;
+    var mousePositionDirty = false;
     var INTERSECTED, currentColor, highlightObjectColor, highlightObjectOpacity;
 
     var camera;
@@ -180,6 +181,8 @@
         mouseScene2.x = mouseScene1.x - 2;
         mouseScene2.y = mouseScene1.y;
 
+        mousePositionDirty = true;
+
     }
 
 
@@ -203,79 +206,83 @@
 
         // ray caster temp test
 
-        
-        var intersects;
 
-        // raycaster.setFromCamera( mouseScene1, camera );
-        // if ( polyhedralDiagram ) {
-        //     intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces.children );
-        //     // var intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces );
-        //     // var intersects = raycaster.intersectObjects( scene1.children );
-        //     if ( intersects.length > 0 ) {
-        //         if ( INTERSECTED != intersects[ 0 ].object ) {
-        //             if (INTERSECTED) INTERSECTED.material.opacity = 0.05;
+        if (mousePositionDirty) {
 
-        //             INTERSECTED = intersects[0].object;
-        //             INTERSECTED.material.opacity = 1.0;
-        //             console.log(intersects[0].object.diagramId);
-        //         }
-                
-        //     } else {
-        //         if (INTERSECTED) INTERSECTED.material.opacity = 0.05;
-        //         INTERSECTED = null;
-        //     }
-        // }
+            mousePositionDirty = false;
+        
+            var intersects;
 
-        if ( mouseScene2.x > -1 ) {
-            raycaster.setFromCamera( mouseScene2, camera );
-        }
-        
-        
-        
-        if ( polyhedralDiagram ) {
-            // intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.form.objects.edges.children );
-            intersects = raycaster.intersectObjects( scene2.children, true );
+            // raycaster.setFromCamera( mouseScene1, camera );
+            // if ( polyhedralDiagram ) {
+            //     intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces.children );
+            //     // var intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces );
+            //     // var intersects = raycaster.intersectObjects( scene1.children );
+            //     if ( intersects.length > 0 ) {
+            //         if ( INTERSECTED != intersects[ 0 ].object ) {
+            //             if (INTERSECTED) INTERSECTED.material.opacity = 0.05;
+
+            //             INTERSECTED = intersects[0].object;
+            //             INTERSECTED.material.opacity = 1.0;
+            //             console.log(intersects[0].object.diagramId);
+            //         }
+                    
+            //     } else {
+            //         if (INTERSECTED) INTERSECTED.material.opacity = 0.05;
+            //         INTERSECTED = null;
+            //     }
+            // }
+
+            if ( mouseScene2.x > -1 ) {
+                raycaster.setFromCamera( mouseScene2, camera );
+            }
             
-            // var intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces );
-            // var intersects = raycaster.intersectObjects( scene1.children );
-            if ( intersects.length > 0 ) {
-                if ( INTERSECTED != intersects[0].object ) {
+            
+            
+            if ( polyhedralDiagram ) {
+                // intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.form.objects.edges.children );
+                intersects = raycaster.intersectObjects( scene2.children, true );
+                
+                // var intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces );
+                // var intersects = raycaster.intersectObjects( scene1.children );
+                if ( intersects.length > 0 ) {
+                    if ( INTERSECTED != intersects[0].object ) {
+                        if (INTERSECTED) {
+                            // release last highlighted object
+                            // INTERSECTED.material.color.setHex( currentColor );
+                            releaseHighlighted( INTERSECTED );
+                        }
+
+                        INTERSECTED = intersects[0].object;
+
+                        currentColor = INTERSECTED.material.color.getHex();
+                        INTERSECTED.material.color.setHex( 0x00ff00 );
+                        // INTERSECTED.material.needsUpdate = true;
+                        console.log(intersects[0].object.diagramId, intersects[0].object.diagramForceFaceId);
+
+
+                        // highlight corresponding force face in scene1
+                        var e = INTERSECTED.diagramId;
+                        var f = INTERSECTED.diagramForceFaceId;
+                        if (e && f) {
+                            var forceFace = polyhedralDiagram.diagram.force.maps.faceId2Object[f];
+                            highlightObjectColor = forceFace.material.color.getHex();
+                            highlightObjectOpacity = forceFace.material.opacity;
+                            forceFace.material.color.setHex( 0x0000ff );
+                            forceFace.material.opacity = 1.0;
+                        }
+
+                    }
+                    
+                } else {
                     if (INTERSECTED) {
-                        // release last highlighted object
                         // INTERSECTED.material.color.setHex( currentColor );
                         releaseHighlighted( INTERSECTED );
                     }
-
-                    INTERSECTED = intersects[0].object;
-
-                    currentColor = INTERSECTED.material.color.getHex();
-                    INTERSECTED.material.color.setHex( 0x00ff00 );
-                    // INTERSECTED.material.needsUpdate = true;
-                    console.log(intersects[0].object.diagramId, intersects[0].object.diagramForceFaceId);
-
-
-                    // highlight corresponding force face in scene1
-                    var e = INTERSECTED.diagramId;
-                    var f = INTERSECTED.diagramForceFaceId;
-                    if (e && f) {
-                        var forceFace = polyhedralDiagram.diagram.force.maps.faceId2Object[f];
-                        highlightObjectColor = forceFace.material.color.getHex();
-                        highlightObjectOpacity = forceFace.material.opacity;
-                        forceFace.material.color.setHex( 0x0000ff );
-                        forceFace.material.opacity = 1.0;
-                    }
-
+                    INTERSECTED = null;
                 }
-                
-            } else {
-                if (INTERSECTED) {
-                    // INTERSECTED.material.color.setHex( currentColor );
-                    releaseHighlighted( INTERSECTED );
-                }
-                INTERSECTED = null;
             }
         }
-        
 
 
 
