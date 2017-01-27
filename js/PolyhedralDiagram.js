@@ -218,6 +218,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
         curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
         curMesh.diagramId = edgesId[j];
         curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
+        curMesh.diagramType = 'form_edge';
         edgesParent.add( curMesh );
     }
 
@@ -230,6 +231,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
         curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
         curMesh.diagramId = exEdgesId[j];
         curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
+        curMesh.diagramType = 'form_ex_edge';
         exEdgesParent.add( curMesh );
     }
 
@@ -252,12 +254,16 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var curVertexGeometry;
     var curVertexMesh;
 
+    // vertex 2 force face array
+    var v2fa = this.json.form.vertices_2_force_faces;
+
     for ( i = 0 ; i < len; i ++ ) {
         curVertexGeometry = vertexShapeGeometry.clone();
         curVertexGeometry.translate( verticesOnlyGeometry.vertices[ i ].x, verticesOnlyGeometry.vertices[ i ].y, verticesOnlyGeometry.vertices[ i ].z );
         curVertexMesh = new THREE.Mesh( curVertexGeometry.clone(), curMaterial.clone() );
         curVertexMesh.diagramId = vid2vid[i];
-        // curVertexMesh.digramForceEdgeId = this.json.form.edges[curMesh.diagramId].force_face
+        curVertexMesh.digramForceFaceIdArray = v2fa[ curVertexMesh.diagramId ];
+        curVertexMesh.diagramType = 'form_vertex';
         verticesParent.add( curVertexMesh );
     }
 }

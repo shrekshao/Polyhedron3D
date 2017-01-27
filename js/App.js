@@ -82,60 +82,6 @@
 
                 polyhedralDiagram = new PolyhedralDiagram(diagramJson);
 
-                // var material = new THREE.LineBasicMaterial( { 
-                //     color: 0xffffff, 
-                //     opacity: 1, 
-                //     linewidth: 3
-                // } );
-
-                // var mesh = new THREE.LineSegments( 
-                //     polyhedralDiagram.formGeometry, 
-                //     material
-                // );
-
-                // scene2.add(mesh);
-
-                // var materialExEdges = new THREE.LineBasicMaterial( { 
-                //     color: 0xff0000, 
-                //     opacity: 1, 
-                //     linewidth: 3
-                // } );
-
-                // var meshExEdges = new THREE.LineSegments( 
-                //     polyhedralDiagram.formExEdges, 
-                //     materialExEdges
-                // );
-                
-                // scene2.add(meshExEdges);
-
-                // scene2.add(polyhedralDiagram.formExForces);
-                
-                // // var mesh2 = new THREE.Mesh( 
-                // //     // new THREE.BoxGeometry( 2, 2, 2 ), 
-                // //     new THREE.IcosahedronGeometry(1.5, 0), 
-                // //     new THREE.MeshPhongMaterial( { color: 0x156289, shading: THREE.FlatShading } )
-                // // );
-                // // scene2.add(mesh2);
-
-
-                // var materialForceFace = new THREE.MeshPhongMaterial( { 
-                //         color: 0xffaa00, 
-                //         shading: THREE.FlatShading,
-                //         opacity: 0.3,
-                //         transparent: true,
-                //         side: THREE.DoubleSide
-                // });
-
-                // var meshForceFace = new THREE.Mesh( polyhedralDiagram.forceGeometry, materialForceFace );
-                // scene1.add( meshForceFace );
-
-
-                // var meshForceEdge = new THREE.LineSegments( polyhedralDiagram.forceEdgeGeometry, material );
-                // scene1.add( meshForceEdge );
-
-
-
-
 
                 // scene2.add( polyhedralDiagram.diagram.form.meshEdges );
                 // scene2.add( polyhedralDiagram.diagram.form.meshExEdges );
@@ -227,7 +173,7 @@
 
 
     
-    function releaseHighlighted( formEdge ) {
+    function releaseHighlightedFace( formEdge ) {
         formEdge.material.color.setHex( currentColor );
         // var e = formEdge.diagramId;
         var f = formEdge.diagramForceFaceId;
@@ -235,6 +181,31 @@
             var forceFace = polyhedralDiagram.diagram.force.maps.faceId2Object[f];
             forceFace.material.color.setHex( highlightObjectColor );
             forceFace.material.opacity = highlightObjectOpacity;
+        }
+    }
+
+    function releaseHighlightedFaceArray( formVertex ) {
+        formVertex.material.color.setHex( currentColor );
+        // var e = formEdge.diagramId;
+        var farray = formVertex.digramForceFaceIdArray;
+        if (farray) {
+            var f, forceFace;
+            for (f in farray) {
+                forceFace = polyhedralDiagram.diagram.force.maps.faceId2Object[ farray[f] ];
+                if (forceFace) {
+                    forceFace.material.color.setHex( highlightObjectColor );
+                    forceFace.material.opacity = highlightObjectOpacity;
+                }
+            }
+            
+        }
+    }
+
+    function releaseHighlighted( mesh ) {
+        if (mesh.diagramType !== 'form_vertex') {
+            releaseHighlightedFace( mesh );
+        } else {
+            releaseHighlightedFaceArray ( mesh );
         }
     }
 
@@ -278,20 +249,40 @@
 
                         currentColor = INTERSECTED.material.color.getHex();
                         INTERSECTED.material.color.setHex( cfg.highlightColors.form );
-                        // INTERSECTED.material.needsUpdate = true;
-                        console.log(intersects[0].object.diagramId, intersects[0].object.diagramForceFaceId);
+                        
 
+                        if (INTERSECTED.diagramType !== 'form_vertex') {
+                            console.log(INTERSECTED.diagramId, INTERSECTED.diagramForceFaceId);
 
-                        // highlight corresponding force face in scene1
-                        var e = INTERSECTED.diagramId;
-                        var f = INTERSECTED.diagramForceFaceId;
-                        if (e && f) {
-                            var forceFace = polyhedralDiagram.diagram.force.maps.faceId2Object[f];
-                            highlightObjectColor = forceFace.material.color.getHex();
-                            highlightObjectOpacity = forceFace.material.opacity;
-                            forceFace.material.color.setHex( cfg.highlightColors.force );
-                            forceFace.material.opacity = 1.0;
+                            // highlight corresponding force face in scene1
+                            var e = INTERSECTED.diagramId;
+                            var f = INTERSECTED.diagramForceFaceId;
+                            if (e && f) {
+                                var forceFace = polyhedralDiagram.diagram.force.maps.faceId2Object[f];
+                                highlightObjectColor = forceFace.material.color.getHex();
+                                highlightObjectOpacity = forceFace.material.opacity;
+                                forceFace.material.color.setHex( cfg.highlightColors.force );
+                                forceFace.material.opacity = 1.0;
+                            }
+                        } else {
+                            console.log(INTERSECTED.diagramId, INTERSECTED.digramForceFaceIdArray);
+
+                            var e = INTERSECTED.diagramId;
+                            var farray = INTERSECTED.digramForceFaceIdArray;
+                            if (e && farray) {
+                                var f, forceFace;
+                                for (f in farray) {
+                                    forceFace = polyhedralDiagram.diagram.force.maps.faceId2Object[ farray[f] ];
+                                    if (forceFace) {
+                                        highlightObjectColor = forceFace.material.color.getHex();
+                                        highlightObjectOpacity = forceFace.material.opacity;
+                                        forceFace.material.color.setHex( cfg.highlightColors.force );
+                                        forceFace.material.opacity = 1.0;
+                                    }
+                                }
+                            }
                         }
+                        
 
                     }
                     
@@ -350,7 +341,7 @@
         
 
         raycaster = new THREE.Raycaster();
-        raycaster.linePrecision = 0.2;
+        raycaster.linePrecision = 0.1;
         // raycaster.params.Points.threshold = 0.1;
 
         mouseScene1 = new THREE.Vector2();

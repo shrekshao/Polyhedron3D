@@ -6,6 +6,8 @@ class DiagramJson:
         self.json = {
             'form': {
                 'vertices': {}, 
+                'vertices_2_force_faces': {},   # face array
+                'vertices_2_force_cells': {},
                 'edges': {}
             },
 
@@ -22,13 +24,20 @@ class Txt2JsonParser:
     def __init__(self):
         self.diagramJson = DiagramJson()
 
+        # # tmp data structures used only when parsing
+        # self.form_edge_2_vertex = {}
+
     def readFormVertex(self, filename):
         f = open(filename)
         v = self.diagramJson.json['form']['vertices']
+        v2fa = self.diagramJson.json['form']['vertices_2_force_faces']
         for line in f:
             vertex = line.strip().split('\t')
             # print vertex
             v[vertex[0]] = map(float, vertex[1:])
+
+            # create array for form_vertices to force_face array (cells)
+            v2fa[vertex[0]] = []
 
         # print self.diagramJson.json
         f.close()
@@ -47,12 +56,16 @@ class Txt2JsonParser:
         f_edge_vertex.close()
 
         
-
+        v2fa = self.diagramJson.json['form']['vertices_2_force_faces']
 
         f_edge_to_force_face = open(filename_edge_to_force_face)
         for line in f_edge_to_force_face:
             edge = line.strip().split('\t')
             edges[edge[0]]['force_face'] = edge[1] if edge[1] != "Null" else None
+
+            edge_vertex = edges[edge[0]]['vertex']
+            for v in edge_vertex:
+                v2fa[v].append(edge[1] if edge[1] != "Null" else None)
 
         f_edge_to_force_face.close()
 
