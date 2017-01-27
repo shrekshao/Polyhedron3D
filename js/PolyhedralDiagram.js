@@ -38,32 +38,38 @@ var PolyhedralDiagram = function (json) {
 
         materials: {
             lineBasic: new THREE.LineBasicMaterial( { 
-                color: 0xffffff, 
+                // color: 0xffffff, 
+                color: 0x000000,
                 opacity: 1, 
                 transparent: false
                 // linewidth: 3     // ANGLE limitation
             } ),
 
             lineExternal: new THREE.LineBasicMaterial( { 
-                color: 0xff0000, 
+                color: 0x888888, 
                 opacity: 1, 
                 transparent: false
                 // linewidth: 3
             } ),
 
+            // arrow: new THREE.LineBasicMaterial( { 
+            //     color: 0x000000
+            // } ),
+            arrow: 0xaaaaaa,
+
             vertex: new THREE.PointsMaterial({
-                color: 0xffffff,
+                color: 0x000000,
                 size: 0.5
             }),
 
             vertexIcosahedron: new THREE.MeshBasicMaterial( { 
-                color: 0xffffff, 
+                color: 0x000000, 
                 // shading: THREE.FlatShading,
                 transparent: false,
             }),
 
             forceFace: new THREE.MeshBasicMaterial( { 
-                color: 0xffaa00, 
+                color: 0x156289, 
                 shading: THREE.FlatShading,
                 opacity: 0.05,
                 transparent: true,
@@ -156,7 +162,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
             tmpVec3.sub( vec3[vertex[0]] );
             arrowLen = tmpVec3.length();
             tmpVec3.multiplyScalar( 1 / arrowLen );
-            arrow = new THREE.ArrowHelper( tmpVec3, vec3[vertex[0]], arrowLen );
+            arrow = new THREE.ArrowHelper( tmpVec3, vec3[vertex[0]], arrowLen, this.diagram.materials.arrow );
             arrow.diagramId = edge;
             exForces.add( arrow );
         } else {

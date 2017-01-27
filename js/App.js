@@ -12,7 +12,14 @@
     var camera;
     var scene1, scene2;
 
-    var gui, cfg;
+    var gui;
+    var cfg = {
+        highlightColors: {
+            vertex: 0xffffff,
+            edge: 0xffffff,
+            face: 0xffffff,
+        }
+    };
 
     var polyhedralDiagram;
 
@@ -23,7 +30,9 @@
             width: 0.5,
             height: 1.0,
 
-            background: new THREE.Color().setRGB( 0.5, 0.5, 0.7 )
+            // background: new THREE.Color().setRGB( 0.5, 0.5, 0.7 )
+            background: new THREE.Color().setRGB( 0.9, 0.9, 0.9 )
+            // background: new THREE.Color().setRGB( 1, 1, 1 )
         },
 
         {
@@ -32,8 +41,9 @@
             width: 0.5,
             height: 1.0,
 
-            // background: new THREE.Color().setRGB( 0.7, 0.7, 0.7 )
-            background: new THREE.Color().setRGB( 0.5, 0.5, 0.7 )
+            // background: new THREE.Color().setRGB( 0.5, 0.5, 0.7 )
+            background: new THREE.Color().setRGB( 0.9, 0.9, 0.9 )
+            // background: new THREE.Color().setRGB( 1, 1, 1 )
         }
     ];
 
@@ -137,6 +147,11 @@
 
                 // var materials = gui.addFolder( 'materials' );
                 // materials.add( polyhedralDiagram.diagram.materials.forceFace, 'opacity', 0.0, 1.0 );
+
+                var colors = gui.addFolder( 'highlightColors' );
+                colors.addColor( cfg.highlightColors, 'vertex' );
+                colors.addColor( cfg.highlightColors, 'edge' );
+                colors.addColor( cfg.highlightColors, 'face' );
             };
         }
     }
@@ -256,7 +271,7 @@
                         INTERSECTED = intersects[0].object;
 
                         currentColor = INTERSECTED.material.color.getHex();
-                        INTERSECTED.material.color.setHex( 0x00ff00 );
+                        INTERSECTED.material.color.setHex( cfg.highlightColors.edge );
                         // INTERSECTED.material.needsUpdate = true;
                         console.log(intersects[0].object.diagramId, intersects[0].object.diagramForceFaceId);
 
@@ -268,7 +283,7 @@
                             var forceFace = polyhedralDiagram.diagram.force.maps.faceId2Object[f];
                             highlightObjectColor = forceFace.material.color.getHex();
                             highlightObjectOpacity = forceFace.material.opacity;
-                            forceFace.material.color.setHex( 0x0000ff );
+                            forceFace.material.color.setHex( cfg.highlightColors.face );
                             forceFace.material.opacity = 1.0;
                         }
 
@@ -333,14 +348,14 @@
         document.getElementById('files').addEventListener('change', handleFileSelect, false);
 
         gui = new dat.GUI();
-        cfg = {
+        var tmpList = {
             load_json: function () {
                 // console.log('load json file');
                 document.getElementById("files").click()
             }
         }
 
-        gui.add(cfg, 'load_json');
+        gui.add(tmpList, 'load_json');
 
 
 
