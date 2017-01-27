@@ -310,10 +310,6 @@
 
 
 
-
-
-
-
         var view;
         for ( var ii = 0; ii < views.length; ++ii ) {
             view = views[ii];

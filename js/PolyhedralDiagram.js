@@ -110,10 +110,13 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var exEdges = new THREE.Geometry();
     var exForces = this.diagram.form.objects.exForceArrows;
 
+    var verticesOnlyGeometry = new THREE.Geometry();    // temparary used for vertices mapping
+
     var vec3 = {};
+    var vid2vid = {};
     var v;
 
-    
+    var c = 0;
     for (v in json.form.vertices) {
         vec3[v] = new THREE.Vector3 ( 
             json.form.vertices[v][0],
@@ -121,7 +124,9 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
             json.form.vertices[v][2]
         );
 
-        // geometry.vertices.push(vec3[v]);
+        vid2vid[c++] = v;
+
+        verticesOnlyGeometry.vertices.push(vec3[v]);
 
     }
 
@@ -189,6 +194,8 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     exForces.translateY( offset.y );
     exForces.translateZ( offset.z );
 
+    verticesOnlyGeometry.translate( offset.x, offset.y, offset.z );
+
 
     // build separate meshes
     var edgesParent = this.diagram.form.objects.edges;
@@ -240,96 +247,22 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
 
     // curMaterial = this.diagram.materials.vertex;
     curMaterial = this.diagram.materials.vertexIcosahedron;
-    len = geometry.vertices.length;
+    // len = geometry.vertices.length;
+    len = verticesOnlyGeometry.vertices.length;
     var curVertexGeometry;
     var curVertexMesh;
+
     for ( i = 0 ; i < len; i ++ ) {
-        if (!vertexAdded[verticesId[i]]) {
-            vertexAdded[verticesId[i]] = true;
-
-            // curVertexGeometry = new THREE.BufferGeometry()
-            // curVertexGeometry.addAttribute(
-            //     'position', 
-            //     new THREE.BufferAttribute(
-            //         new Float32Array([ 
-            //             geometry.vertices[ i ].x, geometry.vertices[ i ].y, geometry.vertices[ i ].z
-            //         ]),
-            //         3
-            //     )
-            // );
-
-            // curVertexMesh = new THREE.Points( curVertexGeometry.clone(), curMaterial.clone() );
-            
-            // verticesParent.add( curVertexMesh );
-
-
-            // -------------------------------
-            curVertexGeometry = vertexShapeGeometry.clone();
-            // curVertexGeometry.position = new THREE.Vector3(geometry.vertices[ i ].x, geometry.vertices[ i ].y, geometry.vertices[ i ].z);
-            curVertexGeometry.translate( geometry.vertices[ i ].x, geometry.vertices[ i ].y, geometry.vertices[ i ].z );
-            curVertexMesh = new THREE.Mesh( curVertexGeometry.clone(), curMaterial.clone() );
-            verticesParent.add( curVertexMesh );
-
-
-            // --------------------------------------------
-            // buffer
-            // verticesArray.push( geometry.vertices[ i ].x, geometry.vertices[ i ].y, geometry.vertices[ i ].z );
-
-
-        }
+        curVertexGeometry = vertexShapeGeometry.clone();
+        curVertexGeometry.translate( verticesOnlyGeometry.vertices[ i ].x, verticesOnlyGeometry.vertices[ i ].y, verticesOnlyGeometry.vertices[ i ].z );
+        curVertexMesh = new THREE.Mesh( curVertexGeometry.clone(), curMaterial.clone() );
+        curVertexMesh.diagramId = vid2vid[i];
+        // curVertexMesh.digramForceEdgeId = this.json.form.edges[curMesh.diagramId].force_face
+        verticesParent.add( curVertexMesh );
     }
-
-    len = exEdges.vertices.length;
-    for ( i = 0 ; i < len; i ++ ) {
-        if (!vertexAdded[exVerticesId[i]]) {
-            vertexAdded[exVerticesId[i]] = true;
-
-            // curVertexGeometry = new THREE.BufferGeometry()
-            // curVertexGeometry.addAttribute(
-            //     'position', 
-            //     new THREE.BufferAttribute(
-            //         new Float32Array([ 
-            //             exEdges.vertices[ i ].x, exEdges.vertices[ i ].y, exEdges.vertices[ i ].z
-            //         ]),
-            //         3
-            //     )
-            // );
-
-            // curVertexMesh = new THREE.Points( curVertexGeometry.clone(), curMaterial.clone() );
-            
-            // verticesParent.add( curVertexMesh );
-
-            // -------------------------------
-            curVertexGeometry = vertexShapeGeometry.clone();
-            // curVertexGeometry.position = new THREE.Vector3(exEdges.vertices[ i ].x, exEdges.vertices[ i ].y, exEdges.vertices[ i ].z);
-            curVertexGeometry.translate( exEdges.vertices[ i ].x, exEdges.vertices[ i ].y, exEdges.vertices[ i ].z );
-            curVertexMesh = new THREE.Mesh( curVertexGeometry.clone(), curMaterial.clone() );
-            verticesParent.add( curVertexMesh );
-
-
-            // --------------------------------------------
-            // buffer
-            // verticesArray.push( exEdges.vertices[ i ].x, exEdges.vertices[ i ].y, exEdges.vertices[ i ].z );
-        }
-    }
-
-
-
-
-    // points in one mesh
-
-    // var verticesBufferGeometry = new THREE.BufferGeometry();
-    // verticesBufferGeometry.addAttribute(
-    //     'position', 
-    //     new THREE.BufferAttribute(
-    //         new Float32Array(verticesArray), 3
-    //     )
-    // );
-
-    // var verticesMesh = new THREE.Points( verticesBufferGeometry, this.diagram.materials.vertex );
-
-    // verticesParent.add(verticesMesh);
 }
+
+
 
 
 PolyhedralDiagram.prototype.buildForceDiagram = function() {
