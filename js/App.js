@@ -15,9 +15,8 @@
     var gui;
     var cfg = {
         highlightColors: {
-            vertex: 0xffffff,
-            edge: 0xffffff,
-            face: 0xffffff,
+            form: 0xffffff,
+            force: 0xffffff,
         }
     };
 
@@ -149,9 +148,8 @@
                 // materials.add( polyhedralDiagram.diagram.materials.forceFace, 'opacity', 0.0, 1.0 );
 
                 var colors = gui.addFolder( 'highlightColors' );
-                colors.addColor( cfg.highlightColors, 'vertex' );
-                colors.addColor( cfg.highlightColors, 'edge' );
-                colors.addColor( cfg.highlightColors, 'face' );
+                colors.addColor( cfg.highlightColors, 'form' );
+                colors.addColor( cfg.highlightColors, 'force' );
             };
         }
     }
@@ -271,7 +269,7 @@
                         INTERSECTED = intersects[0].object;
 
                         currentColor = INTERSECTED.material.color.getHex();
-                        INTERSECTED.material.color.setHex( cfg.highlightColors.edge );
+                        INTERSECTED.material.color.setHex( cfg.highlightColors.form );
                         // INTERSECTED.material.needsUpdate = true;
                         console.log(intersects[0].object.diagramId, intersects[0].object.diagramForceFaceId);
 
@@ -283,7 +281,7 @@
                             var forceFace = polyhedralDiagram.diagram.force.maps.faceId2Object[f];
                             highlightObjectColor = forceFace.material.color.getHex();
                             highlightObjectOpacity = forceFace.material.opacity;
-                            forceFace.material.color.setHex( cfg.highlightColors.face );
+                            forceFace.material.color.setHex( cfg.highlightColors.force );
                             forceFace.material.opacity = 1.0;
                         }
 
@@ -363,8 +361,8 @@
         canvas = document.getElementById( 'webgl-canvas' );
 
         raycaster = new THREE.Raycaster();
-        raycaster.linePrecision = 0.1;
-        raycaster.params.Points.threshold = 0.1;
+        raycaster.linePrecision = 0.2;
+        // raycaster.params.Points.threshold = 0.1;
 
         mouseScene1 = new THREE.Vector2();
         mouseScene2 = new THREE.Vector2();
