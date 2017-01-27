@@ -11,6 +11,7 @@
 
     var camera;
     var scene1, scene2;
+    var scenes;
 
     var gui;
     var cfg = {
@@ -29,6 +30,14 @@
             width: 0.5,
             height: 1.0,
 
+            // updated in window resize
+            window: {
+                left: 0,
+                bottom: 0,
+                width: 0.5,
+                height: 1.0
+            },
+
             // background: new THREE.Color().setRGB( 0.5, 0.5, 0.7 )
             background: new THREE.Color().setRGB( 0.9, 0.9, 0.9 )
             // background: new THREE.Color().setRGB( 1, 1, 1 )
@@ -39,6 +48,14 @@
             bottom: 0,
             width: 0.5,
             height: 1.0,
+
+            // updated in window resize
+            window: {
+                left: 0,
+                bottom: 0,
+                width: 0.5,
+                height: 1.0
+            },
 
             // background: new THREE.Color().setRGB( 0.5, 0.5, 0.7 )
             background: new THREE.Color().setRGB( 0.9, 0.9, 0.9 )
@@ -179,6 +196,16 @@
 
         renderer.setSize(window.innerWidth, window.innerHeight);
 
+        var view;
+        for ( var ii = 0; ii < views.length; ++ii ) {
+            view = views[ii];
+
+            view.window.left   = Math.floor( window.innerWidth  * view.left );
+            view.window.bottom = Math.floor( window.innerHeight * view.bottom );
+            view.window.width  = Math.floor( window.innerWidth  * view.width );
+            view.window.height = Math.floor( window.innerHeight * view.height );
+        }
+
     }
 
     function onMouseMove( event ) {
@@ -226,25 +253,6 @@
         
             var intersects;
 
-            // raycaster.setFromCamera( mouseScene1, camera );
-            // if ( polyhedralDiagram ) {
-            //     intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces.children );
-            //     // var intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces );
-            //     // var intersects = raycaster.intersectObjects( scene1.children );
-            //     if ( intersects.length > 0 ) {
-            //         if ( INTERSECTED != intersects[ 0 ].object ) {
-            //             if (INTERSECTED) INTERSECTED.material.opacity = 0.05;
-
-            //             INTERSECTED = intersects[0].object;
-            //             INTERSECTED.material.opacity = 1.0;
-            //             console.log(intersects[0].object.diagramId);
-            //         }
-                    
-            //     } else {
-            //         if (INTERSECTED) INTERSECTED.material.opacity = 0.05;
-            //         INTERSECTED = null;
-            //     }
-            // }
 
             if ( mouseScene2.x > -1 ) {
                 raycaster.setFromCamera( mouseScene2, camera );
@@ -310,28 +318,14 @@
         for ( var ii = 0; ii < views.length; ++ii ) {
             view = views[ii];
 
-            var left   = Math.floor( window.innerWidth  * view.left );
-            var bottom = Math.floor( window.innerHeight * view.bottom );
-            var width  = Math.floor( window.innerWidth  * view.width );
-            var height = Math.floor( window.innerHeight * view.height );
-            renderer.setViewport( left, bottom, width, height );
-            renderer.setScissor( left, bottom, width, height );
+            renderer.setViewport( view.window.left, view.window.bottom, view.window.width, view.window.height );
+            renderer.setScissor( view.window.left, view.window.bottom, view.window.width, view.window.height );
             renderer.setScissorTest( true );
             renderer.setClearColor( view.background );
-            camera.aspect = width / height;
+            camera.aspect = view.window.width / view.window.height;
             camera.updateProjectionMatrix();
 
-
-            // tmp hard code
-            if (ii === 0) {
-                // renderer.clear();
-                renderer.render( scene1, camera );
-                // renderer.autoClear = false;
-            } else {
-                // renderer.clearDepth();
-                renderer.render( scene2, camera );
-                // renderer.autoClear = true;
-            }
+            renderer.render( view.scene, camera );
             
         }
 
@@ -355,10 +349,9 @@
 
         gui.add(tmpList, 'load_json');
 
-
-
-
         canvas = document.getElementById( 'webgl-canvas' );
+
+        
 
         raycaster = new THREE.Raycaster();
         raycaster.linePrecision = 0.2;
@@ -386,6 +379,8 @@
 
         scene1 = new THREE.Scene();
         scene2 = new THREE.Scene();
+        views[0].scene = scene1;
+        views[1].scene = scene2;
 
         var ambient = new THREE.AmbientLight( 0x444444 );
         scene1.add( ambient );
@@ -410,7 +405,7 @@
         var mesh = new THREE.Mesh( geometry, material );
         // scene1.add(mesh);
 
-        
+        onWindowResize();
 
 
         // var mesh2 = new THREE.Mesh( 
