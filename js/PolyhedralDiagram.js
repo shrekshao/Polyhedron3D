@@ -52,6 +52,14 @@ var PolyhedralDiagram = function (json) {
                 // linewidth: 3
             } ),
 
+            cylinderBasic: new THREE.MeshBasicMaterial( {
+                color: 0x000000
+            } ),
+
+            cylinderExternal: new THREE.MeshBasicMaterial( {
+                color: 0x888888
+            } ),
+
             // arrow: new THREE.LineBasicMaterial( { 
             //     color: 0x000000
             // } ),
@@ -163,11 +171,21 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
 
             exVerticesId.push( vertex[0], vertex[1] );
         } else if (json.form.edges[edge].ex_force) {
-            tmpVec3.copy( vec3[vertex[1]] );
-            tmpVec3.sub( vec3[vertex[0]] );
-            arrowLen = tmpVec3.length();
-            tmpVec3.multiplyScalar( 1 / arrowLen );
-            arrow = new THREE.ArrowHelper( tmpVec3, vec3[vertex[0]], arrowLen, this.diagram.materials.arrow );
+            // tmpVec3.copy( vec3[vertex[1]] );
+            // tmpVec3.sub( vec3[vertex[0]] );
+            // arrowLen = tmpVec3.length();
+            // tmpVec3.multiplyScalar( 1 / arrowLen );
+            // arrow = new THREE.ArrowHelper( tmpVec3, vec3[vertex[0]], arrowLen, this.diagram.materials.arrow );
+            // arrow.diagramId = edge;
+            // exForces.add( arrow );
+
+            arrow = createCylinderMesh( 
+                vec3[vertex[0]],
+                vec3[vertex[1]],
+                this.diagram.materials.cylinderExternal.clone(),
+                0,
+                0.1
+            );
             arrow.diagramId = edge;
             exForces.add( arrow );
         } else {
@@ -213,22 +231,48 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
 
     // edges
     for ( i = 0, j = 0; i < len; i += 2, j ++ ) {
-        curEdgeGeometry = new THREE.Geometry();
-        curEdgeGeometry.vertices.push( geometry.vertices[i].clone(), geometry.vertices[i+1].clone() );
-        curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
+        // curEdgeGeometry = new THREE.Geometry();
+        // curEdgeGeometry.vertices.push( geometry.vertices[i].clone(), geometry.vertices[i+1].clone() );
+        // curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
+        // curMesh.diagramId = edgesId[j];
+        // curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
+        // curMesh.diagramType = 'form_edge';
+        //edgesParent.add( curMesh );
+
+
+        // cylinder edge
+        curMesh = createCylinderMesh( 
+                geometry.vertices[i].clone(), 
+                geometry.vertices[i+1].clone(), 
+                this.diagram.materials.cylinderBasic.clone(),
+                0.1
+        );
         curMesh.diagramId = edgesId[j];
         curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
         curMesh.diagramType = 'form_edge';
         edgesParent.add( curMesh );
+
     }
 
     curMaterial = this.diagram.materials.lineExternal;
     len = exEdges.vertices.length;
     // exEdges
     for ( i = 0, j = 0; i < len; i += 2, j ++ ) {
-        curEdgeGeometry = new THREE.Geometry();
-        curEdgeGeometry.vertices.push( exEdges.vertices[i].clone(), exEdges.vertices[i+1].clone() );
-        curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
+        // curEdgeGeometry = new THREE.Geometry();
+        // curEdgeGeometry.vertices.push( exEdges.vertices[i].clone(), exEdges.vertices[i+1].clone() );
+        // curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
+        // curMesh.diagramId = exEdgesId[j];
+        // curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
+        // curMesh.diagramType = 'form_ex_edge';
+        // exEdgesParent.add( curMesh );
+
+        // cylinder edge
+        curMesh = createCylinderMesh( 
+                exEdges.vertices[i].clone(), 
+                exEdges.vertices[i+1].clone(), 
+                this.diagram.materials.cylinderExternal.clone(),
+                0.1
+        );
         curMesh.diagramId = exEdgesId[j];
         curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
         curMesh.diagramType = 'form_ex_edge';
