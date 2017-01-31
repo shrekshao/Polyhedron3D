@@ -113,6 +113,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     //     this.diagram.form.parentObjects.add( this.diagram.form.obejcts[o] );
     // }
 
+    var edgeStrengthScale = 5000.0;
 
     var geometry = new THREE.Geometry();
     var exEdges = new THREE.Geometry();
@@ -149,6 +150,9 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var verticesId = [];
     var exVerticesId = [];
 
+    var edgeInfo;
+    var strengthRadius;
+
     for (edge in json.form.edges) {
         vertex = json.form.edges[edge].vertex;
 
@@ -179,14 +183,23 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
             // arrow.diagramId = edge;
             // exForces.add( arrow );
 
+            edgeInfo = this.json.form.edges[edge];
+            
+            strengthRadius = edgeInfo.strength / edgeStrengthScale;
+
             arrow = createCylinderMesh( 
                 vec3[vertex[0]],
                 vec3[vertex[1]],
                 this.diagram.materials.cylinderExternal.clone(),
                 0,
-                0.1
+                strengthRadius
             );
+
+            
+
             arrow.diagramId = edge;
+            arrow.diagramForceFaceId = edgeInfo.force_face;
+            
             exForces.add( arrow );
         } else {
             geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
@@ -240,15 +253,18 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
         //edgesParent.add( curMesh );
 
 
+        edgeInfo = this.json.form.edges[edgesId[j]];
+        strengthRadius = edgeInfo.strength / edgeStrengthScale;
+
         // cylinder edge
         curMesh = createCylinderMesh( 
                 geometry.vertices[i].clone(), 
                 geometry.vertices[i+1].clone(), 
                 this.diagram.materials.cylinderBasic.clone(),
-                0.1
+                strengthRadius
         );
         curMesh.diagramId = edgesId[j];
-        curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
+        curMesh.diagramForceFaceId = edgeInfo.force_face;
         curMesh.diagramType = 'form_edge';
         edgesParent.add( curMesh );
 

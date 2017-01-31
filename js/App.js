@@ -25,7 +25,7 @@
             
 
             click: {
-                form: 0xd46a6a,
+                form: 0xff2a2a,
                 force: 0xd46a6a
             }
         }

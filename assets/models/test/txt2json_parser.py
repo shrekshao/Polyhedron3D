@@ -1,5 +1,29 @@
 import json
 from sets import Set
+import math
+
+# tmp hacky functions for vec3
+
+def norm2 (a):
+    return dot(a, a)
+
+def dot ( a, b ):
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
+def area (a, b, c):
+    u = [ b[0] - a[0], b[1] - a[1], b[2] - a[2] ]
+    v = [ c[0] - a[0], c[1] - a[1], c[2] - a[2] ]
+
+    cross2 = norm2(u) * norm2(v) - dot(u, v)
+    return math.sqrt(cross2) * 0.5
+
+
+
+
+
+
+
+
 
 class DiagramJson:
     def __init__(self):
@@ -26,6 +50,7 @@ class Txt2JsonParser:
 
         # # tmp data structures used only when parsing
         # self.form_edge_2_vertex = {}
+        self.force_face_2_form_edge = {}    # inverse index, for caluclate edge width i.e. area of faces (strength)
 
     def readFormVertex(self, filename):
         f = open(filename)
@@ -61,11 +86,16 @@ class Txt2JsonParser:
         f_edge_to_force_face = open(filename_edge_to_force_face)
         for line in f_edge_to_force_face:
             edge = line.strip().split('\t')
-            edges[edge[0]]['force_face'] = edge[1] if edge[1] != "Null" else None
+            f = edge[1] if edge[1] != "Null" else None
+            edges[edge[0]]['force_face'] = f
 
             edge_vertex = edges[edge[0]]['vertex']
             for v in edge_vertex:
-                v2fa[v].append(edge[1] if edge[1] != "Null" else None)
+                v2fa[v].append(f)
+
+            # force_face_2_form_edge (tmp structure) for compute strength
+            if f != None:
+                self.force_face_2_form_edge[f] = edge[0]
 
         f_edge_to_force_face.close()
 
@@ -151,9 +181,20 @@ class Txt2JsonParser:
         f_face_vertex = open(filename_face_vertex)
         # fan shape order
         faces_v = self.diagramJson.json['force']['faces_v']
+
+        v = self.diagramJson.json['force']['vertices']
+        e = self.diagramJson.json['form']['edges']
+
         for line in f_face_vertex:
             face = line.strip().split('\t')
             faces_v[face[0]] = face[1:]
+
+            if len(face) == 4:
+                # tri
+                e[ self.force_face_2_form_edge[face[0]] ]['strength'] = area( v[face[1]], v[face[2]], v[face[3]] )
+            elif len(face) == 5:
+                # quad
+                e[ self.force_face_2_form_edge[face[0]] ]['strength'] = area( v[face[1]], v[face[2]], v[face[3]] ) + area( v[face[1]], v[face[3]], v[face[4]] )
 
         f_face_vertex.close()
 
