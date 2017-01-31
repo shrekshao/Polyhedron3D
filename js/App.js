@@ -17,8 +17,17 @@
     var gui;
     var cfg = {
         highlightColors: {
-            form: 0xffffff,
-            force: 0xffffff,
+
+            over: {
+                form: 0xffffff,
+                force: 0xffffff
+            },
+            
+
+            click: {
+                form: 0xd46a6a,
+                force: 0xd46a6a
+            }
         }
     };
 
@@ -112,8 +121,10 @@
                 // materials.add( polyhedralDiagram.diagram.materials.forceFace, 'opacity', 0.0, 1.0 );
 
                 var colors = gui.addFolder( 'highlightColors' );
-                colors.addColor( cfg.highlightColors, 'form' );
-                colors.addColor( cfg.highlightColors, 'force' );
+                colors.addColor( cfg.highlightColors.over, 'form' ).name( 'form-mouseover' );
+                colors.addColor( cfg.highlightColors.over, 'force' ).name( 'force-mouseover' );
+                colors.addColor( cfg.highlightColors.click, 'form' ).name( 'form-click' );
+                colors.addColor( cfg.highlightColors.click, 'force' ).name( 'force-click' );;
             };
         }
     }
@@ -219,7 +230,7 @@
 
 
 
-    function doRayCast() {
+    function doRayCast( highlightColor, clicked ) {
         if ( mousePositionDirty ) {
 
             mousePositionDirty = false;
@@ -237,7 +248,7 @@
                 // var intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces );
                 // var intersects = raycaster.intersectObjects( scene1.children );
                 if ( intersects.length > 0 ) {
-                    if ( INTERSECTED != intersects[0].object ) {
+                    if ( INTERSECTED != intersects[0].object || clicked ) {
                         if (INTERSECTED) {
                             // release last highlighted object
                             // INTERSECTED.material.color.setHex( currentColor );
@@ -247,7 +258,7 @@
                         INTERSECTED = intersects[0].object;
 
                         currentColor = INTERSECTED.material.color.getHex();
-                        INTERSECTED.material.color.setHex( cfg.highlightColors.form );
+                        INTERSECTED.material.color.setHex( highlightColor.form );
                         
 
                         if (INTERSECTED.diagramType !== 'form_vertex') {
@@ -260,7 +271,7 @@
                                 var forceFace = polyhedralDiagram.diagram.force.maps.faceId2Object[f];
                                 highlightObjectColor = forceFace.material.color.getHex();
                                 highlightObjectOpacity = forceFace.material.opacity;
-                                forceFace.material.color.setHex( cfg.highlightColors.force );
+                                forceFace.material.color.setHex( highlightColor.force );
                                 forceFace.material.opacity = 1.0;
                             }
                         } else {
@@ -275,7 +286,7 @@
                                     if (forceFace) {
                                         highlightObjectColor = forceFace.material.color.getHex();
                                         highlightObjectOpacity = forceFace.material.opacity;
-                                        forceFace.material.color.setHex( cfg.highlightColors.force );
+                                        forceFace.material.color.setHex( highlightColor.force );
                                         forceFace.material.opacity = 1.0;
                                     }
                                 }
@@ -304,7 +315,7 @@
 
         if (clicked) {
             // try click select
-            doRayCast();
+            doRayCast(cfg.highlightColors.click, true);
 
             if (INTERSECTED) {
                 pickingClickSelected = true;
@@ -314,8 +325,8 @@
             }
 
         } else if (!pickingClickSelected) {
-            // hovering highlight
-            doRayCast();
+            // mouse over highlight
+            doRayCast(cfg.highlightColors.over, false);
         }
 
 
