@@ -1,4 +1,15 @@
-// tmp
+// import THREE from 'three';
+const THREE = require('three');
+const OrbitControls = require('three-orbit-controls')(THREE);
+// import dat from 'dat.gui'
+// const dat = require('dat.gui');
+import dat from 'dat-gui'
+
+// import CylinderEdgeHelper from './utils/CylinderEdgeHelper'
+// import PolyhedralDiagram from './PolyhedralDiagram'
+const CylinderEdgeHelper = require('./utils/CylinderEdgeHelper');
+const PolyhedralDiagram = require('./PolyhedralDiagram');
+// new PolyhedralDiagram.default();
 
 (function() {
     'use strict'
@@ -414,7 +425,7 @@
         camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
         camera.position.z = 100;
 
-        var orbit = new THREE.OrbitControls( camera, renderer.domElement );
+        // var orbit = new THREE.OrbitControls( camera, renderer.domElement );
 
 
         scene1 = new THREE.Scene();

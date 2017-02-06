@@ -1,3 +1,5 @@
+const THREE = require('three');
+
 var PolyhedralDiagram = function (json) {
     if (json === null) {
         console.log( ' no json object to init the polydral digram pair' );
