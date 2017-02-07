@@ -49355,8 +49355,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_dat_gui___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_dat_gui__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__PolyhedralDiagram__ = __webpack_require__(1);
 // import THREE from 'three';
-const THREE = __webpack_require__(0);
-const OrbitControls = __webpack_require__(3)(THREE);
+var THREE = __webpack_require__(0);
+// const OrbitControls = require('three-orbit-controls')(THREE);
+THREE.OrbitControls = __webpack_require__(3)(THREE);
 // import dat from 'dat.gui'
 // const dat = require('dat.gui');
 
@@ -49783,7 +49784,7 @@ const OrbitControls = __webpack_require__(3)(THREE);
         camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
         camera.position.z = 100;
 
-        // var orbit = new THREE.OrbitControls( camera, renderer.domElement );
+        var orbit = new THREE.OrbitControls( camera, renderer.domElement );
 
 
         scene1 = new THREE.Scene();

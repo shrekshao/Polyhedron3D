@@ -1,6 +1,7 @@
 // import THREE from 'three';
-const THREE = require('three');
-const OrbitControls = require('three-orbit-controls')(THREE);
+var THREE = require('three');
+// const OrbitControls = require('three-orbit-controls')(THREE);
+THREE.OrbitControls = require('three-orbit-controls')(THREE);
 // import dat from 'dat.gui'
 // const dat = require('dat.gui');
 import dat from 'dat-gui'
@@ -427,7 +428,7 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
         camera.position.z = 100;
 
-        // var orbit = new THREE.OrbitControls( camera, renderer.domElement );
+        var orbit = new THREE.OrbitControls( camera, renderer.domElement );
 
 
         scene1 = new THREE.Scene();
