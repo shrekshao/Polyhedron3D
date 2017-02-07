@@ -13,9 +13,11 @@ var PolyhedralDiagram = function (json) {
         form: {
             // geometries: {},
             // objects: {}
-            // parentObjects: new THREE.Object3D(),
+            
 
             objects: {
+                root: new THREE.Object3D(),
+
                 vertices: new THREE.Object3D(),
                 edges: new THREE.Object3D(),
                 exEdges: new THREE.Object3D(),
@@ -28,7 +30,10 @@ var PolyhedralDiagram = function (json) {
         },
         force: {
             // geometries: {},
+
             objects: {
+                root: new THREE.Object3D(),
+
                 faces: new THREE.Object3D(),
                 edges: new THREE.Object3D()
             },
@@ -110,11 +115,6 @@ PolyhedralDiagram.prototype.constructor = PolyhedralDiagram;
 
 PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var json = this.json;
-
-
-    // for (var o in this.diagram.form.obejcts) {
-    //     this.diagram.form.parentObjects.add( this.diagram.form.obejcts[o] );
-    // }
 
     var edgeStrengthScale = 5000.0;
 
@@ -235,6 +235,12 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var edgesParent = this.diagram.form.objects.edges;
     var exEdgesParent = this.diagram.form.objects.exEdges;
     var verticesParent = this.diagram.form.objects.vertices;
+
+    var root = this.diagram.form.objects.root;
+    root.add(edgesParent);
+    root.add(exEdgesParent);
+    root.add(verticesParent);
+    root.add(exForces);     // arrow forces
 
     var i, j;
     var curMesh;
@@ -466,10 +472,10 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
         this.diagram.materials.lineBasic
     );
 
-    this.diagram.force.meshFaces = new THREE.Mesh(
-        geometry,
-        this.diagram.materials.forceFace
-    );
+
+    var root = this.diagram.force.objects.root;
+    root.add(this.diagram.force.meshEdges);
+    root.add(this.diagram.force.objects.faces);
 
 
 }

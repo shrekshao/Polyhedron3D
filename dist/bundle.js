@@ -43387,9 +43387,11 @@ var PolyhedralDiagram = function (json) {
         form: {
             // geometries: {},
             // objects: {}
-            // parentObjects: new THREE.Object3D(),
+            
 
             objects: {
+                root: new THREE.Object3D(),
+
                 vertices: new THREE.Object3D(),
                 edges: new THREE.Object3D(),
                 exEdges: new THREE.Object3D(),
@@ -43402,7 +43404,10 @@ var PolyhedralDiagram = function (json) {
         },
         force: {
             // geometries: {},
+
             objects: {
+                root: new THREE.Object3D(),
+
                 faces: new THREE.Object3D(),
                 edges: new THREE.Object3D()
             },
@@ -43484,11 +43489,6 @@ PolyhedralDiagram.prototype.constructor = PolyhedralDiagram;
 
 PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var json = this.json;
-
-
-    // for (var o in this.diagram.form.obejcts) {
-    //     this.diagram.form.parentObjects.add( this.diagram.form.obejcts[o] );
-    // }
 
     var edgeStrengthScale = 5000.0;
 
@@ -43609,6 +43609,12 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var edgesParent = this.diagram.form.objects.edges;
     var exEdgesParent = this.diagram.form.objects.exEdges;
     var verticesParent = this.diagram.form.objects.vertices;
+
+    var root = this.diagram.form.objects.root;
+    root.add(edgesParent);
+    root.add(exEdgesParent);
+    root.add(verticesParent);
+    root.add(exForces);     // arrow forces
 
     var i, j;
     var curMesh;
@@ -43840,10 +43846,10 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
         this.diagram.materials.lineBasic
     );
 
-    this.diagram.force.meshFaces = new THREE.Mesh(
-        geometry,
-        this.diagram.materials.forceFace
-    );
+
+    var root = this.diagram.force.objects.root;
+    root.add(this.diagram.force.meshEdges);
+    root.add(this.diagram.force.objects.faces);
 
 
 }
@@ -49370,6 +49376,7 @@ THREE.OrbitControls = __webpack_require__(3)(THREE);
 
 // new PolyhedralDiagram.default();
 
+
 (function() {
     'use strict'
 
@@ -49385,6 +49392,12 @@ THREE.OrbitControls = __webpack_require__(3)(THREE);
     var scenes;
 
     var gui;
+    var guiList = {
+        loadJson: null,
+        visible: null,
+        colors: null
+    };
+
     var cfg = {
         highlightColors: {
 
@@ -49453,30 +49466,47 @@ THREE.OrbitControls = __webpack_require__(3)(THREE);
         var reader = new FileReader();
 
 
+        if ( guiList.visible ) {
+            gui.removeFolder('toggle-visibility');
+        }
+
+        if ( guiList.colors ) {
+            gui.removeFolder('highlightColors');
+        }
+
+        if (polyhedralDiagram) {
+            scene2.remove(polyhedralDiagram.diagram.form.objects.root);
+            scene1.remove(polyhedralDiagram.diagram.force.objects.root);
+        }
+        
+        // scene2.children.forEach(function(object){
+        //     scene2.remove(object);
+        // });
+
+        // scene1.children.forEach(function(object){
+        //     scene1.remove(object);
+        // });
+
         for (var i = 0, f; f = files[i]; i++) {
             reader.readAsText(f, "UTF-8");
             reader.onload = function (e) {
+                
+                
+
                 // console.log( e.target.result );
                 var diagramJson = JSON.parse( e.target.result );
                 // console.log(diagramJson);
 
                 polyhedralDiagram = new __WEBPACK_IMPORTED_MODULE_1__PolyhedralDiagram__["a" /* PolyhedralDiagram */](diagramJson);
 
+                scene2.add( polyhedralDiagram.diagram.form.objects.root );
 
-                // scene2.add( polyhedralDiagram.diagram.form.meshEdges );
-                // scene2.add( polyhedralDiagram.diagram.form.meshExEdges );
-                // scene2.add( polyhedralDiagram.diagram.form.exForceArrows );
-                scene2.add( polyhedralDiagram.diagram.form.objects.edges );
-                scene2.add( polyhedralDiagram.diagram.form.objects.exEdges );
-                scene2.add( polyhedralDiagram.diagram.form.objects.exForceArrows );
-                scene2.add( polyhedralDiagram.diagram.form.objects.vertices );
-
-                scene1.add( polyhedralDiagram.diagram.force.meshEdges );
-                // scene1.add( polyhedralDiagram.diagram.force.meshFaces );
-                scene1.add( polyhedralDiagram.diagram.force.objects.faces );
+                // scene1.add( polyhedralDiagram.diagram.force.meshEdges );
+                // scene1.add( polyhedralDiagram.diagram.force.objects.faces );
+                scene1.add( polyhedralDiagram.diagram.force.objects.root );
 
 
-                var visible = gui.addFolder( 'toggle-visibility' );
+                var visible = guiList.visible = gui.addFolder( 'toggle-visibility' );
 
                 visible.add( polyhedralDiagram.diagram.form.objects.vertices, 'visible' ).name('form-vertices');
                 visible.add( polyhedralDiagram.diagram.form.objects.edges, 'visible' ).name('form-edges');
@@ -49490,7 +49520,7 @@ THREE.OrbitControls = __webpack_require__(3)(THREE);
                 // var materials = gui.addFolder( 'materials' );
                 // materials.add( polyhedralDiagram.diagram.materials.forceFace, 'opacity', 0.0, 1.0 );
 
-                var colors = gui.addFolder( 'highlightColors' );
+                var colors = guiList.colors = gui.addFolder( 'highlightColors' );
                 colors.addColor( cfg.highlightColors.over, 'form' ).name( 'form-mouseover' );
                 colors.addColor( cfg.highlightColors.over, 'force' ).name( 'force-mouseover' );
                 colors.addColor( cfg.highlightColors.click, 'form' ).name( 'form-click' );
@@ -49500,17 +49530,6 @@ THREE.OrbitControls = __webpack_require__(3)(THREE);
     }
 
     
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -49612,11 +49631,8 @@ THREE.OrbitControls = __webpack_require__(3)(THREE);
             }
 
             if ( polyhedralDiagram ) {
-                // intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.form.objects.edges.children );
                 intersects = raycaster.intersectObjects( scene2.children, true );
                 
-                // var intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.force.objects.faces );
-                // var intersects = raycaster.intersectObjects( scene1.children );
                 if ( intersects.length > 0 ) {
                     if ( INTERSECTED != intersects[0].object || clicked ) {
                         if (INTERSECTED) {
@@ -49745,18 +49761,28 @@ THREE.OrbitControls = __webpack_require__(3)(THREE);
 
 
     window.onload = function() {
+        __WEBPACK_IMPORTED_MODULE_0_dat_gui___default.a.GUI.prototype.removeFolder = function(name) {
+            var folder = this.__folders[name];
+            if (!folder) {
+                return;
+            }
+            folder.close();
+            this.__ul.removeChild(folder.domElement.parentNode);
+            delete this.__folders[name];
+            this.onResize();
+        };
 
         document.getElementById('files').addEventListener('change', handleFileSelect, false);
 
         gui = new __WEBPACK_IMPORTED_MODULE_0_dat_gui___default.a.GUI();
-        var tmpList = {
+        guiList.loadJson = {
             load_json: function () {
                 // console.log('load json file');
                 document.getElementById("files").click()
             }
         }
 
-        gui.add(tmpList, 'load_json');
+        gui.add(guiList.loadJson, 'load_json');
 
         canvas = document.getElementById( 'webgl-canvas' );
 
@@ -49772,7 +49798,6 @@ THREE.OrbitControls = __webpack_require__(3)(THREE);
         renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true } );
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
-        // console.log(renderer.sortObjects);
 
         window.addEventListener('resize', onWindowResize, false);
 
