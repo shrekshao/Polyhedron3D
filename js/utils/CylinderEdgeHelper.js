@@ -25,3 +25,5 @@ function createCylinderMesh(pointX, pointY, material, radius, radius2) {
     edge.position.z = (pointY.z + pointX.z) / 2;
     return edge;
 }
+
+export { createCylinderMesh };

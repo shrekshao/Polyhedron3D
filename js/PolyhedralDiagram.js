@@ -1,4 +1,5 @@
 const THREE = require('three');
+import { createCylinderMesh } from './utils/CylinderEdgeHelper'
 
 var PolyhedralDiagram = function (json) {
     if (json === null) {
@@ -472,3 +473,6 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
 
 
 }
+
+
+export { PolyhedralDiagram };

@@ -5,10 +5,12 @@ const OrbitControls = require('three-orbit-controls')(THREE);
 // const dat = require('dat.gui');
 import dat from 'dat-gui'
 
-// import CylinderEdgeHelper from './utils/CylinderEdgeHelper'
-// import PolyhedralDiagram from './PolyhedralDiagram'
-const CylinderEdgeHelper = require('./utils/CylinderEdgeHelper');
-const PolyhedralDiagram = require('./PolyhedralDiagram');
+
+import { PolyhedralDiagram } from './PolyhedralDiagram'
+
+// const CylinderEdgeHelper = require('./utils/CylinderEdgeHelper');
+// const PolyhedralDiagram = require('./PolyhedralDiagram');
+
 // new PolyhedralDiagram.default();
 
 (function() {
