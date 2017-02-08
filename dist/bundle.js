@@ -43367,505 +43367,13 @@ function CanvasRenderer() {
 
 /***/ }),
 /* 1 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_CylinderEdgeHelper__ = __webpack_require__(4);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PolyhedralDiagram; });
-const THREE = __webpack_require__(0);
-
-
-var PolyhedralDiagram = function (json) {
-    if (json === null) {
-        console.log( ' no json object to init the polydral digram pair' );
-        return;
-    }
-
-    this.json = json;
-
-    this.diagram = {
-        form: {
-            // geometries: {},
-            // objects: {}
-            
-
-            objects: {
-                root: new THREE.Object3D(),
-
-                vertices: new THREE.Object3D(),
-                edges: new THREE.Object3D(),
-                exEdges: new THREE.Object3D(),
-                exForceArrows: new THREE.Object3D()
-            },
-
-            maps: {
-                edgeId2Object: {}
-            }
-        },
-        force: {
-            // geometries: {},
-
-            objects: {
-                root: new THREE.Object3D(),
-
-                faces: new THREE.Object3D(),
-                edges: new THREE.Object3D()
-            },
-
-            maps: {
-                faceId2Object: {},
-                edgeId2Object: {}
-            }
-        },
-
-        materials: {
-            lineBasic: new THREE.LineBasicMaterial( { 
-                // color: 0xffffff, 
-                color: 0x000000,
-                opacity: 1, 
-                transparent: false
-                // linewidth: 3     // ANGLE limitation
-            } ),
-
-            lineExternal: new THREE.LineBasicMaterial( { 
-                color: 0x888888, 
-                opacity: 1, 
-                transparent: false
-                // linewidth: 3
-            } ),
-
-            cylinderBasic: new THREE.MeshBasicMaterial( {
-                color: 0x000000
-            } ),
-
-            cylinderExternal: new THREE.MeshBasicMaterial( {
-                color: 0x888888
-            } ),
-
-            // arrow: new THREE.LineBasicMaterial( { 
-            //     color: 0x000000
-            // } ),
-            arrow: 0xaaaaaa,
-
-            vertex: new THREE.PointsMaterial({
-                color: 0x000000,
-                size: 0.5
-            }),
-
-            vertexIcosahedron: new THREE.MeshBasicMaterial( { 
-                color: 0x000000, 
-                // shading: THREE.FlatShading,
-                transparent: false,
-            }),
-
-            forceFace: new THREE.MeshBasicMaterial( { 
-                color: 0x156289, 
-                shading: THREE.FlatShading,
-                opacity: 0.05,
-                transparent: true,
-                side: THREE.DoubleSide,
-
-                // blending: THREE.CustomBlending,
-
-                depthWrite: false
-            })
-            // forceFace: new THREE.MeshPhongMaterial( { 
-            //     color: 0xffaa00, 
-            //     shading: THREE.FlatShading,
-            //     opacity: 0.9,
-            //     transparent: true,
-            //     side: THREE.DoubleSide
-            // })
-        }
-    };
-
-    this.buildFormDiagram();
-    this.buildForceDiagram();
-
-};
-
-PolyhedralDiagram.prototype.constructor = PolyhedralDiagram;
-
-
-PolyhedralDiagram.prototype.buildFormDiagram = function() {
-    var json = this.json;
-
-    var edgeStrengthScale = 5000.0;
-
-    var geometry = new THREE.Geometry();
-    var exEdges = new THREE.Geometry();
-    var exForces = this.diagram.form.objects.exForceArrows;
-
-    var verticesOnlyGeometry = new THREE.Geometry();    // temparary used for vertices mapping
-
-    var vec3 = {};
-    var vid2vid = {};
-    var v;
-
-    var c = 0;
-    for (v in json.form.vertices) {
-        vec3[v] = new THREE.Vector3 ( 
-            json.form.vertices[v][0],
-            json.form.vertices[v][1],
-            json.form.vertices[v][2]
-        );
-
-        vid2vid[c++] = v;
-
-        verticesOnlyGeometry.vertices.push(vec3[v]);
-
-    }
-
-
-    var lines = {};
-
-    var tmpVec3 = new THREE.Vector3();
-    var arrowLen;
-    var edge, vertex, arrow;
-    var edgesId = [];
-    var exEdgesId = [];
-    var verticesId = [];
-    var exVerticesId = [];
-
-    var edgeInfo;
-    var strengthRadius;
-
-    for (edge in json.form.edges) {
-        vertex = json.form.edges[edge].vertex;
-
-        // console.log(edge, vertex);
-
-        // geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
-
-        // if (json.form.edges[edge].external) {
-        //     geometry.colors.push( new THREE.Color(0xff0000), new THREE.Color(0xff0000)  );
-        // } else if (json.form.edges[edge].ex_force) {
-        //     geometry.colors.push( new THREE.Color(0xffff00), new THREE.Color(0x00ff00)  );
-        // } else {
-        //     geometry.colors.push( new THREE.Color(0xffffff), new THREE.Color(0xffffff)  );
-        // }
-
-
-        if (json.form.edges[edge].external) {
-            exEdges.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
-            exEdgesId.push( edge );
-
-            exVerticesId.push( vertex[0], vertex[1] );
-        } else if (json.form.edges[edge].ex_force) {
-            // tmpVec3.copy( vec3[vertex[1]] );
-            // tmpVec3.sub( vec3[vertex[0]] );
-            // arrowLen = tmpVec3.length();
-            // tmpVec3.multiplyScalar( 1 / arrowLen );
-            // arrow = new THREE.ArrowHelper( tmpVec3, vec3[vertex[0]], arrowLen, this.diagram.materials.arrow );
-            // arrow.diagramId = edge;
-            // exForces.add( arrow );
-
-            edgeInfo = this.json.form.edges[edge];
-            
-            strengthRadius = edgeInfo.strength / edgeStrengthScale;
-
-            arrow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils_CylinderEdgeHelper__["a" /* createCylinderMesh */])( 
-                vec3[vertex[0]],
-                vec3[vertex[1]],
-                this.diagram.materials.cylinderExternal.clone(),
-                0,
-                strengthRadius
-            );
-
-            
-
-            arrow.diagramId = edge;
-            arrow.diagramForceFaceId = edgeInfo.force_face;
-            
-            exForces.add( arrow );
-        } else {
-            geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
-            edgesId.push( edge );
-
-            verticesId.push( vertex[0], vertex[1] );
-        }
-
-        
-        
-    }
-
-    // geometry.center();
-    // exEdges.center();
-
-    geometry.computeBoundingBox();
-    var offset = geometry.boundingBox.getCenter().negate();
-    geometry.translate( offset.x, offset.y, offset.z );
-
-    exEdges.translate( offset.x, offset.y, offset.z );
-
-    exForces.translateX( offset.x );
-    exForces.translateY( offset.y );
-    exForces.translateZ( offset.z );
-
-    verticesOnlyGeometry.translate( offset.x, offset.y, offset.z );
-
-
-    // build separate meshes
-    var edgesParent = this.diagram.form.objects.edges;
-    var exEdgesParent = this.diagram.form.objects.exEdges;
-    var verticesParent = this.diagram.form.objects.vertices;
-
-    var root = this.diagram.form.objects.root;
-    root.add(edgesParent);
-    root.add(exEdgesParent);
-    root.add(verticesParent);
-    root.add(exForces);     // arrow forces
-
-    var i, j;
-    var curMesh;
-    var curEdgeGeometry;
-    var curMaterial = this.diagram.materials.lineBasic;
-    var len = geometry.vertices.length;
-
-    
-    var vertexAdded = {};
-
-    // edges
-    for ( i = 0, j = 0; i < len; i += 2, j ++ ) {
-        // curEdgeGeometry = new THREE.Geometry();
-        // curEdgeGeometry.vertices.push( geometry.vertices[i].clone(), geometry.vertices[i+1].clone() );
-        // curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
-        // curMesh.diagramId = edgesId[j];
-        // curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
-        // curMesh.diagramType = 'form_edge';
-        //edgesParent.add( curMesh );
-
-
-        edgeInfo = this.json.form.edges[edgesId[j]];
-        strengthRadius = edgeInfo.strength / edgeStrengthScale;
-
-        // cylinder edge
-        curMesh = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils_CylinderEdgeHelper__["a" /* createCylinderMesh */])( 
-                geometry.vertices[i].clone(), 
-                geometry.vertices[i+1].clone(), 
-                this.diagram.materials.cylinderBasic.clone(),
-                strengthRadius
-        );
-        curMesh.diagramId = edgesId[j];
-        curMesh.diagramForceFaceId = edgeInfo.force_face;
-        curMesh.diagramType = 'form_edge';
-        edgesParent.add( curMesh );
-
-    }
-
-    curMaterial = this.diagram.materials.lineExternal;
-    len = exEdges.vertices.length;
-    // exEdges
-    for ( i = 0, j = 0; i < len; i += 2, j ++ ) {
-        // curEdgeGeometry = new THREE.Geometry();
-        // curEdgeGeometry.vertices.push( exEdges.vertices[i].clone(), exEdges.vertices[i+1].clone() );
-        // curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
-        // curMesh.diagramId = exEdgesId[j];
-        // curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
-        // curMesh.diagramType = 'form_ex_edge';
-        // exEdgesParent.add( curMesh );
-
-        // cylinder edge
-        curMesh = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils_CylinderEdgeHelper__["a" /* createCylinderMesh */])( 
-                exEdges.vertices[i].clone(), 
-                exEdges.vertices[i+1].clone(), 
-                this.diagram.materials.cylinderExternal.clone(),
-                0.1
-        );
-        curMesh.diagramId = exEdgesId[j];
-        curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
-        curMesh.diagramType = 'form_ex_edge';
-        exEdgesParent.add( curMesh );
-    }
-
-
-
-    // vertices 
-    // single point geometry won't work for picking
-
-    
-    var vertexShapeGeometry = new THREE.IcosahedronGeometry(0.2, 0);
-    // var vertexShapeGeometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
-
-    var verticesArray = [];
-
-
-    // curMaterial = this.diagram.materials.vertex;
-    curMaterial = this.diagram.materials.vertexIcosahedron;
-    // len = geometry.vertices.length;
-    len = verticesOnlyGeometry.vertices.length;
-    var curVertexGeometry;
-    var curVertexMesh;
-
-    // vertex 2 force face array
-    var v2fa = this.json.form.vertices_2_force_faces;
-
-    for ( i = 0 ; i < len; i ++ ) {
-        curVertexGeometry = vertexShapeGeometry.clone();
-        curVertexGeometry.translate( verticesOnlyGeometry.vertices[ i ].x, verticesOnlyGeometry.vertices[ i ].y, verticesOnlyGeometry.vertices[ i ].z );
-        curVertexMesh = new THREE.Mesh( curVertexGeometry.clone(), curMaterial.clone() );
-        curVertexMesh.diagramId = vid2vid[i];
-        curVertexMesh.digramForceFaceIdArray = v2fa[ curVertexMesh.diagramId ];
-        curVertexMesh.diagramType = 'form_vertex';
-        verticesParent.add( curVertexMesh );
-    }
-}
-
-
-
-
-PolyhedralDiagram.prototype.buildForceDiagram = function() {
-    var json = this.json;
-
-    var vec3 = {};
-    var v;
-
-    var geometry = this.diagram.force.geometry = new THREE.Geometry();
-
-
-    var vid2vid = {};
-
-    var c = 0;
-    for (v in json.force.vertices) {
-        vec3[v] = new THREE.Vector3 ( 
-            json.force.vertices[v][0],
-            json.force.vertices[v][1],
-            json.force.vertices[v][2]
-        );
-
-        geometry.vertices.push(vec3[v].clone());
-
-        // if (!vid2vid[v]) {
-            vid2vid[v] = c++;
-        // }
-        
-    }
-
-    geometry.computeBoundingBox();
-    var offset = geometry.boundingBox.getCenter().negate();
-    geometry.translate( offset.x, offset.y, offset.z );
-
-
-
-    // edges
-    var edgeGeometry = this.diagram.force.edges = new THREE.Geometry();
-    var edge, vertex, arrow;
-    for (edge in json.force.edges) {
-        vertex = json.force.edges[edge];
-
-        edgeGeometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
-    }
-
-    edgeGeometry.translate( offset.x, offset.y, offset.z );
-
-
-    // face
-    var faces = {};
-
-    var f;
-    var face3;
-    var face_v;
-    
-    var face_geometry;
-    var face_mesh;
-
-    for (f in json.force.faces_v) {
-        face_v = json.force.faces_v[f];
-
-        if (face_v.length === 3) {
-            face3 = new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[1]], vid2vid[face_v[2]] );
-            geometry.faces.push( face3 );
-
-
-
-            // separate mesh for each face
-            face_geometry = new THREE.BufferGeometry();
-            face_geometry.addAttribute(
-                'position', 
-                new THREE.BufferAttribute(
-                    new Float32Array([ 
-                        geometry.vertices[ vid2vid[ face_v[0]] ].x, geometry.vertices[ vid2vid[ face_v[0]] ].y, geometry.vertices[ vid2vid[ face_v[0]] ].z,
-                        geometry.vertices[ vid2vid[ face_v[1]] ].x, geometry.vertices[ vid2vid[ face_v[1]] ].y, geometry.vertices[ vid2vid[ face_v[1]] ].z,
-                        geometry.vertices[ vid2vid[ face_v[2]] ].x, geometry.vertices[ vid2vid[ face_v[2]] ].y, geometry.vertices[ vid2vid[ face_v[2]] ].z
-                    ]),
-                    3
-                )
-            );
-
-            // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace );
-            // face_mesh.diagramId = f;
-            // this.diagram.force.objects.faces.add( face_mesh );
-
-        } else if (face_v.length === 4) {
-            geometry.faces.push( new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[1]], vid2vid[face_v[2]] ) );
-            geometry.faces.push( new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[2]], vid2vid[face_v[3]] ) );
-            console.log(face_v);
-
-
-             // separate mesh for each face
-            face_geometry = new THREE.BufferGeometry();
-            face_geometry.addAttribute(
-                'position', 
-                new THREE.BufferAttribute(
-                    new Float32Array([ 
-                        geometry.vertices[ vid2vid[ face_v[0]] ].x, geometry.vertices[ vid2vid[ face_v[0]] ].y, geometry.vertices[ vid2vid[ face_v[0]] ].z,
-                        geometry.vertices[ vid2vid[ face_v[1]] ].x, geometry.vertices[ vid2vid[ face_v[1]] ].y, geometry.vertices[ vid2vid[ face_v[1]] ].z,
-                        geometry.vertices[ vid2vid[ face_v[2]] ].x, geometry.vertices[ vid2vid[ face_v[2]] ].y, geometry.vertices[ vid2vid[ face_v[2]] ].z,
-                        geometry.vertices[ vid2vid[ face_v[0]] ].x, geometry.vertices[ vid2vid[ face_v[0]] ].y, geometry.vertices[ vid2vid[ face_v[0]] ].z,
-                        geometry.vertices[ vid2vid[ face_v[2]] ].x, geometry.vertices[ vid2vid[ face_v[2]] ].y, geometry.vertices[ vid2vid[ face_v[2]] ].z,
-                        geometry.vertices[ vid2vid[ face_v[3]] ].x, geometry.vertices[ vid2vid[ face_v[3]] ].y, geometry.vertices[ vid2vid[ face_v[3]] ].z
-                    ]),
-                    3
-                )
-            );
-
-            // // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace );
-            // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace.clone() );
-            // face_mesh.diagramId = f;
-            // this.diagram.force.objects.faces.add( face_mesh );
-        }
-
-        face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace.clone() );
-        face_mesh.diagramId = f;
-        this.diagram.force.objects.faces.add( face_mesh );
-        this.diagram.force.maps.faceId2Object[f] = face_mesh;
-
-        
-    }
-
-    // normal should read from txt files... (order)
-    geometry.computeFaceNormals();
-    geometry.computeVertexNormals();
-
-
-
-
-    // build mesh
-    this.diagram.force.meshEdges = new THREE.LineSegments( 
-        edgeGeometry, 
-        this.diagram.materials.lineBasic
-    );
-
-
-    var root = this.diagram.force.objects.root;
-    root.add(this.diagram.force.meshEdges);
-    root.add(this.diagram.force.objects.faces);
-
-
-}
-
-
-
+module.exports = __webpack_require__(5)
+module.exports.color = __webpack_require__(4)
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(6)
-module.exports.color = __webpack_require__(5)
-
-/***/ }),
-/* 3 */
 /***/ (function(module, exports) {
 
 module.exports = function( THREE ) {
@@ -44891,43 +44399,512 @@ module.exports = function( THREE ) {
 
 
 /***/ }),
-/* 4 */
+/* 3 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return createCylinderMesh; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_CylinderEdgeHelper__ = __webpack_require__(6);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PolyhedralDiagram; });
 const THREE = __webpack_require__(0);
 
-function createCylinderMesh(pointX, pointY, material, radius, radius2) {
-    if (radius === undefined) {
-        radius = 1;
+
+var PolyhedralDiagram = function (json) {
+    if (json === null) {
+        console.log( ' no json object to init the polydral digram pair' );
+        return;
     }
 
-    if (radius2 === undefined) {
-        radius2 = radius;
+    this.json = json;
+
+    this.diagram = {
+        form: {
+            // geometries: {},
+            // objects: {}
+            
+
+            objects: {
+                root: new THREE.Object3D(),
+
+                vertices: new THREE.Object3D(),
+                edges: new THREE.Object3D(),
+                exEdges: new THREE.Object3D(),
+                exForceArrows: new THREE.Object3D()
+            },
+
+            maps: {
+                edgeId2Object: {}
+            }
+        },
+        force: {
+            // geometries: {},
+
+            objects: {
+                root: new THREE.Object3D(),
+
+                faces: new THREE.Object3D(),
+                edges: new THREE.Object3D()
+            },
+
+            maps: {
+                faceId2Object: {},
+                edgeId2Object: {}
+            }
+        },
+
+        materials: {
+            lineBasic: new THREE.LineBasicMaterial( { 
+                // color: 0xffffff, 
+                color: 0x000000,
+                opacity: 1, 
+                transparent: false
+                // linewidth: 3     // ANGLE limitation
+            } ),
+
+            lineExternal: new THREE.LineBasicMaterial( { 
+                color: 0x888888, 
+                opacity: 1, 
+                transparent: false
+                // linewidth: 3
+            } ),
+
+            cylinderBasic: new THREE.MeshBasicMaterial( {
+                color: 0x000000
+            } ),
+
+            cylinderExternal: new THREE.MeshBasicMaterial( {
+                color: 0x888888
+            } ),
+
+            // arrow: new THREE.LineBasicMaterial( { 
+            //     color: 0x000000
+            // } ),
+            arrow: 0xaaaaaa,
+
+            vertex: new THREE.PointsMaterial({
+                color: 0x000000,
+                size: 0.5
+            }),
+
+            vertexIcosahedron: new THREE.MeshBasicMaterial( { 
+                color: 0x000000, 
+                // shading: THREE.FlatShading,
+                transparent: false,
+            }),
+
+            // vertexContour: new THREE.ShaderMaterial( {
+
+            //     uniforms: {
+            //         color: 0x000000
+            //     },
+            //     attributes: {
+            //         vertexOpacity: { value: [] }
+            //     },
+            //     // vertexShader: document.getElementById( 'vertexShader' ).textContent,
+            //     fragmentShader: require( 'glsl/contour.frag.glsl' )
+
+            // } ),
+
+            forceFace: new THREE.MeshBasicMaterial( { 
+                color: 0x156289, 
+                shading: THREE.FlatShading,
+                opacity: 0.05,
+                transparent: true,
+                side: THREE.DoubleSide,
+
+                // blending: THREE.CustomBlending,
+
+                depthWrite: false
+            })
+            // forceFace: new THREE.MeshPhongMaterial( { 
+            //     color: 0xffaa00, 
+            //     shading: THREE.FlatShading,
+            //     opacity: 0.9,
+            //     transparent: true,
+            //     side: THREE.DoubleSide
+            // })
+        }
+    };
+
+    this.buildFormDiagram();
+    this.buildForceDiagram();
+
+};
+
+PolyhedralDiagram.prototype.constructor = PolyhedralDiagram;
+
+
+PolyhedralDiagram.prototype.buildFormDiagram = function() {
+    var json = this.json;
+
+    var edgeStrengthScale = 5000.0;
+
+    var geometry = new THREE.Geometry();
+    var exEdges = new THREE.Geometry();
+    var exForces = this.diagram.form.objects.exForceArrows;
+
+    var verticesOnlyGeometry = new THREE.Geometry();    // temparary used for vertices mapping
+
+    var vec3 = {};
+    var vid2vid = {};
+    var v;
+
+    var c = 0;
+    for (v in json.form.vertices) {
+        vec3[v] = new THREE.Vector3 ( 
+            json.form.vertices[v][0],
+            json.form.vertices[v][1],
+            json.form.vertices[v][2]
+        );
+
+        vid2vid[c++] = v;
+
+        verticesOnlyGeometry.vertices.push(vec3[v]);
+
     }
 
-    var direction = new THREE.Vector3().subVectors(pointY, pointX);
-    var orientation = new THREE.Matrix4();
-    orientation.lookAt(pointX, pointY, new THREE.Object3D().up);
-    orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0,
-        0, 0, 1, 0,
-        0, -1, 0, 0,
-        0, 0, 0, 1));
-    var edgeGeometry = new THREE.CylinderGeometry(radius, radius2, direction.length(), 8, 1);
-    var edge = new THREE.Mesh(edgeGeometry, material);
-    edge.applyMatrix(orientation);
-    // position based on midpoints - there may be a better solution than this
-    edge.position.x = (pointY.x + pointX.x) / 2;
-    edge.position.y = (pointY.y + pointX.y) / 2;
-    edge.position.z = (pointY.z + pointX.z) / 2;
-    return edge;
+
+    var lines = {};
+
+    var tmpVec3 = new THREE.Vector3();
+    var arrowLen;
+    var edge, vertex, arrow;
+    var edgesId = [];
+    var exEdgesId = [];
+    var verticesId = [];
+    var exVerticesId = [];
+
+    var edgeInfo;
+    var strengthRadius;
+
+    for (edge in json.form.edges) {
+        vertex = json.form.edges[edge].vertex;
+
+        // console.log(edge, vertex);
+
+        // geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+
+        // if (json.form.edges[edge].external) {
+        //     geometry.colors.push( new THREE.Color(0xff0000), new THREE.Color(0xff0000)  );
+        // } else if (json.form.edges[edge].ex_force) {
+        //     geometry.colors.push( new THREE.Color(0xffff00), new THREE.Color(0x00ff00)  );
+        // } else {
+        //     geometry.colors.push( new THREE.Color(0xffffff), new THREE.Color(0xffffff)  );
+        // }
+
+
+        if (json.form.edges[edge].external) {
+            exEdges.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+            exEdgesId.push( edge );
+
+            exVerticesId.push( vertex[0], vertex[1] );
+        } else if (json.form.edges[edge].ex_force) {
+            // tmpVec3.copy( vec3[vertex[1]] );
+            // tmpVec3.sub( vec3[vertex[0]] );
+            // arrowLen = tmpVec3.length();
+            // tmpVec3.multiplyScalar( 1 / arrowLen );
+            // arrow = new THREE.ArrowHelper( tmpVec3, vec3[vertex[0]], arrowLen, this.diagram.materials.arrow );
+            // arrow.diagramId = edge;
+            // exForces.add( arrow );
+
+            edgeInfo = this.json.form.edges[edge];
+            
+            strengthRadius = edgeInfo.strength / edgeStrengthScale;
+
+            arrow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils_CylinderEdgeHelper__["a" /* createCylinderMesh */])( 
+                vec3[vertex[0]],
+                vec3[vertex[1]],
+                this.diagram.materials.cylinderExternal.clone(),
+                0,
+                strengthRadius
+            );
+
+            
+
+            arrow.diagramId = edge;
+            arrow.diagramForceFaceId = edgeInfo.force_face;
+            
+            exForces.add( arrow );
+        } else {
+            geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+            edgesId.push( edge );
+
+            verticesId.push( vertex[0], vertex[1] );
+        }
+
+        
+        
+    }
+
+    // geometry.center();
+    // exEdges.center();
+
+    geometry.computeBoundingBox();
+    var offset = geometry.boundingBox.getCenter().negate();
+    geometry.translate( offset.x, offset.y, offset.z );
+
+    exEdges.translate( offset.x, offset.y, offset.z );
+
+    exForces.translateX( offset.x );
+    exForces.translateY( offset.y );
+    exForces.translateZ( offset.z );
+
+    verticesOnlyGeometry.translate( offset.x, offset.y, offset.z );
+
+
+    // build separate meshes
+    var edgesParent = this.diagram.form.objects.edges;
+    var exEdgesParent = this.diagram.form.objects.exEdges;
+    var verticesParent = this.diagram.form.objects.vertices;
+
+    var root = this.diagram.form.objects.root;
+    root.add(edgesParent);
+    root.add(exEdgesParent);
+    root.add(verticesParent);
+    root.add(exForces);     // arrow forces
+
+    var i, j;
+    var curMesh;
+    var curEdgeGeometry;
+    var curMaterial = this.diagram.materials.lineBasic;
+    var len = geometry.vertices.length;
+
+    
+    var vertexAdded = {};
+
+    // edges
+    for ( i = 0, j = 0; i < len; i += 2, j ++ ) {
+        // curEdgeGeometry = new THREE.Geometry();
+        // curEdgeGeometry.vertices.push( geometry.vertices[i].clone(), geometry.vertices[i+1].clone() );
+        // curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
+        // curMesh.diagramId = edgesId[j];
+        // curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
+        // curMesh.diagramType = 'form_edge';
+        //edgesParent.add( curMesh );
+
+
+        edgeInfo = this.json.form.edges[edgesId[j]];
+        strengthRadius = edgeInfo.strength / edgeStrengthScale;
+
+        // cylinder edge
+        curMesh = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils_CylinderEdgeHelper__["a" /* createCylinderMesh */])( 
+                geometry.vertices[i].clone(), 
+                geometry.vertices[i+1].clone(), 
+                this.diagram.materials.cylinderBasic.clone(),
+                strengthRadius
+        );
+        curMesh.diagramId = edgesId[j];
+        curMesh.diagramForceFaceId = edgeInfo.force_face;
+        curMesh.diagramType = 'form_edge';
+        edgesParent.add( curMesh );
+
+    }
+
+    curMaterial = this.diagram.materials.lineExternal;
+    len = exEdges.vertices.length;
+    // exEdges
+    for ( i = 0, j = 0; i < len; i += 2, j ++ ) {
+        // curEdgeGeometry = new THREE.Geometry();
+        // curEdgeGeometry.vertices.push( exEdges.vertices[i].clone(), exEdges.vertices[i+1].clone() );
+        // curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
+        // curMesh.diagramId = exEdgesId[j];
+        // curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
+        // curMesh.diagramType = 'form_ex_edge';
+        // exEdgesParent.add( curMesh );
+
+        // cylinder edge
+        curMesh = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils_CylinderEdgeHelper__["a" /* createCylinderMesh */])( 
+                exEdges.vertices[i].clone(), 
+                exEdges.vertices[i+1].clone(), 
+                this.diagram.materials.cylinderExternal.clone(),
+                0.1
+        );
+        curMesh.diagramId = exEdgesId[j];
+        curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
+        curMesh.diagramType = 'form_ex_edge';
+        exEdgesParent.add( curMesh );
+    }
+
+
+
+    // vertices 
+    // single point geometry won't work for picking
+
+    
+    var vertexShapeGeometry = new THREE.IcosahedronGeometry(0.2, 0);
+    // var vertexShapeGeometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
+
+    var verticesArray = [];
+
+
+    // curMaterial = this.diagram.materials.vertex;
+    curMaterial = this.diagram.materials.vertexIcosahedron;
+    // len = geometry.vertices.length;
+    len = verticesOnlyGeometry.vertices.length;
+    var curVertexGeometry;
+    var curVertexMesh;
+
+    // vertex 2 force face array
+    var v2fa = this.json.form.vertices_2_force_faces;
+
+    for ( i = 0 ; i < len; i ++ ) {
+        curVertexGeometry = vertexShapeGeometry.clone();
+        curVertexGeometry.translate( verticesOnlyGeometry.vertices[ i ].x, verticesOnlyGeometry.vertices[ i ].y, verticesOnlyGeometry.vertices[ i ].z );
+        curVertexMesh = new THREE.Mesh( curVertexGeometry.clone(), curMaterial.clone() );
+        curVertexMesh.diagramId = vid2vid[i];
+        curVertexMesh.digramForceFaceIdArray = v2fa[ curVertexMesh.diagramId ];
+        curVertexMesh.diagramType = 'form_vertex';
+        verticesParent.add( curVertexMesh );
+    }
 }
 
 
 
+
+PolyhedralDiagram.prototype.buildForceDiagram = function() {
+    var json = this.json;
+
+    var vec3 = {};
+    var v;
+
+    var geometry = this.diagram.force.geometry = new THREE.Geometry();
+
+
+    var vid2vid = {};
+
+    var c = 0;
+    for (v in json.force.vertices) {
+        vec3[v] = new THREE.Vector3 ( 
+            json.force.vertices[v][0],
+            json.force.vertices[v][1],
+            json.force.vertices[v][2]
+        );
+
+        geometry.vertices.push(vec3[v].clone());
+
+        // if (!vid2vid[v]) {
+            vid2vid[v] = c++;
+        // }
+        
+    }
+
+    geometry.computeBoundingBox();
+    var offset = geometry.boundingBox.getCenter().negate();
+    geometry.translate( offset.x, offset.y, offset.z );
+
+
+
+    // edges
+    var edgeGeometry = this.diagram.force.edges = new THREE.Geometry();
+    var edge, vertex, arrow;
+    for (edge in json.force.edges) {
+        vertex = json.force.edges[edge];
+
+        edgeGeometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+    }
+
+    edgeGeometry.translate( offset.x, offset.y, offset.z );
+
+
+    // face
+    var faces = {};
+
+    var f;
+    var face3;
+    var face_v;
+    
+    var face_geometry;
+    var face_mesh;
+
+    for (f in json.force.faces_v) {
+        face_v = json.force.faces_v[f];
+
+        if (face_v.length === 3) {
+            face3 = new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[1]], vid2vid[face_v[2]] );
+            geometry.faces.push( face3 );
+
+
+
+            // separate mesh for each face
+            face_geometry = new THREE.BufferGeometry();
+            face_geometry.addAttribute(
+                'position', 
+                new THREE.BufferAttribute(
+                    new Float32Array([ 
+                        geometry.vertices[ vid2vid[ face_v[0]] ].x, geometry.vertices[ vid2vid[ face_v[0]] ].y, geometry.vertices[ vid2vid[ face_v[0]] ].z,
+                        geometry.vertices[ vid2vid[ face_v[1]] ].x, geometry.vertices[ vid2vid[ face_v[1]] ].y, geometry.vertices[ vid2vid[ face_v[1]] ].z,
+                        geometry.vertices[ vid2vid[ face_v[2]] ].x, geometry.vertices[ vid2vid[ face_v[2]] ].y, geometry.vertices[ vid2vid[ face_v[2]] ].z
+                    ]),
+                    3
+                )
+            );
+
+            // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace );
+            // face_mesh.diagramId = f;
+            // this.diagram.force.objects.faces.add( face_mesh );
+
+        } else if (face_v.length === 4) {
+            geometry.faces.push( new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[1]], vid2vid[face_v[2]] ) );
+            geometry.faces.push( new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[2]], vid2vid[face_v[3]] ) );
+            console.log(face_v);
+
+
+             // separate mesh for each face
+            face_geometry = new THREE.BufferGeometry();
+            face_geometry.addAttribute(
+                'position', 
+                new THREE.BufferAttribute(
+                    new Float32Array([ 
+                        geometry.vertices[ vid2vid[ face_v[0]] ].x, geometry.vertices[ vid2vid[ face_v[0]] ].y, geometry.vertices[ vid2vid[ face_v[0]] ].z,
+                        geometry.vertices[ vid2vid[ face_v[1]] ].x, geometry.vertices[ vid2vid[ face_v[1]] ].y, geometry.vertices[ vid2vid[ face_v[1]] ].z,
+                        geometry.vertices[ vid2vid[ face_v[2]] ].x, geometry.vertices[ vid2vid[ face_v[2]] ].y, geometry.vertices[ vid2vid[ face_v[2]] ].z,
+                        geometry.vertices[ vid2vid[ face_v[0]] ].x, geometry.vertices[ vid2vid[ face_v[0]] ].y, geometry.vertices[ vid2vid[ face_v[0]] ].z,
+                        geometry.vertices[ vid2vid[ face_v[2]] ].x, geometry.vertices[ vid2vid[ face_v[2]] ].y, geometry.vertices[ vid2vid[ face_v[2]] ].z,
+                        geometry.vertices[ vid2vid[ face_v[3]] ].x, geometry.vertices[ vid2vid[ face_v[3]] ].y, geometry.vertices[ vid2vid[ face_v[3]] ].z
+                    ]),
+                    3
+                )
+            );
+
+            // // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace );
+            // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace.clone() );
+            // face_mesh.diagramId = f;
+            // this.diagram.force.objects.faces.add( face_mesh );
+        }
+
+        face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace.clone() );
+        face_mesh.diagramId = f;
+        this.diagram.force.objects.faces.add( face_mesh );
+        this.diagram.force.maps.faceId2Object[f] = face_mesh;
+
+        
+    }
+
+    // normal should read from txt files... (order)
+    geometry.computeFaceNormals();
+    geometry.computeVertexNormals();
+
+
+
+
+    // build mesh
+    this.diagram.force.meshEdges = new THREE.LineSegments( 
+        edgeGeometry, 
+        this.diagram.materials.lineBasic
+    );
+
+
+    var root = this.diagram.force.objects.root;
+    root.add(this.diagram.force.meshEdges);
+    root.add(this.diagram.force.objects.faces);
+
+
+}
+
+
+
+
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports) {
 
 /**
@@ -45687,7 +45664,7 @@ dat.color.toString,
 dat.utils.common);
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports) {
 
 /**
@@ -49352,18 +49329,54 @@ dat.dom.dom,
 dat.utils.common);
 
 /***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return createCylinderMesh; });
+const THREE = __webpack_require__(0);
+
+function createCylinderMesh(pointX, pointY, material, radius, radius2) {
+    if (radius === undefined) {
+        radius = 1;
+    }
+
+    if (radius2 === undefined) {
+        radius2 = radius;
+    }
+
+    var direction = new THREE.Vector3().subVectors(pointY, pointX);
+    var orientation = new THREE.Matrix4();
+    orientation.lookAt(pointX, pointY, new THREE.Object3D().up);
+    orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0,
+        0, 0, 1, 0,
+        0, -1, 0, 0,
+        0, 0, 0, 1));
+    var edgeGeometry = new THREE.CylinderGeometry(radius, radius2, direction.length(), 8, 1);
+    var edge = new THREE.Mesh(edgeGeometry, material);
+    edge.applyMatrix(orientation);
+    // position based on midpoints - there may be a better solution than this
+    edge.position.x = (pointY.x + pointX.x) / 2;
+    edge.position.y = (pointY.y + pointX.y) / 2;
+    edge.position.z = (pointY.z + pointX.z) / 2;
+    return edge;
+}
+
+
+
+/***/ }),
 /* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_dat_gui__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_dat_gui__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_dat_gui___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_dat_gui__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__PolyhedralDiagram__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__PolyhedralDiagram__ = __webpack_require__(3);
 // import THREE from 'three';
 var THREE = __webpack_require__(0);
 // const OrbitControls = require('three-orbit-controls')(THREE);
-THREE.OrbitControls = __webpack_require__(3)(THREE);
+THREE.OrbitControls = __webpack_require__(2)(THREE);
 // import dat from 'dat.gui'
 // const dat = require('dat.gui');
 

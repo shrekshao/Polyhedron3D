@@ -84,6 +84,19 @@ var PolyhedralDiagram = function (json) {
                 transparent: false,
             }),
 
+            // vertexContour: new THREE.ShaderMaterial( {
+
+            //     uniforms: {
+            //         color: 0x000000
+            //     },
+            //     attributes: {
+            //         vertexOpacity: { value: [] }
+            //     },
+            //     // vertexShader: document.getElementById( 'vertexShader' ).textContent,
+            //     fragmentShader: require( 'glsl/contour.frag.glsl' )
+
+            // } ),
+
             forceFace: new THREE.MeshBasicMaterial( { 
                 color: 0x156289, 
                 shading: THREE.FlatShading,
