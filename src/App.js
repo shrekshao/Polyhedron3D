@@ -226,8 +226,8 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         var f = formEdge.diagramForceFaceId;
         if (f) {
             var forceFace = polyhedralDiagram.diagram.force.maps.faceId2Object[f];
-            forceFace.material.color.setHex( highlightObjectColor );
-            // console.log( forceFace.material.opacity );
+            // forceFace.material.color.setHex( highlightObjectColor );
+            forceFace.material.color.setHex( forceFace.color.getHex() );
             forceFace.material.opacity = highlightObjectOpacity;
         }
     }
@@ -244,7 +244,8 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
             for (f in farray) {
                 forceFace = polyhedralDiagram.diagram.force.maps.faceId2Object[ farray[f] ];
                 if (forceFace) {
-                    forceFace.material.color.setHex( highlightObjectColor );
+                    // forceFace.material.color.setHex( highlightObjectColor );
+                    forceFace.material.color.setHex( forceFace.color.getHex() );
                     // console.log( forceFace.material.opacity );
                     forceFace.material.opacity = highlightObjectOpacity;
                 }

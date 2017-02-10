@@ -25,6 +25,7 @@
     "webpack-glsl-loader": "^1.0.1"
   },
   "dependencies": {
+    "d3-scale": "^1.0.4",
     "dat-gui": "^0.5.0",
     "dat.gui": "^0.6.1",
     "three": "^0.84.0",

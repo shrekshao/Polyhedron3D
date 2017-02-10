@@ -1,4 +1,5 @@
-const THREE = require('three');
+var THREE = require('three');
+var d3 = require('d3-scale');
 import { createCylinderMesh } from './utils/CylinderEdgeHelper'
 
 var PolyhedralDiagram = function (json) {
@@ -109,7 +110,8 @@ var PolyhedralDiagram = function (json) {
             forceFace: new THREE.MeshBasicMaterial( { 
                 color: 0x156289, 
                 shading: THREE.FlatShading,
-                opacity: 0.05,
+                // opacity: 0.05,
+                opacity: 0.1,
                 transparent: true,
                 side: THREE.DoubleSide,
 
@@ -127,6 +129,19 @@ var PolyhedralDiagram = function (json) {
         }
     };
 
+
+    var strengthMax = this.json.strength_scaler.max;
+    var strengthMin = this.json.strength_scaler.min;
+    var gap = strengthMax - strengthMin;
+
+    // this.strengthScaler = d3.scaleLinear().domain([strengthMin, strengthMax]);
+
+    this.strengthRadiusScaler = d3.scaleLinear().domain([strengthMin, strengthMax])
+                                .range([0.01, 0.5]);
+    this.strengthColorScaler = d3.scaleLinear()
+        .domain([strengthMin, strengthMin + 0.25 * gap, strengthMin + 0.5 * gap, strengthMin + 0.75 * gap, strengthMax])
+        .range(['#aaffff', '#78c8e6', '#468cb0', '#14506e', '#001432']);
+
     this.buildFormDiagram();
     this.buildForceDiagram();
 
@@ -137,8 +152,6 @@ PolyhedralDiagram.prototype.constructor = PolyhedralDiagram;
 
 PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var json = this.json;
-
-    var edgeStrengthScale = 5000.0;
 
     var geometry = new THREE.Geometry();
     var exEdges = new THREE.Geometry();
@@ -182,22 +195,10 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
 
     var edgeInfo;
     var strengthRadius;
+    var strength;
 
     for (edge in json.form.edges) {
         vertex = json.form.edges[edge].vertex;
-
-        // console.log(edge, vertex);
-
-        // geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
-
-        // if (json.form.edges[edge].external) {
-        //     geometry.colors.push( new THREE.Color(0xff0000), new THREE.Color(0xff0000)  );
-        // } else if (json.form.edges[edge].ex_force) {
-        //     geometry.colors.push( new THREE.Color(0xffff00), new THREE.Color(0x00ff00)  );
-        // } else {
-        //     geometry.colors.push( new THREE.Color(0xffffff), new THREE.Color(0xffffff)  );
-        // }
-
 
         if (json.form.edges[edge].external) {
             exEdges.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
@@ -214,8 +215,9 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
             // exForces.add( arrow );
 
             edgeInfo = this.json.form.edges[edge];
+            strength = this.json.force_face_2_strength[edgeInfo.force_face];
             
-            strengthRadius = edgeInfo.strength / edgeStrengthScale;
+            strengthRadius = this.strengthRadiusScaler( strength );
 
             arrow = createCylinderMesh( 
                 vec3[vertex[0]],
@@ -224,7 +226,6 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
                 0,
                 strengthRadius
             );
-
             
 
             arrow.diagramId = edge;
@@ -275,6 +276,8 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var curMaterial = this.diagram.materials.lineBasic;
     var len = geometry.vertices.length;
 
+    var strength;
+
     
     var vertexAdded = {};
 
@@ -290,7 +293,9 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
 
 
         edgeInfo = this.json.form.edges[edgesId[j]];
-        strengthRadius = edgeInfo.strength / edgeStrengthScale;
+        strength = this.json.force_face_2_strength[edgeInfo.force_face];
+
+        strengthRadius = this.strengthRadiusScaler( strength );
 
         // cylinder edge
         curMesh = createCylinderMesh( 
@@ -304,6 +309,8 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
         curMesh.diagramType = 'form_edge';
         edgesParent.add( curMesh );
 
+        curMesh.material.color = new THREE.Color( this.strengthColorScaler( strength ) );
+        this.diagram.force.objects.faces
     }
 
     curMaterial = this.diagram.materials.lineExternal;
@@ -430,6 +437,8 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
     var face_geometry;
     var face_mesh;
 
+    var strength;
+
     for (f in json.force.faces_v) {
         face_v = json.force.faces_v[f];
 
@@ -487,6 +496,11 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
         }
 
         face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace.clone() );
+
+        strength = this.json.force_face_2_strength[ f ];
+        face_mesh.color = new THREE.Color( this.strengthColorScaler(strength) );
+        face_mesh.material.color = face_mesh.color.clone();
+
         face_mesh.diagramId = f;
         this.diagram.force.objects.faces.add( face_mesh );
         this.diagram.force.maps.faceId2Object[f] = face_mesh;

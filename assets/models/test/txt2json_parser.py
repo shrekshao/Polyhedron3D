@@ -1,5 +1,6 @@
 import json
 from sets import Set
+from sys import maxint
 import math
 
 # tmp hacky functions for vec3
@@ -41,7 +42,15 @@ class DiagramJson:
                 'faces_e': {},
                 'faces_v': {},
                 'cells': {}
-            }
+            },
+
+            'strength_scaler': {
+                'min': maxint,
+                'max': 0
+            },
+
+            'force_face_2_strength': {}
+
         }
 
 class Txt2JsonParser:
@@ -182,6 +191,9 @@ class Txt2JsonParser:
         # fan shape order
         faces_v = self.diagramJson.json['force']['faces_v']
 
+        strengthScaler = self.diagramJson.json['strength_scaler']
+        force_face_2_strength = self.diagramJson.json['force_face_2_strength']
+
         v = self.diagramJson.json['force']['vertices']
         e = self.diagramJson.json['form']['edges']
 
@@ -189,12 +201,21 @@ class Txt2JsonParser:
             face = line.strip().split('\t')
             faces_v[face[0]] = face[1:]
 
+            strength = 0
+
             if len(face) == 4:
                 # tri
-                e[ self.force_face_2_form_edge[face[0]] ]['strength'] = area( v[face[1]], v[face[2]], v[face[3]] )
+                strength = area( v[face[1]], v[face[2]], v[face[3]] )                
             elif len(face) == 5:
                 # quad
-                e[ self.force_face_2_form_edge[face[0]] ]['strength'] = area( v[face[1]], v[face[2]], v[face[3]] ) + area( v[face[1]], v[face[3]], v[face[4]] )
+                strength = area( v[face[1]], v[face[2]], v[face[3]] ) + area( v[face[1]], v[face[3]], v[face[4]] )
+
+            # e[ self.force_face_2_form_edge[face[0]] ]['strength'] = strength
+            force_face_2_strength[ face[0] ] = strength
+
+
+            strengthScaler['max'] = max(strength, strengthScaler['max'])
+            strengthScaler['min'] = min(strength, strengthScaler['min'])
 
         f_face_vertex.close()
 
