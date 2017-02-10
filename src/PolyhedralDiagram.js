@@ -93,6 +93,9 @@ var PolyhedralDiagram = function (json) {
                 uniforms: {
                     color: { 
                         value: new THREE.Color( 0xcccccc )
+                    },
+                    outlineColor: {
+                        value: new THREE.Color( 0x000000 )
                     }
                 },
                 // attributes: {

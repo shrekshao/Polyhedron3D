@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 7);
+/******/ 	return __webpack_require__(__webpack_require__.s = 9);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -44403,7 +44403,7 @@ module.exports = function( THREE ) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_CylinderEdgeHelper__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_CylinderEdgeHelper__ = __webpack_require__(8);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PolyhedralDiagram; });
 const THREE = __webpack_require__(0);
 
@@ -44500,13 +44500,16 @@ var PolyhedralDiagram = function (json) {
                 uniforms: {
                     color: { 
                         value: new THREE.Color( 0xcccccc )
+                    },
+                    outlineColor: {
+                        value: new THREE.Color( 0x000000 )
                     }
                 },
                 // attributes: {
                 //     vertexOpacity: { value: [] }
                 // },
-                vertexShader: __webpack_require__( 10 ),
-                fragmentShader: __webpack_require__( 9 )
+                vertexShader: __webpack_require__( 7 ),
+                fragmentShader: __webpack_require__( 6 )
 
             } ),
 
@@ -49349,6 +49352,18 @@ dat.utils.common);
 
 /***/ }),
 /* 6 */
+/***/ (function(module, exports) {
+
+module.exports = "uniform vec3 color;\r\nuniform vec3 outlineColor;\r\n\r\nvarying vec3 v_normal;\r\n\r\nvoid main() {\r\n    if ( dot( v_normal, vec3(0.0, 0.0, 1.0) ) < 0.5 )\r\n    {\r\n        gl_FragColor = vec4(outlineColor, 1.0);\r\n    }\r\n    else\r\n    {\r\n        gl_FragColor = vec4(color, 1.0);\r\n    }\r\n    \r\n}"
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports) {
+
+module.exports = "varying vec3 v_normal;\r\n\r\nvoid main() {\r\n    v_normal = normalize( normalMatrix * normal );\r\n    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\r\n}"
+
+/***/ }),
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -49384,7 +49399,7 @@ function createCylinderMesh(pointX, pointY, material, radius, radius2) {
 
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -49888,19 +49903,6 @@ THREE.OrbitControls = __webpack_require__(2)(THREE);
         render();
     };
 })();
-
-/***/ }),
-/* 8 */,
-/* 9 */
-/***/ (function(module, exports) {
-
-module.exports = "uniform vec3 color;\r\n\r\nvarying vec3 v_normal;\r\n\r\nvoid main() {\r\n    if ( dot( v_normal, vec3(0.0, 0.0, 1.0) ) < 0.5 )\r\n    {\r\n        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);\r\n    }\r\n    else\r\n    {\r\n        gl_FragColor = vec4(color, 1.0);\r\n    }\r\n    \r\n}"
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports) {
-
-module.exports = "varying vec3 v_normal;\r\n\r\nvoid main() {\r\n    v_normal = normalMatrix * normal;\r\n    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\r\n}"
 
 /***/ })
 /******/ ]);
