@@ -44460,11 +44460,11 @@ var PolyhedralDiagram = function (json) {
                 // linewidth: 3     // ANGLE limitation
             } ),
 
-            lineExternal: new THREE.LineBasicMaterial( { 
+            lineExternal: new THREE.LineDashedMaterial( { 
                 color: 0x888888, 
-                opacity: 1, 
-                transparent: false
-                // linewidth: 3
+                dashSize: 0.3,
+                gapSize: 0.1,
+                linewidth: 1        // ANGLE limitation
             } ),
 
             cylinderBasic: new THREE.MeshBasicMaterial( {
@@ -44475,10 +44475,14 @@ var PolyhedralDiagram = function (json) {
                 color: 0x888888
             } ),
 
+            arrowForce: new THREE.MeshBasicMaterial( {
+                color: 0x009600
+            } ),
+
             // arrow: new THREE.LineBasicMaterial( { 
             //     color: 0x000000
             // } ),
-            arrow: 0xaaaaaa,
+            arrow: 0x009600,
 
             vertex: new THREE.PointsMaterial({
                 color: 0x000000,
@@ -44620,7 +44624,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
             arrow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils_CylinderEdgeHelper__["a" /* createCylinderMesh */])( 
                 vec3[vertex[0]],
                 vec3[vertex[1]],
-                this.diagram.materials.cylinderExternal.clone(),
+                this.diagram.materials.arrowForce.clone(),
                 0,
                 strengthRadius
             );
@@ -44710,25 +44714,26 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     len = exEdges.vertices.length;
     // exEdges
     for ( i = 0, j = 0; i < len; i += 2, j ++ ) {
-        // curEdgeGeometry = new THREE.Geometry();
-        // curEdgeGeometry.vertices.push( exEdges.vertices[i].clone(), exEdges.vertices[i+1].clone() );
-        // curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
-        // curMesh.diagramId = exEdgesId[j];
-        // curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
-        // curMesh.diagramType = 'form_ex_edge';
-        // exEdgesParent.add( curMesh );
-
-        // cylinder edge
-        curMesh = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__utils_CylinderEdgeHelper__["a" /* createCylinderMesh */])( 
-                exEdges.vertices[i].clone(), 
-                exEdges.vertices[i+1].clone(), 
-                this.diagram.materials.cylinderExternal.clone(),
-                0.1
-        );
+        curEdgeGeometry = new THREE.Geometry();
+        curEdgeGeometry.vertices.push( exEdges.vertices[i].clone(), exEdges.vertices[i+1].clone() );
+        curEdgeGeometry.computeLineDistances(); // for dashed line material
+        curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
         curMesh.diagramId = exEdgesId[j];
         curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
         curMesh.diagramType = 'form_ex_edge';
         exEdgesParent.add( curMesh );
+
+        // // cylinder edge
+        // curMesh = createCylinderMesh( 
+        //         exEdges.vertices[i].clone(), 
+        //         exEdges.vertices[i+1].clone(), 
+        //         this.diagram.materials.cylinderExternal.clone(),
+        //         0.1
+        // );
+        // curMesh.diagramId = exEdgesId[j];
+        // curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
+        // curMesh.diagramType = 'form_ex_edge';
+        // exEdgesParent.add( curMesh );
     }
 
 
