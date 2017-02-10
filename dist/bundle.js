@@ -44553,9 +44553,14 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var c = 0;
     for (v in json.form.vertices) {
         vec3[v] = new THREE.Vector3 ( 
+            // json.form.vertices[v][0],
+            // json.form.vertices[v][1],
+            // json.form.vertices[v][2]
+
+            // Rhinos coordinate system
             json.form.vertices[v][0],
-            json.form.vertices[v][1],
-            json.form.vertices[v][2]
+            - json.form.vertices[v][2],
+            json.form.vertices[v][1]
         );
 
         vid2vid[c++] = v;
@@ -44778,9 +44783,14 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
     var c = 0;
     for (v in json.force.vertices) {
         vec3[v] = new THREE.Vector3 ( 
+            // json.force.vertices[v][0],
+            // json.force.vertices[v][1],
+            // json.force.vertices[v][2]
+
+            // Rhinos coordinate system
             json.force.vertices[v][0],
-            json.force.vertices[v][1],
-            json.force.vertices[v][2]
+            - json.force.vertices[v][2],
+            json.force.vertices[v][1]
         );
 
         geometry.vertices.push(vec3[v].clone());
