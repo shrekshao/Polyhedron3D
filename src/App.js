@@ -2,6 +2,7 @@
 var THREE = require('three');
 // const OrbitControls = require('three-orbit-controls')(THREE);
 THREE.OrbitControls = require('three-orbit-controls')(THREE);
+// THREE.OutlineEffect = require('./lib/OutlineEffect.js')(THREE);
 // import dat from 'dat.gui'
 // const dat = require('dat.gui');
 import dat from 'dat-gui'
@@ -28,6 +29,8 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
     var camera;
     var scene1, scene2;
     var scenes;
+
+    // var outlineEffect;
 
     var gui;
     var guiList = {
@@ -230,7 +233,10 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
     }
 
     function releaseHighlightedFaceArray( formVertex ) {
-        formVertex.material.color.setHex( currentColor );
+        // formVertex.material.color.setHex( currentColor );
+        formVertex.material.uniforms.color.value.setHex( currentColor );
+
+
         // var e = formEdge.diagramId;
         var farray = formVertex.digramForceFaceIdArray;
         if (farray) {
@@ -281,12 +287,14 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
 
                         INTERSECTED = intersects[0].object;
 
-                        currentColor = INTERSECTED.material.color.getHex();
-                        INTERSECTED.material.color.setHex( highlightColor.form );
+                        // currentColor = INTERSECTED.material.color.getHex();
+                        // INTERSECTED.material.color.setHex( highlightColor.form );
                         
 
                         if (INTERSECTED.diagramType !== 'form_vertex') {
                             console.log(INTERSECTED.diagramId, INTERSECTED.diagramForceFaceId);
+                            currentColor = INTERSECTED.material.color.getHex();
+                            INTERSECTED.material.color.setHex( highlightColor.form );
 
                             // highlight corresponding force face in scene1
                             var e = INTERSECTED.diagramId;
@@ -300,6 +308,8 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
                             }
                         } else {
                             console.log(INTERSECTED.diagramId, INTERSECTED.digramForceFaceIdArray);
+                            currentColor = INTERSECTED.material.uniforms.color.value.getHex();
+                            INTERSECTED.material.uniforms.color.value.setHex( highlightColor.form );
 
                             var e = INTERSECTED.diagramId;
                             var farray = INTERSECTED.digramForceFaceIdArray;
@@ -389,6 +399,7 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
             camera.updateProjectionMatrix();
 
             renderer.render( view.scene, camera );
+            // outlineEffect.render( view.scene, camera );
             
         }
 
@@ -466,17 +477,7 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         
         scene2.add( directionalLight.clone() );
 
-
-        // test
-        var geometry  = new THREE.IcosahedronGeometry( 15, 0 );
-        var material = new THREE.MeshPhongMaterial( { color: 0xffaa00, shading: THREE.FlatShading } );
-        // var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-
-
-        var mesh = new THREE.Object3D();
-
-        var mesh = new THREE.Mesh( geometry, material );
-        // scene1.add(mesh);
+        // outlineEffect = new THREE.OutlineEffect( renderer );
 
         onWindowResize();
 

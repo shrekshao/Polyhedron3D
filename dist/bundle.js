@@ -44491,18 +44491,20 @@ var PolyhedralDiagram = function (json) {
                 transparent: false,
             }),
 
-            // vertexContour: new THREE.ShaderMaterial( {
+            vertexContour: new THREE.ShaderMaterial( {
 
-            //     uniforms: {
-            //         color: 0x000000
-            //     },
-            //     attributes: {
-            //         vertexOpacity: { value: [] }
-            //     },
-            //     // vertexShader: document.getElementById( 'vertexShader' ).textContent,
-            //     fragmentShader: require( 'glsl/contour.frag.glsl' )
+                uniforms: {
+                    color: { 
+                        value: new THREE.Color( 0xcccccc )
+                    }
+                },
+                // attributes: {
+                //     vertexOpacity: { value: [] }
+                // },
+                vertexShader: __webpack_require__( 10 ),
+                fragmentShader: __webpack_require__( 9 )
 
-            // } ),
+            } ),
 
             forceFace: new THREE.MeshBasicMaterial( { 
                 color: 0x156289, 
@@ -44730,14 +44732,16 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     // single point geometry won't work for picking
 
     
-    var vertexShapeGeometry = new THREE.IcosahedronGeometry(0.2, 0);
+    // var vertexShapeGeometry = new THREE.IcosahedronGeometry(0.2, 0);
+    var vertexShapeGeometry = new THREE.SphereBufferGeometry(0.2, 8, 6);
     // var vertexShapeGeometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
 
     var verticesArray = [];
 
 
     // curMaterial = this.diagram.materials.vertex;
-    curMaterial = this.diagram.materials.vertexIcosahedron;
+    // curMaterial = this.diagram.materials.vertexIcosahedron;
+    curMaterial = this.diagram.materials.vertexContour;
     // len = geometry.vertices.length;
     len = verticesOnlyGeometry.vertices.length;
     var curVertexGeometry;
@@ -49377,6 +49381,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 var THREE = __webpack_require__(0);
 // const OrbitControls = require('three-orbit-controls')(THREE);
 THREE.OrbitControls = __webpack_require__(2)(THREE);
+// THREE.OutlineEffect = require('./lib/OutlineEffect.js')(THREE);
 // import dat from 'dat.gui'
 // const dat = require('dat.gui');
 
@@ -49403,6 +49408,8 @@ THREE.OrbitControls = __webpack_require__(2)(THREE);
     var camera;
     var scene1, scene2;
     var scenes;
+
+    // var outlineEffect;
 
     var gui;
     var guiList = {
@@ -49605,7 +49612,10 @@ THREE.OrbitControls = __webpack_require__(2)(THREE);
     }
 
     function releaseHighlightedFaceArray( formVertex ) {
-        formVertex.material.color.setHex( currentColor );
+        // formVertex.material.color.setHex( currentColor );
+        formVertex.material.uniforms.color.value.setHex( currentColor );
+
+
         // var e = formEdge.diagramId;
         var farray = formVertex.digramForceFaceIdArray;
         if (farray) {
@@ -49656,12 +49666,14 @@ THREE.OrbitControls = __webpack_require__(2)(THREE);
 
                         INTERSECTED = intersects[0].object;
 
-                        currentColor = INTERSECTED.material.color.getHex();
-                        INTERSECTED.material.color.setHex( highlightColor.form );
+                        // currentColor = INTERSECTED.material.color.getHex();
+                        // INTERSECTED.material.color.setHex( highlightColor.form );
                         
 
                         if (INTERSECTED.diagramType !== 'form_vertex') {
                             console.log(INTERSECTED.diagramId, INTERSECTED.diagramForceFaceId);
+                            currentColor = INTERSECTED.material.color.getHex();
+                            INTERSECTED.material.color.setHex( highlightColor.form );
 
                             // highlight corresponding force face in scene1
                             var e = INTERSECTED.diagramId;
@@ -49675,6 +49687,8 @@ THREE.OrbitControls = __webpack_require__(2)(THREE);
                             }
                         } else {
                             console.log(INTERSECTED.diagramId, INTERSECTED.digramForceFaceIdArray);
+                            currentColor = INTERSECTED.material.uniforms.color.value.getHex();
+                            INTERSECTED.material.uniforms.color.value.setHex( highlightColor.form );
 
                             var e = INTERSECTED.diagramId;
                             var farray = INTERSECTED.digramForceFaceIdArray;
@@ -49764,6 +49778,7 @@ THREE.OrbitControls = __webpack_require__(2)(THREE);
             camera.updateProjectionMatrix();
 
             renderer.render( view.scene, camera );
+            // outlineEffect.render( view.scene, camera );
             
         }
 
@@ -49841,17 +49856,7 @@ THREE.OrbitControls = __webpack_require__(2)(THREE);
         
         scene2.add( directionalLight.clone() );
 
-
-        // test
-        var geometry  = new THREE.IcosahedronGeometry( 15, 0 );
-        var material = new THREE.MeshPhongMaterial( { color: 0xffaa00, shading: THREE.FlatShading } );
-        // var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-
-
-        var mesh = new THREE.Object3D();
-
-        var mesh = new THREE.Mesh( geometry, material );
-        // scene1.add(mesh);
+        // outlineEffect = new THREE.OutlineEffect( renderer );
 
         onWindowResize();
 
@@ -49868,6 +49873,19 @@ THREE.OrbitControls = __webpack_require__(2)(THREE);
         render();
     };
 })();
+
+/***/ }),
+/* 8 */,
+/* 9 */
+/***/ (function(module, exports) {
+
+module.exports = "uniform vec3 color;\r\n\r\nvarying vec3 v_normal;\r\n\r\nvoid main() {\r\n    if ( dot( v_normal, vec3(0.0, 0.0, 1.0) ) < 0.5 )\r\n    {\r\n        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);\r\n    }\r\n    else\r\n    {\r\n        gl_FragColor = vec4(color, 1.0);\r\n    }\r\n    \r\n}"
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports) {
+
+module.exports = "varying vec3 v_normal;\r\n\r\nvoid main() {\r\n    v_normal = normalMatrix * normal;\r\n    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\r\n}"
 
 /***/ })
 /******/ ]);

@@ -84,18 +84,20 @@ var PolyhedralDiagram = function (json) {
                 transparent: false,
             }),
 
-            // vertexContour: new THREE.ShaderMaterial( {
+            vertexContour: new THREE.ShaderMaterial( {
 
-            //     uniforms: {
-            //         color: 0x000000
-            //     },
-            //     attributes: {
-            //         vertexOpacity: { value: [] }
-            //     },
-            //     // vertexShader: document.getElementById( 'vertexShader' ).textContent,
-            //     fragmentShader: require( 'glsl/contour.frag.glsl' )
+                uniforms: {
+                    color: { 
+                        value: new THREE.Color( 0xcccccc )
+                    }
+                },
+                // attributes: {
+                //     vertexOpacity: { value: [] }
+                // },
+                vertexShader: require( './glsl/contourNode.vert.glsl' ),
+                fragmentShader: require( './glsl/contourNode.frag.glsl' )
 
-            // } ),
+            } ),
 
             forceFace: new THREE.MeshBasicMaterial( { 
                 color: 0x156289, 
@@ -323,14 +325,16 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     // single point geometry won't work for picking
 
     
-    var vertexShapeGeometry = new THREE.IcosahedronGeometry(0.2, 0);
+    // var vertexShapeGeometry = new THREE.IcosahedronGeometry(0.2, 0);
+    var vertexShapeGeometry = new THREE.SphereBufferGeometry(0.2, 8, 6);
     // var vertexShapeGeometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
 
     var verticesArray = [];
 
 
     // curMaterial = this.diagram.materials.vertex;
-    curMaterial = this.diagram.materials.vertexIcosahedron;
+    // curMaterial = this.diagram.materials.vertexIcosahedron;
+    curMaterial = this.diagram.materials.vertexContour;
     // len = geometry.vertices.length;
     len = verticesOnlyGeometry.vertices.length;
     var curVertexGeometry;
