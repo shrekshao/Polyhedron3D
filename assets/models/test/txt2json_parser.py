@@ -219,9 +219,11 @@ class Txt2JsonParser:
             # e[ self.force_face_2_form_edge[face[0]] ]['strength'] = strength
             force_face_2_strength[ face[0] ] = strength
 
+            curEdge = e[ self.force_face_2_form_edge[face[0]] ]
 
-            strengthScaler['max'] = max(strength, strengthScaler['max'])
-            strengthScaler['min'] = min(strength, strengthScaler['min'])
+            if 'external' not in curEdge and 'ex_force' not in curEdge:
+                strengthScaler['max'] = max(strength, strengthScaler['max'])
+                strengthScaler['min'] = min(strength, strengthScaler['min'])
 
         f_face_vertex.close()
 

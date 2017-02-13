@@ -55,7 +55,7 @@ var PolyhedralDiagram = function (json) {
             } ),
 
             lineExternal: new THREE.LineDashedMaterial( { 
-                color: 0x888888, 
+                color: 0xcccccc, 
                 dashSize: 0.3,
                 gapSize: 0.1,
                 linewidth: 1        // ANGLE limitation
@@ -137,7 +137,7 @@ var PolyhedralDiagram = function (json) {
     // this.strengthScaler = d3.scaleLinear().domain([strengthMin, strengthMax]);
 
     this.strengthRadiusScaler = d3.scaleLinear().domain([strengthMin, strengthMax])
-                                .range([0.01, 0.5]);
+                                .range([0.01, 0.2]);
     this.strengthColorScaler = d3.scaleLinear()
         .domain([strengthMin, strengthMin + 0.25 * gap, strengthMin + 0.5 * gap, strengthMin + 0.75 * gap, strengthMax])
         .range(['#aaffff', '#78c8e6', '#468cb0', '#14506e', '#001432']);
@@ -218,6 +218,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
             strength = this.json.force_face_2_strength[edgeInfo.force_face];
             
             strengthRadius = this.strengthRadiusScaler( strength );
+            // strengthRadius = 0.25;
 
             arrow = createCylinderMesh( 
                 vec3[vertex[0]],
@@ -227,6 +228,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
                 strengthRadius
             );
             
+            // arrow.material.color = new THREE.Color( this.strengthColorScaler( strength ) );
 
             arrow.diagramId = edge;
             arrow.diagramForceFaceId = edgeInfo.force_face;
@@ -346,7 +348,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
 
     
     // var vertexShapeGeometry = new THREE.IcosahedronGeometry(0.2, 0);
-    var vertexShapeGeometry = new THREE.SphereBufferGeometry(0.2, 8, 6);
+    var vertexShapeGeometry = new THREE.SphereBufferGeometry(0.25, 8, 6);
     // var vertexShapeGeometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
 
     var verticesArray = [];

@@ -1,4 +1,4 @@
-const THREE = require('three');
+var THREE = require('three');
 
 function createCylinderMesh(pointX, pointY, material, radius, radius2) {
     if (radius === undefined) {

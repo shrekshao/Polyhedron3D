@@ -448,6 +448,7 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true } );
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
+        
 
         window.addEventListener('resize', onWindowResize, false);
 
