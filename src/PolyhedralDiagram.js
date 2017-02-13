@@ -1,6 +1,7 @@
 var THREE = require('three');
 var d3 = require('d3-scale');
 import { createCylinderMesh } from './utils/CylinderEdgeHelper'
+import { createCylinderArrowMesh } from './utils/CylinderArrowHelper'
 
 var PolyhedralDiagram = function (json) {
     if (json === null) {
@@ -52,6 +53,11 @@ var PolyhedralDiagram = function (json) {
                 opacity: 1, 
                 transparent: false
                 // linewidth: 3     // ANGLE limitation
+            } ),
+
+            lineForce: new THREE.LineBasicMaterial( {
+                color: 0xcccccc,
+                transparent: false
             } ),
 
             lineExternal: new THREE.LineDashedMaterial( { 
@@ -220,12 +226,19 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
             strengthRadius = this.strengthRadiusScaler( strength );
             // strengthRadius = 0.25;
 
-            arrow = createCylinderMesh( 
+            // arrow = createCylinderMesh( 
+            //     vec3[vertex[0]],
+            //     vec3[vertex[1]],
+            //     this.diagram.materials.arrowForce.clone(),
+            //     0,
+            //     strengthRadius
+            // );
+
+            arrow = createCylinderArrowMesh( 
                 vec3[vertex[0]],
                 vec3[vertex[1]],
                 this.diagram.materials.arrowForce.clone(),
-                0,
-                strengthRadius
+                0.2
             );
             
             // arrow.material.color = new THREE.Color( this.strengthColorScaler( strength ) );
@@ -301,8 +314,8 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
 
         // cylinder edge
         curMesh = createCylinderMesh( 
-                geometry.vertices[i].clone(), 
-                geometry.vertices[i+1].clone(), 
+                geometry.vertices[i], 
+                geometry.vertices[i+1], 
                 this.diagram.materials.cylinderBasic.clone(),
                 strengthRadius
         );
@@ -327,18 +340,6 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
         curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
         curMesh.diagramType = 'form_ex_edge';
         exEdgesParent.add( curMesh );
-
-        // // cylinder edge
-        // curMesh = createCylinderMesh( 
-        //         exEdges.vertices[i].clone(), 
-        //         exEdges.vertices[i+1].clone(), 
-        //         this.diagram.materials.cylinderExternal.clone(),
-        //         0.1
-        // );
-        // curMesh.diagramId = exEdgesId[j];
-        // curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
-        // curMesh.diagramType = 'form_ex_edge';
-        // exEdgesParent.add( curMesh );
     }
 
 
@@ -527,7 +528,7 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
     // build mesh
     this.diagram.force.meshEdges = new THREE.LineSegments( 
         edgeGeometry, 
-        this.diagram.materials.lineBasic
+        this.diagram.materials.lineForce
     );
 
 
