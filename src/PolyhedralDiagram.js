@@ -362,8 +362,15 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
 
     // vertex 2 force face array
     var v2fa = this.json.form.vertices_2_force_faces;
+    var vex = this.json.form.vertices_external;
 
     for ( i = 0 ; i < len; i ++ ) {
+
+        if ( vex[vid2vid [i] ] === 1 ) {
+            // external vertex, don't draw
+            continue;
+        }
+
         curVertexGeometry = vertexShapeGeometry.clone();
         curVertexGeometry.translate( verticesOnlyGeometry.vertices[ i ].x, verticesOnlyGeometry.vertices[ i ].y, verticesOnlyGeometry.vertices[ i ].z );
         curVertexMesh = new THREE.Mesh( curVertexGeometry.clone(), curMaterial.clone() );

@@ -33,6 +33,8 @@ class DiagramJson:
                 'vertices': {}, 
                 'vertices_2_force_faces': {},   # face array
                 'vertices_2_force_cells': {},
+                'vertices_external': None,         # converted from set: vid: 1
+
                 'edges': {}
             },
 
@@ -60,6 +62,7 @@ class Txt2JsonParser:
         # # tmp data structures used only when parsing
         # self.form_edge_2_vertex = {}
         self.force_face_2_form_edge = {}    # inverse index, for caluclate edge width i.e. area of faces (strength)
+        # self.form_vertex_external_count = {}    # vid: count - 0, 1, 2
 
     def readFormVertex(self, filename):
         f = open(filename)
@@ -121,6 +124,9 @@ class Txt2JsonParser:
                 vertex_ex_set.add(edges[e]['vertex'][1])
 
         f_edge_ex.close()
+
+
+        self.diagramJson.json['form']['vertices_external'] = dict.fromkeys(vertex_ex_set, 1)
 
 
 
