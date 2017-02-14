@@ -47768,6 +47768,8 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
     var f;
     var face3;
     var face_v;
+
+    var v1, v2, v3, v4;
     
     var face_geometry;
     var face_mesh;
@@ -47778,20 +47780,21 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
         face_v = json.force.faces_v[f];
 
         if (face_v.length === 3) {
-            face3 = new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[1]], vid2vid[face_v[2]] );
-            geometry.faces.push( face3 );
-
-
 
             // separate mesh for each face
+
+            v1 = geometry.vertices[ vid2vid[ face_v[0]] ];
+            v2 = geometry.vertices[ vid2vid[ face_v[1]] ];
+            v3 = geometry.vertices[ vid2vid[ face_v[2]] ];
+
             face_geometry = new THREE.BufferGeometry();
             face_geometry.addAttribute(
                 'position', 
                 new THREE.BufferAttribute(
                     new Float32Array([ 
-                        geometry.vertices[ vid2vid[ face_v[0]] ].x, geometry.vertices[ vid2vid[ face_v[0]] ].y, geometry.vertices[ vid2vid[ face_v[0]] ].z,
-                        geometry.vertices[ vid2vid[ face_v[1]] ].x, geometry.vertices[ vid2vid[ face_v[1]] ].y, geometry.vertices[ vid2vid[ face_v[1]] ].z,
-                        geometry.vertices[ vid2vid[ face_v[2]] ].x, geometry.vertices[ vid2vid[ face_v[2]] ].y, geometry.vertices[ vid2vid[ face_v[2]] ].z
+                        v1.x, v1.y, v1.z,
+                        v2.x, v2.y, v2.z,
+                        v3.x, v3.y, v3.z
                     ]),
                     3
                 )
@@ -47802,23 +47805,23 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
             // this.diagram.force.objects.faces.add( face_mesh );
 
         } else if (face_v.length === 4) {
-            geometry.faces.push( new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[1]], vid2vid[face_v[2]] ) );
-            geometry.faces.push( new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[2]], vid2vid[face_v[3]] ) );
-            // console.log(face_v);
 
+            v1 = geometry.vertices[ vid2vid[ face_v[0]] ];
+            v2 = geometry.vertices[ vid2vid[ face_v[1]] ];
+            v3 = geometry.vertices[ vid2vid[ face_v[2]] ];
+            v4 = geometry.vertices[ vid2vid[ face_v[3]] ];
 
-             // separate mesh for each face
             face_geometry = new THREE.BufferGeometry();
             face_geometry.addAttribute(
                 'position', 
                 new THREE.BufferAttribute(
                     new Float32Array([ 
-                        geometry.vertices[ vid2vid[ face_v[0]] ].x, geometry.vertices[ vid2vid[ face_v[0]] ].y, geometry.vertices[ vid2vid[ face_v[0]] ].z,
-                        geometry.vertices[ vid2vid[ face_v[1]] ].x, geometry.vertices[ vid2vid[ face_v[1]] ].y, geometry.vertices[ vid2vid[ face_v[1]] ].z,
-                        geometry.vertices[ vid2vid[ face_v[2]] ].x, geometry.vertices[ vid2vid[ face_v[2]] ].y, geometry.vertices[ vid2vid[ face_v[2]] ].z,
-                        geometry.vertices[ vid2vid[ face_v[0]] ].x, geometry.vertices[ vid2vid[ face_v[0]] ].y, geometry.vertices[ vid2vid[ face_v[0]] ].z,
-                        geometry.vertices[ vid2vid[ face_v[2]] ].x, geometry.vertices[ vid2vid[ face_v[2]] ].y, geometry.vertices[ vid2vid[ face_v[2]] ].z,
-                        geometry.vertices[ vid2vid[ face_v[3]] ].x, geometry.vertices[ vid2vid[ face_v[3]] ].y, geometry.vertices[ vid2vid[ face_v[3]] ].z
+                        v1.x, v1.y, v1.z,
+                        v2.x, v2.y, v2.z,
+                        v3.x, v3.y, v3.z,
+                        v1.x, v1.y, v1.z,
+                        v3.x, v3.y, v3.z,
+                        v4.x, v4.y, v4.z
                     ]),
                     3
                 )
@@ -47837,6 +47840,7 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
         face_mesh.material.color = face_mesh.color.clone();
 
         face_mesh.diagramId = f;
+        // face_mesh.position *= 2;
         this.diagram.force.objects.faces.add( face_mesh );
         this.diagram.force.maps.faceId2Object[f] = face_mesh;
 
