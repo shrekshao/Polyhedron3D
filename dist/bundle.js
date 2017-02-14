@@ -47804,7 +47804,7 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
         } else if (face_v.length === 4) {
             geometry.faces.push( new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[1]], vid2vid[face_v[2]] ) );
             geometry.faces.push( new THREE.Face3( vid2vid[face_v[0]], vid2vid[face_v[2]], vid2vid[face_v[3]] ) );
-            console.log(face_v);
+            // console.log(face_v);
 
 
              // separate mesh for each face
