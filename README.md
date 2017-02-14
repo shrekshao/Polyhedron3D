@@ -7,4 +7,4 @@ Web 3D interactive structural design tools based on reciprocal polyhedral diagra
 PennDesign RA project
 
 #### Current-Test-ScreenShot
-![](img/test4.png)
+![](img/test5.png)
