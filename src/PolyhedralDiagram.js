@@ -449,6 +449,8 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
     var face_geometry;
     var face_mesh;
 
+    var direction;
+
     var strength;
 
     for (f in json.force.faces_v) {
@@ -473,6 +475,12 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
                     ]),
                     3
                 )
+            );
+
+            direction = new THREE.Vector3( 
+                (v1.x + v2.x + v3.x ) / 3,
+                (v1.y + v2.y + v3.y ) / 3,
+                (v1.z + v2.z + v3.z ) / 3
             );
 
             // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace );
@@ -502,6 +510,12 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
                 )
             );
 
+            direction = new THREE.Vector3( 
+                (v1.x + v2.x + v3.x + v4.x ) / 4,
+                (v1.y + v2.y + v3.y + v4.y ) / 4,
+                (v1.z + v2.z + v3.z + v4.z ) / 4
+            );
+
             // // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace );
             // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace.clone() );
             // face_mesh.diagramId = f;
@@ -515,7 +529,18 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
         face_mesh.material.color = face_mesh.color.clone();
 
         face_mesh.diagramId = f;
-        // face_mesh.position *= 2;
+        face_mesh.direction = direction;
+        
+        // face_mesh.translateOnAxis( face_mesh.direction, 1 );
+
+        // face_mesh.translateOnAxis( face_mesh.direction, -1 );
+
+        // face_mesh.geometry.translate( -face_mesh.direction.x, -face_mesh.direction.y, -face_mesh.direction.z );
+        // face_mesh.geometry.scale(0.8, 0.8, 0.8);
+        // face_mesh.geometry.translate( face_mesh.direction.x, face_mesh.direction.y, face_mesh.direction.z );
+
+        // face_mesh.translateOnAxis( face_mesh.direction, 1 );
+
         this.diagram.force.objects.faces.add( face_mesh );
         this.diagram.force.maps.faceId2Object[f] = face_mesh;
 
@@ -535,6 +560,8 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
         this.diagram.materials.lineForce
     );
 
+
+    this.diagram.force.meshEdges.visible = false;
 
     var root = this.diagram.force.objects.root;
     root.add(this.diagram.force.meshEdges);

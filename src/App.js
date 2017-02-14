@@ -33,6 +33,9 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
     var guiList = {
         loadJson: null,
         examples: null,
+
+        vertex_face: false,
+
         visible: null,
         colors: null
     };
@@ -362,7 +365,19 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         clicked = false;
     }
 
+    function scaleAllFaces(isVertexFace) {
+        var s = isVertexFace ? 0.8 : 1.25 ;
 
+        var m = polyhedralDiagram.diagram.force.maps.faceId2Object;
+        var face_mesh;
+        for (var k in m) {
+            face_mesh = m[k];
+
+            face_mesh.geometry.translate( -face_mesh.direction.x, -face_mesh.direction.y, -face_mesh.direction.z );
+            face_mesh.geometry.scale( s, s, s );
+            face_mesh.geometry.translate( face_mesh.direction.x, face_mesh.direction.y, face_mesh.direction.z );
+        }
+    }
 
 
 
@@ -446,6 +461,9 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         exampleDiagramFolder.add(guiList.examples, 'diagram01');
         exampleDiagramFolder.add(guiList.examples, 'diagram02');
         exampleDiagramFolder.add(guiList.examples, 'diagram03');
+
+        gui.add(guiList, 'vertex_face').onChange(scaleAllFaces);
+
 
 
         // load an example diagram at start
