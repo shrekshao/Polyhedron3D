@@ -2,8 +2,12 @@ var THREE = require('three');
 // import { createCylinderMesh } from './CylinderEdgeHelper'
 
 function createCylinderArrowMesh(pointX, pointY, material, radius, radiusCone, edgeLengthRatio) {
+    
+    var direction = new THREE.Vector3().subVectors(pointY, pointX);
+    var l = direction.length();
+
     if (radius === undefined) {
-        radius = 1;
+        radius = l * 0.01;
     }
 
     if (radiusCone === undefined) {
@@ -12,7 +16,6 @@ function createCylinderArrowMesh(pointX, pointY, material, radius, radiusCone, e
 
     edgeLengthRatio = edgeLengthRatio !== undefined ? edgeLengthRatio : 0.7 ;
 
-    var direction = new THREE.Vector3().subVectors(pointY, pointX);
     var pointMid = new THREE.Vector3().addVectors(pointX, edgeLengthRatio * direction);
 
     var orientation = new THREE.Matrix4();
@@ -22,7 +25,7 @@ function createCylinderArrowMesh(pointX, pointY, material, radius, radiusCone, e
         0, -1, 0, 0,
         0, 0, 0, 1));
 
-    var l = direction.length();
+    
 
     var edgeGeometry = new THREE.CylinderGeometry(radius, radius, edgeLengthRatio * l, 8, 1);
     var coneGeometry = new THREE.CylinderGeometry(0, radiusCone, (1-edgeLengthRatio) * l, 8, 1);

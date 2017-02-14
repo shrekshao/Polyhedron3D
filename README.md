@@ -2,7 +2,7 @@ Web 3D interactive structural design tools based on reciprocal polyhedral diagra
 ======================
 
 [Live Demo](https://shrekshao.github.io/Polyhedron3D/)
-(tip: Load test2.json)
+(e.g. Load assets/models/test/example_03/diagram.json)
 
 PennDesign RA project
 

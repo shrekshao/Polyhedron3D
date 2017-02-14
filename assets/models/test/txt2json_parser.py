@@ -233,30 +233,21 @@ class Txt2JsonParser:
 
 
 if __name__ == "__main__":
+    
+    foldername = "example_02"
+    
     parser = Txt2JsonParser()
 
-    # parser.readFormVertex("form_diagram/form_vertex.txt")
-    # parser.readFormEdge("form_diagram/form_edge_vertex.txt", \
-    #                     "form_diagram/form_edge_to_force_face.txt", \
-    #                     "form_diagram/form_edge_ex.txt")
+    parser.readFormVertex(foldername + "/form_v.txt")
+    parser.readFormEdge(foldername + "/form_e_v.txt", \
+                        foldername + "/form_e_to_force_f.txt", \
+                        foldername + "/form_e_ex.txt")
     
-    # parser.readForceVertex("force_diagram/force_vertex.txt")
-    # parser.readForceEdge("force_diagram/force_edge_vertex.txt")
-    # parser.readForceFace("force_diagram/force_face_edge.txt")
+    parser.readForceVertex(foldername + "/force_v.txt")
+    parser.readForceEdge(foldername + "/force_e_v.txt")
+    # parser.readForceFaceEdge(foldername + "/force_f_e.txt")
+    parser.readForceFaceVertex(foldername + "/force_f_v.txt")
 
-    # with open('test.json', 'w') as out:
-    #     json.dump(parser.diagramJson.json, out)
-
-    parser.readFormVertex("test_2/form_v.txt")
-    parser.readFormEdge("test_2/form_e_v.txt", \
-                        "test_2/form_e_to_force_f.txt", \
-                        "test_2/form_e_ex.txt")
-    
-    parser.readForceVertex("test_2/force_v.txt")
-    parser.readForceEdge("test_2/force_e_v.txt")
-    # parser.readForceFaceEdge("test_2/force_f_e.txt")
-    parser.readForceFaceVertex("test_2/force_f_v.txt")
-
-    with open('test2.json', 'w') as out:
+    with open(foldername + '/diagram.json', 'w') as out:
         json.dump(parser.diagramJson.json, out)
     

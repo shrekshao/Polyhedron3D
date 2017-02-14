@@ -1,10 +1,7 @@
-// import THREE from 'three';
+var $ = require("jquery");
 var THREE = require('three');
-// const OrbitControls = require('three-orbit-controls')(THREE);
 THREE.OrbitControls = require('three-orbit-controls')(THREE);
 // THREE.OutlineEffect = require('./lib/OutlineEffect.js')(THREE);
-// import dat from 'dat.gui'
-// const dat = require('dat.gui');
 import dat from 'dat-gui'
 
 
@@ -35,6 +32,7 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
     var gui;
     var guiList = {
         loadJson: null,
+        examples: null,
         visible: null,
         colors: null
     };
@@ -98,14 +96,9 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
     ];
 
 
-
-    function handleFileSelect(e) {
-        var files = e.target.files; // FileList object
-
+    function onloadJsonDiagram(diagramJson) {
         // files is a FileList of File objects. List some properties.
-        console.log('load json file');
-        var reader = new FileReader();
-
+        console.log('json file loaded');
 
         if ( guiList.visible ) {
             gui.removeFolder('toggle-visibility');
@@ -119,55 +112,56 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
             scene2.remove(polyhedralDiagram.diagram.form.objects.root);
             scene1.remove(polyhedralDiagram.diagram.force.objects.root);
         }
-        
-        // scene2.children.forEach(function(object){
-        //     scene2.remove(object);
-        // });
 
-        // scene1.children.forEach(function(object){
-        //     scene1.remove(object);
-        // });
+        polyhedralDiagram = new PolyhedralDiagram(diagramJson);
 
-        for (var i = 0, f; f = files[i]; i++) {
+        scene2.add( polyhedralDiagram.diagram.form.objects.root );
+
+        // scene1.add( polyhedralDiagram.diagram.force.meshEdges );
+        // scene1.add( polyhedralDiagram.diagram.force.objects.faces );
+        scene1.add( polyhedralDiagram.diagram.force.objects.root );
+
+
+        var visible = guiList.visible = gui.addFolder( 'toggle-visibility' );
+
+        visible.add( polyhedralDiagram.diagram.form.objects.vertices, 'visible' ).name('form-vertices');
+        visible.add( polyhedralDiagram.diagram.form.objects.edges, 'visible' ).name('form-edges');
+        visible.add( polyhedralDiagram.diagram.form.objects.exEdges, 'visible' ).name('form-ex-edges');
+        visible.add( polyhedralDiagram.diagram.form.objects.exForceArrows, 'visible' ).name('form-ex-forces');
+
+        visible.add( polyhedralDiagram.diagram.force.meshEdges, 'visible' ).name('force-edges');
+        // visible.add( polyhedralDiagram.diagram.force.meshFaces, 'visible' ).name('force-faces');
+        visible.add( polyhedralDiagram.diagram.force.objects.faces, 'visible' ).name('force-faces');
+
+        // var materials = gui.addFolder( 'materials' );
+        // materials.add( polyhedralDiagram.diagram.materials.forceFace, 'opacity', 0.0, 1.0 );
+
+        var colors = guiList.colors = gui.addFolder( 'highlightColors' );
+        colors.addColor( cfg.highlightColors.over, 'form' ).name( 'form-mouseover' );
+        colors.addColor( cfg.highlightColors.over, 'force' ).name( 'force-mouseover' );
+        colors.addColor( cfg.highlightColors.click, 'form' ).name( 'form-click' );
+        colors.addColor( cfg.highlightColors.click, 'force' ).name( 'force-click' );
+    }
+
+    function onloadJsonDiagramFileReader(e) {
+        onloadJsonDiagram( JSON.parse( e.target.result ) );
+    }
+
+
+    function handleFileSelect(e) {
+        var files = e.target.files; // FileList object
+
+        // files is a FileList of File objects. List some properties.
+        console.log('load json file');
+        var reader = new FileReader();
+
+
+        var f = files[0];
+
+        // for (var i = 0, f; f = files[i]; i++) {
             reader.readAsText(f, "UTF-8");
-            reader.onload = function (e) {
-                
-                
-
-                // console.log( e.target.result );
-                var diagramJson = JSON.parse( e.target.result );
-                // console.log(diagramJson);
-
-                polyhedralDiagram = new PolyhedralDiagram(diagramJson);
-
-                scene2.add( polyhedralDiagram.diagram.form.objects.root );
-
-                // scene1.add( polyhedralDiagram.diagram.force.meshEdges );
-                // scene1.add( polyhedralDiagram.diagram.force.objects.faces );
-                scene1.add( polyhedralDiagram.diagram.force.objects.root );
-
-
-                var visible = guiList.visible = gui.addFolder( 'toggle-visibility' );
-
-                visible.add( polyhedralDiagram.diagram.form.objects.vertices, 'visible' ).name('form-vertices');
-                visible.add( polyhedralDiagram.diagram.form.objects.edges, 'visible' ).name('form-edges');
-                visible.add( polyhedralDiagram.diagram.form.objects.exEdges, 'visible' ).name('form-ex-edges');
-                visible.add( polyhedralDiagram.diagram.form.objects.exForceArrows, 'visible' ).name('form-ex-forces');
-
-                visible.add( polyhedralDiagram.diagram.force.meshEdges, 'visible' ).name('force-edges');
-                // visible.add( polyhedralDiagram.diagram.force.meshFaces, 'visible' ).name('force-faces');
-                visible.add( polyhedralDiagram.diagram.force.objects.faces, 'visible' ).name('force-faces');
-
-                // var materials = gui.addFolder( 'materials' );
-                // materials.add( polyhedralDiagram.diagram.materials.forceFace, 'opacity', 0.0, 1.0 );
-
-                var colors = guiList.colors = gui.addFolder( 'highlightColors' );
-                colors.addColor( cfg.highlightColors.over, 'form' ).name( 'form-mouseover' );
-                colors.addColor( cfg.highlightColors.over, 'force' ).name( 'force-mouseover' );
-                colors.addColor( cfg.highlightColors.click, 'form' ).name( 'form-click' );
-                colors.addColor( cfg.highlightColors.click, 'force' ).name( 'force-click' );;
-            };
-        }
+            reader.onload = onloadJsonDiagramFileReader;
+        // }
     }
 
     
@@ -426,13 +420,37 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
 
         gui = new dat.GUI();
         guiList.loadJson = {
-            load_json: function () {
+            load_json_file: function () {
                 // console.log('load json file');
                 document.getElementById("files").click()
             }
-        }
+        };
 
-        gui.add(guiList.loadJson, 'load_json');
+        gui.add(guiList.loadJson, 'load_json_file');
+
+
+
+        guiList.examples = {
+            diagram01: function() {
+                $.getJSON('assets/models/test/example_01/diagram.json', onloadJsonDiagram);
+            },
+            diagram02: function() {
+                $.getJSON('assets/models/test/example_02/diagram.json', onloadJsonDiagram);
+            },
+            diagram03: function() {
+                $.getJSON('assets/models/test/example_03/diagram.json', onloadJsonDiagram);
+            }
+        };
+
+        var exampleDiagramFolder = gui.addFolder('example-diagrams');
+        exampleDiagramFolder.add(guiList.examples, 'diagram01');
+        exampleDiagramFolder.add(guiList.examples, 'diagram02');
+        exampleDiagramFolder.add(guiList.examples, 'diagram03');
+
+
+        // load an example diagram at start
+        $.getJSON('assets/models/test/example_03/diagram.json', onloadJsonDiagram);
+
 
         canvas = document.getElementById( 'webgl-canvas' );
 
