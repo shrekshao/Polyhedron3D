@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 138);
+/******/ 	return __webpack_require__(__webpack_require__.s = 139);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -307,7 +307,7 @@ var slice = array.slice;
 /* unused harmony reexport interpolateBasisClosed */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__src_date__ = __webpack_require__(45);
 /* unused harmony reexport interpolateDate */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_number__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__src_number__ = __webpack_require__(13);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_5__src_number__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__src_object__ = __webpack_require__(46);
 /* unused harmony reexport interpolateObject */
@@ -415,7 +415,7 @@ function nogamma(a, b) {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_d3_array__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_d3_interpolate__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__continuous__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__continuous__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__tickFormat__ = __webpack_require__(130);
 /* harmony export (immutable) */ __webpack_exports__["b"] = linearish;
 /* harmony export (immutable) */ __webpack_exports__["a"] = linear;
@@ -470,159 +470,6 @@ function linear() {
 
 /***/ }),
 /* 11 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__formatDecimal__ = __webpack_require__(19);
-
-
-/* harmony default export */ __webpack_exports__["a"] = function(x) {
-  return x = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__formatDecimal__["a" /* default */])(Math.abs(x)), x ? x[1] : NaN;
-};
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony default export */ __webpack_exports__["a"] = function(a, b) {
-  return a = +a, b -= a, function(t) {
-    return a + b * t;
-  };
-};
-
-
-/***/ }),
-/* 13 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_d3_array__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_d3_interpolate__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__array__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__constant__ = __webpack_require__(24);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__number__ = __webpack_require__(53);
-/* harmony export (immutable) */ __webpack_exports__["b"] = deinterpolateLinear;
-/* harmony export (immutable) */ __webpack_exports__["c"] = copy;
-/* harmony export (immutable) */ __webpack_exports__["a"] = continuous;
-
-
-
-
-
-
-var unit = [0, 1];
-
-function deinterpolateLinear(a, b) {
-  return (b -= (a = +a))
-      ? function(x) { return (x - a) / b; }
-      : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__constant__["a" /* default */])(b);
-}
-
-function deinterpolateClamp(deinterpolate) {
-  return function(a, b) {
-    var d = deinterpolate(a = +a, b = +b);
-    return function(x) { return x <= a ? 0 : x >= b ? 1 : d(x); };
-  };
-}
-
-function reinterpolateClamp(reinterpolate) {
-  return function(a, b) {
-    var r = reinterpolate(a = +a, b = +b);
-    return function(t) { return t <= 0 ? a : t >= 1 ? b : r(t); };
-  };
-}
-
-function bimap(domain, range, deinterpolate, reinterpolate) {
-  var d0 = domain[0], d1 = domain[1], r0 = range[0], r1 = range[1];
-  if (d1 < d0) d0 = deinterpolate(d1, d0), r0 = reinterpolate(r1, r0);
-  else d0 = deinterpolate(d0, d1), r0 = reinterpolate(r0, r1);
-  return function(x) { return r0(d0(x)); };
-}
-
-function polymap(domain, range, deinterpolate, reinterpolate) {
-  var j = Math.min(domain.length, range.length) - 1,
-      d = new Array(j),
-      r = new Array(j),
-      i = -1;
-
-  // Reverse descending domains.
-  if (domain[j] < domain[0]) {
-    domain = domain.slice().reverse();
-    range = range.slice().reverse();
-  }
-
-  while (++i < j) {
-    d[i] = deinterpolate(domain[i], domain[i + 1]);
-    r[i] = reinterpolate(range[i], range[i + 1]);
-  }
-
-  return function(x) {
-    var i = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_d3_array__["c" /* bisect */])(domain, x, 1, j) - 1;
-    return r[i](d[i](x));
-  };
-}
-
-function copy(source, target) {
-  return target
-      .domain(source.domain())
-      .range(source.range())
-      .interpolate(source.interpolate())
-      .clamp(source.clamp());
-}
-
-// deinterpolate(a, b)(x) takes a domain value x in [a,b] and returns the corresponding parameter t in [0,1].
-// reinterpolate(a, b)(t) takes a parameter t in [0,1] and returns the corresponding domain value x in [a,b].
-function continuous(deinterpolate, reinterpolate) {
-  var domain = unit,
-      range = unit,
-      interpolate = __WEBPACK_IMPORTED_MODULE_1_d3_interpolate__["b" /* interpolate */],
-      clamp = false,
-      piecewise,
-      output,
-      input;
-
-  function rescale() {
-    piecewise = Math.min(domain.length, range.length) > 2 ? polymap : bimap;
-    output = input = null;
-    return scale;
-  }
-
-  function scale(x) {
-    return (output || (output = piecewise(domain, range, clamp ? deinterpolateClamp(deinterpolate) : deinterpolate, interpolate)))(+x);
-  }
-
-  scale.invert = function(y) {
-    return (input || (input = piecewise(range, domain, deinterpolateLinear, clamp ? reinterpolateClamp(reinterpolate) : reinterpolate)))(+y);
-  };
-
-  scale.domain = function(_) {
-    return arguments.length ? (domain = __WEBPACK_IMPORTED_MODULE_2__array__["a" /* map */].call(_, __WEBPACK_IMPORTED_MODULE_4__number__["a" /* default */]), rescale()) : domain.slice();
-  };
-
-  scale.range = function(_) {
-    return arguments.length ? (range = __WEBPACK_IMPORTED_MODULE_2__array__["b" /* slice */].call(_), rescale()) : range.slice();
-  };
-
-  scale.rangeRound = function(_) {
-    return range = __WEBPACK_IMPORTED_MODULE_2__array__["b" /* slice */].call(_), interpolate = __WEBPACK_IMPORTED_MODULE_1_d3_interpolate__["c" /* interpolateRound */], rescale();
-  };
-
-  scale.clamp = function(_) {
-    return arguments.length ? (clamp = !!_, rescale()) : clamp;
-  };
-
-  scale.interpolate = function(_) {
-    return arguments.length ? (interpolate = _, rescale()) : interpolate;
-  };
-
-  return rescale();
-}
-
-
-/***/ }),
-/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -43921,6 +43768,159 @@ function CanvasRenderer() {
 
 
 /***/ }),
+/* 12 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__formatDecimal__ = __webpack_require__(19);
+
+
+/* harmony default export */ __webpack_exports__["a"] = function(x) {
+  return x = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__formatDecimal__["a" /* default */])(Math.abs(x)), x ? x[1] : NaN;
+};
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony default export */ __webpack_exports__["a"] = function(a, b) {
+  return a = +a, b -= a, function(t) {
+    return a + b * t;
+  };
+};
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_d3_array__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_d3_interpolate__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__array__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__constant__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__number__ = __webpack_require__(53);
+/* harmony export (immutable) */ __webpack_exports__["b"] = deinterpolateLinear;
+/* harmony export (immutable) */ __webpack_exports__["c"] = copy;
+/* harmony export (immutable) */ __webpack_exports__["a"] = continuous;
+
+
+
+
+
+
+var unit = [0, 1];
+
+function deinterpolateLinear(a, b) {
+  return (b -= (a = +a))
+      ? function(x) { return (x - a) / b; }
+      : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__constant__["a" /* default */])(b);
+}
+
+function deinterpolateClamp(deinterpolate) {
+  return function(a, b) {
+    var d = deinterpolate(a = +a, b = +b);
+    return function(x) { return x <= a ? 0 : x >= b ? 1 : d(x); };
+  };
+}
+
+function reinterpolateClamp(reinterpolate) {
+  return function(a, b) {
+    var r = reinterpolate(a = +a, b = +b);
+    return function(t) { return t <= 0 ? a : t >= 1 ? b : r(t); };
+  };
+}
+
+function bimap(domain, range, deinterpolate, reinterpolate) {
+  var d0 = domain[0], d1 = domain[1], r0 = range[0], r1 = range[1];
+  if (d1 < d0) d0 = deinterpolate(d1, d0), r0 = reinterpolate(r1, r0);
+  else d0 = deinterpolate(d0, d1), r0 = reinterpolate(r0, r1);
+  return function(x) { return r0(d0(x)); };
+}
+
+function polymap(domain, range, deinterpolate, reinterpolate) {
+  var j = Math.min(domain.length, range.length) - 1,
+      d = new Array(j),
+      r = new Array(j),
+      i = -1;
+
+  // Reverse descending domains.
+  if (domain[j] < domain[0]) {
+    domain = domain.slice().reverse();
+    range = range.slice().reverse();
+  }
+
+  while (++i < j) {
+    d[i] = deinterpolate(domain[i], domain[i + 1]);
+    r[i] = reinterpolate(range[i], range[i + 1]);
+  }
+
+  return function(x) {
+    var i = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_d3_array__["c" /* bisect */])(domain, x, 1, j) - 1;
+    return r[i](d[i](x));
+  };
+}
+
+function copy(source, target) {
+  return target
+      .domain(source.domain())
+      .range(source.range())
+      .interpolate(source.interpolate())
+      .clamp(source.clamp());
+}
+
+// deinterpolate(a, b)(x) takes a domain value x in [a,b] and returns the corresponding parameter t in [0,1].
+// reinterpolate(a, b)(t) takes a parameter t in [0,1] and returns the corresponding domain value x in [a,b].
+function continuous(deinterpolate, reinterpolate) {
+  var domain = unit,
+      range = unit,
+      interpolate = __WEBPACK_IMPORTED_MODULE_1_d3_interpolate__["b" /* interpolate */],
+      clamp = false,
+      piecewise,
+      output,
+      input;
+
+  function rescale() {
+    piecewise = Math.min(domain.length, range.length) > 2 ? polymap : bimap;
+    output = input = null;
+    return scale;
+  }
+
+  function scale(x) {
+    return (output || (output = piecewise(domain, range, clamp ? deinterpolateClamp(deinterpolate) : deinterpolate, interpolate)))(+x);
+  }
+
+  scale.invert = function(y) {
+    return (input || (input = piecewise(range, domain, deinterpolateLinear, clamp ? reinterpolateClamp(reinterpolate) : reinterpolate)))(+y);
+  };
+
+  scale.domain = function(_) {
+    return arguments.length ? (domain = __WEBPACK_IMPORTED_MODULE_2__array__["a" /* map */].call(_, __WEBPACK_IMPORTED_MODULE_4__number__["a" /* default */]), rescale()) : domain.slice();
+  };
+
+  scale.range = function(_) {
+    return arguments.length ? (range = __WEBPACK_IMPORTED_MODULE_2__array__["b" /* slice */].call(_), rescale()) : range.slice();
+  };
+
+  scale.rangeRound = function(_) {
+    return range = __WEBPACK_IMPORTED_MODULE_2__array__["b" /* slice */].call(_), interpolate = __WEBPACK_IMPORTED_MODULE_1_d3_interpolate__["c" /* interpolateRound */], rescale();
+  };
+
+  scale.clamp = function(_) {
+    return arguments.length ? (clamp = !!_, rescale()) : clamp;
+  };
+
+  scale.interpolate = function(_) {
+    return arguments.length ? (interpolate = _, rescale()) : interpolate;
+  };
+
+  return rescale();
+}
+
+
+/***/ }),
 /* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -44447,7 +44447,7 @@ function basis(t1, v0, v1, v2, v3) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__rgb__ = __webpack_require__(47);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__array__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__date__ = __webpack_require__(45);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__number__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__number__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__object__ = __webpack_require__(46);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__string__ = __webpack_require__(48);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__constant__ = __webpack_require__(44);
@@ -45067,7 +45067,7 @@ FormatSpecifier.prototype.toString = function() {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__exponent__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__exponent__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__formatGroup__ = __webpack_require__(86);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__formatSpecifier__ = __webpack_require__(39);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__formatTypes__ = __webpack_require__(40);
@@ -45390,7 +45390,7 @@ var rgbBasisClosed = rgbSpline(__WEBPACK_IMPORTED_MODULE_2__basisClosed__["a" /*
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__number__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__number__ = __webpack_require__(13);
 
 
 var reA = /[-+]?(?:\d+\.?\d*|\.?\d+)(?:[eE][-+]?\d+)?/g,
@@ -46142,7 +46142,7 @@ function ordinal(range) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_time__ = __webpack_require__(23);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_d3_time_format__ = __webpack_require__(49);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__array__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__continuous__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__continuous__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__nice__ = __webpack_require__(52);
 /* harmony export (immutable) */ __webpack_exports__["b"] = calendar;
 
@@ -47320,10 +47320,10 @@ module.exports = function( THREE ) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_CylinderEdgeHelper__ = __webpack_require__(137);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_CylinderArrowHelper__ = __webpack_require__(139);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_CylinderEdgeHelper__ = __webpack_require__(138);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_CylinderArrowHelper__ = __webpack_require__(137);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PolyhedralDiagram; });
-var THREE = __webpack_require__(14);
+var THREE = __webpack_require__(11);
 var d3 = __webpack_require__(59);
 
 
@@ -47446,7 +47446,7 @@ var PolyhedralDiagram = function (json) {
                 transparent: true,
                 side: THREE.DoubleSide,
 
-                // blending: THREE.CustomBlending,
+                // blending: THREE.AdditiveBlending,
 
                 depthWrite: false
             })
@@ -47503,8 +47503,8 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
 
             // Rhinos coordinate system
             json.form.vertices[v][0],
-            - json.form.vertices[v][2],
-            json.form.vertices[v][1]
+            json.form.vertices[v][2],
+            - json.form.vertices[v][1]
         );
 
         vid2vid[c++] = v;
@@ -47563,7 +47563,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
                 vec3[vertex[0]],
                 vec3[vertex[1]],
                 this.diagram.materials.arrowForce.clone(),
-                0.2
+                0.1
             );
             
             // arrow.material.color = new THREE.Color( this.strengthColorScaler( strength ) );
@@ -47732,8 +47732,8 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
 
             // Rhinos coordinate system
             json.force.vertices[v][0],
-            - json.force.vertices[v][2],
-            json.force.vertices[v][1]
+            json.force.vertices[v][2],
+            - json.force.vertices[v][1]
         );
 
         geometry.vertices.push(vec3[v].clone());
@@ -48807,7 +48807,7 @@ function defaultLocale(definition) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__exponent__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__exponent__ = __webpack_require__(12);
 
 
 /* harmony default export */ __webpack_exports__["a"] = function(step) {
@@ -48820,7 +48820,7 @@ function defaultLocale(definition) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__exponent__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__exponent__ = __webpack_require__(12);
 
 
 /* harmony default export */ __webpack_exports__["a"] = function(step, value) {
@@ -48833,7 +48833,7 @@ function defaultLocale(definition) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__exponent__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__exponent__ = __webpack_require__(12);
 
 
 /* harmony default export */ __webpack_exports__["a"] = function(step, max) {
@@ -49032,7 +49032,7 @@ var identity = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__number__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__number__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__parse__ = __webpack_require__(99);
 /* unused harmony export interpolateTransformCss */
 /* unused harmony export interpolateTransformSvg */
@@ -49875,7 +49875,7 @@ function identity() {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_d3_format__ = __webpack_require__(37);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__constant__ = __webpack_require__(24);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__nice__ = __webpack_require__(52);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__continuous__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__continuous__ = __webpack_require__(14);
 /* harmony export (immutable) */ __webpack_exports__["a"] = log;
 
 
@@ -50014,7 +50014,7 @@ function log() {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constant__ = __webpack_require__(24);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__linear__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__continuous__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__continuous__ = __webpack_require__(14);
 /* harmony export (immutable) */ __webpack_exports__["a"] = pow;
 /* harmony export (immutable) */ __webpack_exports__["b"] = sqrt;
 
@@ -54811,8 +54811,65 @@ module.exports = "varying vec3 v_normal;\r\n\r\nvoid main() {\r\n    v_normal = 
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return createCylinderArrowMesh; });
+var THREE = __webpack_require__(11);
+// import { createCylinderMesh } from './CylinderEdgeHelper'
+
+function createCylinderArrowMesh(pointX, pointY, material, radius, radiusCone, edgeLengthRatio) {
+    if (radius === undefined) {
+        radius = 1;
+    }
+
+    if (radiusCone === undefined) {
+        radiusCone = 2 * radius;
+    }
+
+    edgeLengthRatio = edgeLengthRatio !== undefined ? edgeLengthRatio : 0.7 ;
+
+    var direction = new THREE.Vector3().subVectors(pointY, pointX);
+    var pointMid = new THREE.Vector3().addVectors(pointX, edgeLengthRatio * direction);
+
+    var orientation = new THREE.Matrix4();
+    orientation.lookAt(pointX, pointY, new THREE.Object3D().up);
+    orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0,
+        0, 0, 1, 0,
+        0, -1, 0, 0,
+        0, 0, 0, 1));
+
+    var l = direction.length();
+
+    var edgeGeometry = new THREE.CylinderGeometry(radius, radius, edgeLengthRatio * l, 8, 1);
+    var coneGeometry = new THREE.CylinderGeometry(0, radiusCone, (1-edgeLengthRatio) * l, 8, 1);
+
+    edgeGeometry.translate( 0,  -(0.5 - 0.5 * edgeLengthRatio) * l, 0 )
+
+    var translate = new THREE.Matrix4().makeTranslation( 0,  (0.5 - 0.5 * (1 - edgeLengthRatio)) * l, 0 );
+
+    edgeGeometry.merge(coneGeometry, translate);
+
+    var arrow = new THREE.Mesh(edgeGeometry, material);
+
+    arrow.applyMatrix(orientation);
+    
+    arrow.position.x = (pointY.x + pointX.x) / 2;
+    arrow.position.y = (pointY.y + pointX.y) / 2;
+    arrow.position.z = (pointY.z + pointX.z) / 2;
+
+
+    
+    return arrow;
+}
+
+
+
+
+/***/ }),
+/* 138 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return createCylinderMesh; });
-var THREE = __webpack_require__(14);
+var THREE = __webpack_require__(11);
 
 function createCylinderMesh(pointX, pointY, material, radius, radius2) {
     if (radius === undefined) {
@@ -54843,7 +54900,7 @@ function createCylinderMesh(pointX, pointY, material, radius, radius2) {
 
 
 /***/ }),
-/* 138 */
+/* 139 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -54852,7 +54909,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_dat_gui___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_dat_gui__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__PolyhedralDiagram__ = __webpack_require__(58);
 // import THREE from 'three';
-var THREE = __webpack_require__(14);
+var THREE = __webpack_require__(11);
 // const OrbitControls = require('three-orbit-controls')(THREE);
 THREE.OrbitControls = __webpack_require__(57)(THREE);
 // THREE.OutlineEffect = require('./lib/OutlineEffect.js')(THREE);
@@ -55349,241 +55406,6 @@ THREE.OrbitControls = __webpack_require__(57)(THREE);
         render();
     };
 })();
-
-/***/ }),
-/* 139 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return createCylinderArrowMesh; });
-var THREE = __webpack_require__(14);
-// import { createCylinderMesh } from './CylinderEdgeHelper'
-
-function createCylinderArrowMesh(pointX, pointY, material, radius, radiusCone, edgeLengthRatio) {
-    if (radius === undefined) {
-        radius = 1;
-    }
-
-    if (radiusCone === undefined) {
-        radiusCone = 2 * radius;
-    }
-
-    edgeLengthRatio = edgeLengthRatio !== undefined ? edgeLengthRatio : 0.7 ;
-
-    var direction = new THREE.Vector3().subVectors(pointY, pointX);
-    var pointMid = new THREE.Vector3().addVectors(pointX, edgeLengthRatio * direction);
-
-    var orientation = new THREE.Matrix4();
-    orientation.lookAt(pointX, pointY, new THREE.Object3D().up);
-    orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0,
-        0, 0, 1, 0,
-        0, -1, 0, 0,
-        0, 0, 0, 1));
-
-    var l = direction.length();
-
-    var edgeGeometry = new THREE.CylinderGeometry(radius, radius, edgeLengthRatio * l, 8, 1);
-    var coneGeometry = new THREE.CylinderGeometry(0, radiusCone, (1-edgeLengthRatio) * l, 8, 1);
-
-    // var translateE = new THREE.Matrix4().makeTranslation( 0,  -(0.5 - 0.5 * edgeLengthRatio) * l, 0 );
-    edgeGeometry.translate( 0,  -(0.5 - 0.5 * edgeLengthRatio) * l, 0 )
-
-    var translate = new THREE.Matrix4().makeTranslation( 0,  (0.5 - 0.5 * (1 - edgeLengthRatio)) * l, 0 );
-    // var translate = new THREE.Matrix4().makeTranslation( 0, 0, 0 );
-
-    edgeGeometry.merge(coneGeometry, translate);
-
-    var arrow = new THREE.Mesh(edgeGeometry, material);
-
-    arrow.applyMatrix(orientation);
-    // position based on midpoints - there may be a better solution than this
-    arrow.position.x = (pointY.x + pointX.x) / 2;
-    arrow.position.y = (pointY.y + pointX.y) / 2;
-    arrow.position.z = (pointY.z + pointX.z) / 2;
-
-    // var cylinder = createCylinderMesh(pointX, pointMid, material, radius);
-    // var cone = createCylinderMesh(pointMid, pointY, material, radius, 0);
-
-
-    
-    return arrow;
-}
-
-
-
-
-
-
-// function createCylinderArrowMesh(pointX, pointY, material, radius, radiusCone, coneLengthRatio, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
-//     if (radius === undefined) {
-//         radius = 1;
-//     }
-
-//     if (radiusCone === undefined) {
-//         radiusCone = 2 * radius;
-//     }
-
-//     if (coneLengthRatio === undefined) {
-//         coneLengthRatio = 0.3;
-//     }
-
-//     var direction = new THREE.Vector3().subVectors(pointY, pointX);
-//     var orientation = new THREE.Matrix4();
-//     orientation.lookAt(pointX, pointY, new THREE.Object3D().up);
-//     orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0,
-//         0, 0, 1, 0,
-//         0, -1, 0, 0,
-//         0, 0, 0, 1));
-
-    
-//     var geometry = new THREE.BufferGeometry();
-
-//     // buffers
-//     var indices = [];
-//     var vertices = [];
-//     var normals = [];
-//     var uvs = [];
-
-//     // global param
-//     var scope = geometry;
-
-// 	var radiusTop = radius;
-// 	var radiusBottom = radius;
-// 	var height = direction.length();
-
-// 	radialSegments = Math.floor( radialSegments ) || 8;
-// 	heightSegments = Math.floor( heightSegments ) || 1;
-
-// 	openEnded = openEnded !== undefined ? openEnded : false;
-// 	thetaStart = thetaStart !== undefined ? thetaStart : 0.0;
-// 	thetaLength = thetaLength !== undefined ? thetaLength : 2.0 * Math.PI;
-
-//     // helper variables
-
-// 	var index = 0;
-// 	var indexOffset = 0;
-// 	var indexArray = [];
-// 	var halfHeight = height / 2;
-// 	var groupStart = 0;
-
-//     generateTorso();
-
-//     geometry.setIndex( indices );
-//     geometry.addAttribute('position', new Float32Array( vertices, 3 ) );
-//     // geometry.addAttribute('normal', new Float32Array( normals, 3 ) );
-//     // geometry.addAttribute('uv', new Float32Array( uvs, 2 ) );
-
-//     geometry.applyMatrix(orientation);
-
-//     var edge = new THREE.Mesh(geometry, material);
-//     // edge.applyMatrix(orientation);
-//     // position based on midpoints - there may be a better solution than this
-//     edge.position.x = (pointY.x + pointX.x) / 2;
-//     edge.position.y = (pointY.y + pointX.y) / 2;
-//     edge.position.z = (pointY.z + pointX.z) / 2;
-//     return edge;
-
-
-
-
-//     function generateTorso() {
-
-// 		var x, y;
-// 		var normal = new THREE.Vector3();
-// 		var vertex = new THREE.Vector3();
-
-// 		var groupCount = 0;
-
-// 		// this will be used to calculate the normal
-// 		var slope = ( radiusBottom - radiusTop ) / height;
-
-// 		// generate vertices, normals and uvs
-
-// 		for ( y = 0; y <= heightSegments; y ++ ) {
-
-// 			var indexRow = [];
-
-// 			var v = y / heightSegments;
-
-// 			// calculate the radius of the current row
-
-// 			var radius = v * ( radiusBottom - radiusTop ) + radiusTop;
-
-// 			for ( x = 0; x <= radialSegments; x ++ ) {
-
-// 				var u = x / radialSegments;
-
-// 				var theta = u * thetaLength + thetaStart;
-
-// 				var sinTheta = Math.sin( theta );
-// 				var cosTheta = Math.cos( theta );
-
-// 				// vertex
-
-// 				vertex.x = radius * sinTheta;
-// 				vertex.y = - v * height + halfHeight;
-// 				vertex.z = radius * cosTheta;
-// 				vertices.push( vertex.x, vertex.y, vertex.z );
-
-// 				// normal
-
-// 				normal.set( sinTheta, slope, cosTheta ).normalize();
-// 				normals.push( normal.x, normal.y, normal.z );
-
-// 				// uv
-
-// 				uvs.push( u, 1 - v );
-
-// 				// save index of vertex in respective row
-
-// 				indexRow.push( index ++ );
-
-// 			}
-
-// 			// now save vertices of the row in our index array
-
-// 			indexArray.push( indexRow );
-
-// 		}
-
-// 		// generate indices
-
-// 		for ( x = 0; x < radialSegments; x ++ ) {
-
-// 			for ( y = 0; y < heightSegments; y ++ ) {
-
-// 				// we use the index array to access the correct indices
-
-// 				var a = indexArray[ y ][ x ];
-// 				var b = indexArray[ y + 1 ][ x ];
-// 				var c = indexArray[ y + 1 ][ x + 1 ];
-// 				var d = indexArray[ y ][ x + 1 ];
-
-// 				// faces
-
-// 				indices.push( a, b, d );
-// 				indices.push( b, c, d );
-
-// 				// update group counter
-
-// 				groupCount += 6;
-
-// 			}
-
-// 		}
-
-// 		// add a group to the geometry. this will ensure multi material support
-
-// 		scope.addGroup( groupStart, groupCount, 0 );
-
-// 		// calculate new start value for groups
-
-// 		groupStart += groupCount;
-
-// 	}
-// }
-
-
 
 /***/ })
 /******/ ]);

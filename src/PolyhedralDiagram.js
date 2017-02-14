@@ -121,7 +121,7 @@ var PolyhedralDiagram = function (json) {
                 transparent: true,
                 side: THREE.DoubleSide,
 
-                // blending: THREE.CustomBlending,
+                // blending: THREE.AdditiveBlending,
 
                 depthWrite: false
             })
@@ -178,8 +178,8 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
 
             // Rhinos coordinate system
             json.form.vertices[v][0],
-            - json.form.vertices[v][2],
-            json.form.vertices[v][1]
+            json.form.vertices[v][2],
+            - json.form.vertices[v][1]
         );
 
         vid2vid[c++] = v;
@@ -238,7 +238,7 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
                 vec3[vertex[0]],
                 vec3[vertex[1]],
                 this.diagram.materials.arrowForce.clone(),
-                0.2
+                0.1
             );
             
             // arrow.material.color = new THREE.Color( this.strengthColorScaler( strength ) );
@@ -407,8 +407,8 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
 
             // Rhinos coordinate system
             json.force.vertices[v][0],
-            - json.force.vertices[v][2],
-            json.force.vertices[v][1]
+            json.force.vertices[v][2],
+            - json.force.vertices[v][1]
         );
 
         geometry.vertices.push(vec3[v].clone());

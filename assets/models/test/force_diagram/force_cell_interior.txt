@@ -1,6 +1,0 @@
-13f	9f	14f	15f	1f
-14f	8f	11f	16f	4f
-0f	7f	6f	8f	9f
-10f	16f	13f	17f	2f
-11f	12f	3f	10f	7f
-15f	17f	6f	12f	5f
