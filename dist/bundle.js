@@ -57684,7 +57684,10 @@ var PolyhedralDiagram = function (json) {
             //     transparent: true,
             //     side: THREE.DoubleSide
             // })
-        }
+
+        },
+
+        normalizeUnit: 25
     };
 
 
@@ -57718,7 +57721,8 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
     var verticesOnlyGeometry = new THREE.Geometry();    // temparary used for vertices mapping
 
     var vec3 = {};
-    var vid2vid = {};
+    var vid2vid = {};   //  < geometry idx(int), vid(string) > 
+    var vid2vid_i = {}; // < vid(string), geometry idx(int) > 
     var v;
 
     var c = 0;
@@ -57734,11 +57738,20 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
             - json.form.vertices[v][1]
         );
 
-        vid2vid[c++] = v;
+        vid2vid[c] = v;
+        vid2vid_i[v] = c;
+        c++;
 
         verticesOnlyGeometry.vertices.push(vec3[v]);
 
     }
+
+    // normalize
+    verticesOnlyGeometry.normalize();
+    verticesOnlyGeometry.scale( this.diagram.normalizeUnit, this.diagram.normalizeUnit, this.diagram.normalizeUnit );
+    // verticesOnlyGeometry.computeBoundingSphere();
+    // var offset = verticesOnlyGeometry.boundingSphere.getCenter().negate();
+    // var normalizeScale = verticesOnlyGeometry.boundingSphere.radius;
 
 
     var lines = {};
@@ -57759,7 +57772,11 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
         vertex = json.form.edges[edge].vertex;
 
         if (json.form.edges[edge].external) {
-            exEdges.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+            // exEdges.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+            exEdges.vertices.push( 
+                verticesOnlyGeometry.vertices[vid2vid_i[vertex[0]]].clone(), 
+                verticesOnlyGeometry.vertices[vid2vid_i[vertex[1]]].clone() 
+            );
             exEdgesId.push( edge );
 
             exVerticesId.push( vertex[0], vertex[1] );
@@ -57778,17 +57795,18 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
             strengthRadius = this.strengthRadiusScaler( strength );
             // strengthRadius = 0.25;
 
-            // arrow = createCylinderMesh( 
+
+
+            // arrow = createCylinderArrowMesh( 
             //     vec3[vertex[0]],
             //     vec3[vertex[1]],
             //     this.diagram.materials.arrowForce.clone(),
-            //     0,
-            //     strengthRadius
+            //     0.1
             // );
 
             arrow = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__utils_CylinderArrowHelper__["a" /* createCylinderArrowMesh */])( 
-                vec3[vertex[0]],
-                vec3[vertex[1]],
+                verticesOnlyGeometry.vertices[vid2vid_i[vertex[0]]], 
+                verticesOnlyGeometry.vertices[vid2vid_i[vertex[1]]], 
                 this.diagram.materials.arrowForce.clone(),
                 0.1
             );
@@ -57800,7 +57818,11 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
             
             exForces.add( arrow );
         } else {
-            geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+            // geometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+            geometry.vertices.push( 
+                verticesOnlyGeometry.vertices[vid2vid_i[vertex[0]]].clone(), 
+                verticesOnlyGeometry.vertices[vid2vid_i[vertex[1]]].clone() 
+            );
             edgesId.push( edge );
 
             verticesId.push( vertex[0], vertex[1] );
@@ -57810,20 +57832,6 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
         
     }
 
-    // geometry.center();
-    // exEdges.center();
-
-    geometry.computeBoundingBox();
-    var offset = geometry.boundingBox.getCenter().negate();
-    geometry.translate( offset.x, offset.y, offset.z );
-
-    exEdges.translate( offset.x, offset.y, offset.z );
-
-    exForces.translateX( offset.x );
-    exForces.translateY( offset.y );
-    exForces.translateZ( offset.z );
-
-    verticesOnlyGeometry.translate( offset.x, offset.y, offset.z );
 
 
     // build separate meshes
@@ -57939,6 +57947,11 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
 
 
 
+
+
+
+
+
 PolyhedralDiagram.prototype.buildForceDiagram = function() {
     var json = this.json;
 
@@ -57971,9 +57984,8 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
         
     }
 
-    geometry.computeBoundingBox();
-    var offset = geometry.boundingBox.getCenter().negate();
-    geometry.translate( offset.x, offset.y, offset.z );
+    geometry.normalize();
+    geometry.scale( this.diagram.normalizeUnit, this.diagram.normalizeUnit, this.diagram.normalizeUnit );
 
 
 
@@ -57983,10 +57995,9 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
     for (edge in json.force.edges) {
         vertex = json.force.edges[edge];
 
-        edgeGeometry.vertices.push( vec3[vertex[0]].clone(), vec3[vertex[1]].clone() );
+        edgeGeometry.vertices.push( geometry.vertices[vid2vid[vertex[0]]].clone(), geometry.vertices[vid2vid[vertex[1]]].clone() );
     }
 
-    edgeGeometry.translate( offset.x, offset.y, offset.z );
 
 
     // face
@@ -58012,9 +58023,9 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
 
             // separate mesh for each face
 
-            v1 = geometry.vertices[ vid2vid[ face_v[0]] ];
-            v2 = geometry.vertices[ vid2vid[ face_v[1]] ];
-            v3 = geometry.vertices[ vid2vid[ face_v[2]] ];
+            v1 = geometry.vertices[ vid2vid[ face_v[0] ] ];
+            v2 = geometry.vertices[ vid2vid[ face_v[1] ] ];
+            v3 = geometry.vertices[ vid2vid[ face_v[2] ] ];
 
             face_geometry = new THREE.BufferGeometry();
             face_geometry.addAttribute(
@@ -58041,10 +58052,10 @@ PolyhedralDiagram.prototype.buildForceDiagram = function() {
 
         } else if (face_v.length === 4) {
 
-            v1 = geometry.vertices[ vid2vid[ face_v[0]] ];
-            v2 = geometry.vertices[ vid2vid[ face_v[1]] ];
-            v3 = geometry.vertices[ vid2vid[ face_v[2]] ];
-            v4 = geometry.vertices[ vid2vid[ face_v[3]] ];
+            v1 = geometry.vertices[ vid2vid[ face_v[0] ] ];
+            v2 = geometry.vertices[ vid2vid[ face_v[1] ] ];
+            v3 = geometry.vertices[ vid2vid[ face_v[2] ] ];
+            v4 = geometry.vertices[ vid2vid[ face_v[3] ] ];
 
             face_geometry = new THREE.BufferGeometry();
             face_geometry.addAttribute(
