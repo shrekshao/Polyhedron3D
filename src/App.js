@@ -103,6 +103,8 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         // files is a FileList of File objects. List some properties.
         console.log('json file loaded');
 
+        // guiList.vertex_face = false;
+
         if ( guiList.visible ) {
             gui.removeFolder('toggle-visibility');
         }
@@ -144,6 +146,12 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         colors.addColor( cfg.highlightColors.over, 'force' ).name( 'force-mouseover' );
         colors.addColor( cfg.highlightColors.click, 'form' ).name( 'form-click' );
         colors.addColor( cfg.highlightColors.click, 'force' ).name( 'force-click' );
+
+
+        if (guiList.vertex_face) {
+            scaleAllFaces(guiList.vertex_face);
+        }
+        
     }
 
     function onloadJsonDiagramFileReader(e) {
@@ -462,7 +470,9 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         exampleDiagramFolder.add(guiList.examples, 'diagram02');
         exampleDiagramFolder.add(guiList.examples, 'diagram03');
 
-        gui.add(guiList, 'vertex_face').onChange(scaleAllFaces);
+        var vfbutton = gui.add(guiList, 'vertex_face');
+        vfbutton.onChange(scaleAllFaces);
+        // vfbutton.listen();
 
 
 
