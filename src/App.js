@@ -108,12 +108,16 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
             releaseHighlighted( INTERSECTED );
         }
 
+        if ( guiList.view ) {
+            gui.remove( guiList.view );
+        }
+
         if ( guiList.visible ) {
-            gui.removeFolder('toggle-visibility');
+            gui.removeFolder( 'toggle-visibility' );
         }
 
         if ( guiList.colors ) {
-            gui.removeFolder('highlightColors');
+            gui.removeFolder( 'highlightColors' );
         }
 
         if (polyhedralDiagram) {
@@ -128,6 +132,12 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         // scene1.add( polyhedralDiagram.diagram.force.meshEdges );
         // scene1.add( polyhedralDiagram.diagram.force.objects.faces );
         scene1.add( polyhedralDiagram.diagram.force.objects.root );
+
+
+        var view = guiList.view = gui.add(polyhedralDiagram, 'view', [ 'all', 'exterior' ] );
+        view.onChange(function (value) {
+            polyhedralDiagram.onChangeView(value);
+        });
 
 
         var visible = guiList.visible = gui.addFolder( 'toggle-visibility' );

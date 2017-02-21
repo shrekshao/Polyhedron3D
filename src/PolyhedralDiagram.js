@@ -14,6 +14,29 @@ var PolyhedralDiagram = function (json) {
     var exteriorGreen = 0x009600;
 
 
+    var self = this;
+    
+    this.views = {
+        all: {
+            name: 'all',
+            onEnter: function(){ self.onEnterAll(); },
+            onExit: null
+        },
+
+        exterior: {
+            name: 'exterior',
+            onEnter: function(){ self.onEnterExterior(); },
+            onExit: function(){ self.onExitExterior(); }
+        }
+    };
+    this.view = 'all';
+    this.curView = this.views.all;
+
+
+    // this.curViewValue = 'all';
+
+
+
     this.diagram = {
         form: {
             // geometries: {},
@@ -175,6 +198,85 @@ var PolyhedralDiagram = function (json) {
     'use strict'
 
     PolyhedralDiagram.prototype.constructor = PolyhedralDiagram;
+
+
+    PolyhedralDiagram.prototype.onEnterAll = function () {
+        
+        this.diagram.form.objects.edges.visible = true;
+        this.diagram.form.objects.exEdges.visible = true;
+        this.diagram.form.objects.exForceArrows.visible = true;
+        this.diagram.form.objects.vertices.visible = true;
+        
+        this.diagram.force.objects.edges.visible = true;
+        this.diagram.force.objects.faces.visible = true;
+        this.diagram.force.objects.exFaces.visible = true;
+    };
+
+    PolyhedralDiagram.prototype.onEnterExterior = function () {
+        
+        this.diagram.form.objects.edges.visible = false;
+        this.diagram.form.objects.exEdges.visible = false;
+        this.diagram.form.objects.exForceArrows.visible = true;
+        this.diagram.form.objects.vertices.visible = false;
+        
+        this.diagram.force.objects.edges.visible = false;
+        this.diagram.force.objects.faces.visible = false;
+        this.diagram.force.objects.exFaces.visible = true;
+
+        var f, mesh;
+        for (f in this.diagram.force.maps.exFaceId2Object) {
+            mesh = this.diagram.force.maps.exFaceId2Object[f];
+
+            mesh.material.color = new THREE.Color( this.diagram.colors.exteriorGreen );
+        }
+    };
+
+    PolyhedralDiagram.prototype.onExitExterior = function () {
+        var f, mesh;
+        for (f in this.diagram.force.maps.exFaceId2Object) {
+            mesh = this.diagram.force.maps.exFaceId2Object[f];
+
+            mesh.material.color = mesh.color;
+        }
+    };
+
+
+    PolyhedralDiagram.prototype.onChangeView = function (value) {
+        if (this.curView.onExit) {
+            this.curView.onExit();
+        }
+        
+        this.curView = this.views[value];
+
+        if (this.curView.onEnter) {
+            this.curView.onEnter();
+        }
+
+        // // onExit
+        // switch(this.curViewValue) {
+        //     case 'all':
+        //     break;
+        //     case 'exterior':
+        //     this.onExitExterior();
+        //     break;
+        // }
+
+        // // onEnter
+        // switch(value) {
+        //     case 'all':
+        //     this.onEnterAll();
+        //     break;
+        //     case 'exterior':
+        //     this.onEnterExterior();
+        //     break;
+        // }
+
+
+        // this.curViewValue = value;
+        
+    };
+
+
 
 
     PolyhedralDiagram.prototype.buildFormDiagram = function() {
