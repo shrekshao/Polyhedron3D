@@ -134,7 +134,7 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         scene1.add( polyhedralDiagram.diagram.force.objects.root );
 
 
-        var view = guiList.view = gui.add(polyhedralDiagram, 'view', [ 'all', 'exterior' ] );
+        var view = guiList.view = gui.add(polyhedralDiagram, 'view', [ 'all', 'interior', 'exterior' ] );
         view.onChange(function (value) {
             polyhedralDiagram.onChangeView(value);
         });

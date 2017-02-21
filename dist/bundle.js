@@ -57570,13 +57570,16 @@ var PolyhedralDiagram = function (json) {
     
     this.views = {
         all: {
-            name: 'all',
             onEnter: function(){ self.onEnterAll(); },
             onExit: null
         },
 
+        interior: {
+            onEnter: function(){ self.onEnterInterior(); },
+            onExit: null
+        },
+
         exterior: {
-            name: 'exterior',
             onEnter: function(){ self.onEnterExterior(); },
             onExit: function(){ self.onExitExterior(); }
         }
@@ -57762,6 +57765,18 @@ var PolyhedralDiagram = function (json) {
         this.diagram.force.objects.edges.visible = true;
         this.diagram.force.objects.faces.visible = true;
         this.diagram.force.objects.exFaces.visible = true;
+    };
+
+    PolyhedralDiagram.prototype.onEnterInterior = function () {
+        
+        this.diagram.form.objects.edges.visible = true;
+        this.diagram.form.objects.exEdges.visible = false;
+        this.diagram.form.objects.exForceArrows.visible = false;
+        this.diagram.form.objects.vertices.visible = true;
+        
+        this.diagram.force.objects.edges.visible = true;
+        this.diagram.force.objects.faces.visible = true;
+        this.diagram.force.objects.exFaces.visible = false;
     };
 
     PolyhedralDiagram.prototype.onEnterExterior = function () {
@@ -65493,7 +65508,7 @@ THREE.OrbitControls = __webpack_require__(58)(THREE);
         scene1.add( polyhedralDiagram.diagram.force.objects.root );
 
 
-        var view = guiList.view = gui.add(polyhedralDiagram, 'view', [ 'all', 'exterior' ] );
+        var view = guiList.view = gui.add(polyhedralDiagram, 'view', [ 'all', 'interior', 'exterior' ] );
         view.onChange(function (value) {
             polyhedralDiagram.onChangeView(value);
         });
