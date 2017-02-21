@@ -153,7 +153,7 @@ var PolyhedralDiagram = function (json) {
 
             forceFace: new THREE.MeshBasicMaterial( { 
                 color: 0x156289, 
-                shading: THREE.FlatShading,
+                // shading: THREE.FlatShading,
                 // opacity: 0.05,
                 opacity: 0.1,
                 transparent: true,
@@ -410,6 +410,9 @@ var PolyhedralDiagram = function (json) {
                 
                 // arrow.material.color = new THREE.Color( this.strengthColorScaler( strength ) );
 
+                arrow.castShadow = true;
+                arrow.receiveShadow = false;
+
                 arrow.diagramId = edge;
                 arrow.diagramForceFaceId = edgeInfo.force_face;
 
@@ -497,6 +500,10 @@ var PolyhedralDiagram = function (json) {
                     this.diagram.materials.cylinderBasic.clone(),
                     strengthRadius
             );
+            
+            curMesh.receiveShadow = false;
+            curMesh.castShadow = true;
+
             curMesh.diagramId = edgesId[j];
             curMesh.diagramForceFaceId = edgeInfo.force_face;
             curMesh.diagramType = 'form_edge';
@@ -514,6 +521,8 @@ var PolyhedralDiagram = function (json) {
             curEdgeGeometry.vertices.push( exEdges.vertices[i].clone(), exEdges.vertices[i+1].clone() );
             curEdgeGeometry.computeLineDistances(); // for dashed line material
             curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
+            curMesh.receiveShadow = false;
+            curMesh.castShadow = true;
             curMesh.diagramId = exEdgesId[j];
             curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
             curMesh.diagramType = 'form_ex_edge';
@@ -555,6 +564,8 @@ var PolyhedralDiagram = function (json) {
             curVertexGeometry = vertexShapeGeometry.clone();
             curVertexGeometry.translate( verticesOnlyGeometry.vertices[ i ].x, verticesOnlyGeometry.vertices[ i ].y, verticesOnlyGeometry.vertices[ i ].z );
             curVertexMesh = new THREE.Mesh( curVertexGeometry.clone(), curMaterial.clone() );
+            curVertexMesh.receiveShadow = false;
+            curVertexMesh.castShadow = true;
             curVertexMesh.diagramId = vid2vid[i];
             curVertexMesh.digramForceFaceIdArray = v2fa[ curVertexMesh.diagramId ];
             curVertexMesh.diagramType = 'form_vertex';
@@ -711,6 +722,13 @@ var PolyhedralDiagram = function (json) {
 
             face_mesh.diagramId = f;
             face_mesh.direction = direction;
+
+            // face_mesh.position.add(direction);
+
+            // face_mesh.castShadow = true;
+            // face_mesh.receiveShadow = false;
+
+
             
             // face_mesh.translateOnAxis( face_mesh.direction, 1 );
 
@@ -749,8 +767,10 @@ var PolyhedralDiagram = function (json) {
             this.diagram.materials.lineForce
         );
 
+        this.diagram.force.meshEdges.castShadow = true;
+        this.diagram.force.meshEdges.receiveShadow = false;
 
-        // this.diagram.force.meshEdges.visible = false;
+        this.diagram.force.meshEdges.visible = true;
 
         var root = this.diagram.force.objects.root;
         root.add(this.diagram.force.meshEdges);

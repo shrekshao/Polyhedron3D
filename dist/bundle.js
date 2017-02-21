@@ -57705,7 +57705,7 @@ var PolyhedralDiagram = function (json) {
 
             forceFace: new THREE.MeshBasicMaterial( { 
                 color: 0x156289, 
-                shading: THREE.FlatShading,
+                // shading: THREE.FlatShading,
                 // opacity: 0.05,
                 opacity: 0.1,
                 transparent: true,
@@ -57962,6 +57962,9 @@ var PolyhedralDiagram = function (json) {
                 
                 // arrow.material.color = new THREE.Color( this.strengthColorScaler( strength ) );
 
+                arrow.castShadow = true;
+                arrow.receiveShadow = false;
+
                 arrow.diagramId = edge;
                 arrow.diagramForceFaceId = edgeInfo.force_face;
 
@@ -58049,6 +58052,10 @@ var PolyhedralDiagram = function (json) {
                     this.diagram.materials.cylinderBasic.clone(),
                     strengthRadius
             );
+            
+            curMesh.receiveShadow = false;
+            curMesh.castShadow = true;
+
             curMesh.diagramId = edgesId[j];
             curMesh.diagramForceFaceId = edgeInfo.force_face;
             curMesh.diagramType = 'form_edge';
@@ -58066,6 +58073,8 @@ var PolyhedralDiagram = function (json) {
             curEdgeGeometry.vertices.push( exEdges.vertices[i].clone(), exEdges.vertices[i+1].clone() );
             curEdgeGeometry.computeLineDistances(); // for dashed line material
             curMesh = new THREE.LineSegments( curEdgeGeometry, curMaterial.clone() );
+            curMesh.receiveShadow = false;
+            curMesh.castShadow = true;
             curMesh.diagramId = exEdgesId[j];
             curMesh.diagramForceFaceId = this.json.form.edges[curMesh.diagramId].force_face;
             curMesh.diagramType = 'form_ex_edge';
@@ -58107,6 +58116,8 @@ var PolyhedralDiagram = function (json) {
             curVertexGeometry = vertexShapeGeometry.clone();
             curVertexGeometry.translate( verticesOnlyGeometry.vertices[ i ].x, verticesOnlyGeometry.vertices[ i ].y, verticesOnlyGeometry.vertices[ i ].z );
             curVertexMesh = new THREE.Mesh( curVertexGeometry.clone(), curMaterial.clone() );
+            curVertexMesh.receiveShadow = false;
+            curVertexMesh.castShadow = true;
             curVertexMesh.diagramId = vid2vid[i];
             curVertexMesh.digramForceFaceIdArray = v2fa[ curVertexMesh.diagramId ];
             curVertexMesh.diagramType = 'form_vertex';
@@ -58263,6 +58274,13 @@ var PolyhedralDiagram = function (json) {
 
             face_mesh.diagramId = f;
             face_mesh.direction = direction;
+
+            // face_mesh.position.add(direction);
+
+            // face_mesh.castShadow = true;
+            // face_mesh.receiveShadow = false;
+
+
             
             // face_mesh.translateOnAxis( face_mesh.direction, 1 );
 
@@ -58301,8 +58319,10 @@ var PolyhedralDiagram = function (json) {
             this.diagram.materials.lineForce
         );
 
+        this.diagram.force.meshEdges.castShadow = true;
+        this.diagram.force.meshEdges.receiveShadow = false;
 
-        // this.diagram.force.meshEdges.visible = false;
+        this.diagram.force.meshEdges.visible = true;
 
         var root = this.diagram.force.objects.root;
         root.add(this.diagram.force.meshEdges);
@@ -65668,7 +65688,8 @@ THREE.OrbitControls = __webpack_require__(58)(THREE);
             }
 
             if ( polyhedralDiagram ) {
-                intersects = raycaster.intersectObjects( scene2.children, true );
+                // intersects = raycaster.intersectObjects( scene2.children, true );
+                intersects = raycaster.intersectObjects( polyhedralDiagram.diagram.form.objects.root.children, true );
                 
                 if ( intersects.length > 0 ) {
                     if ( INTERSECTED != intersects[0].object || clicked ) {
@@ -65881,6 +65902,7 @@ THREE.OrbitControls = __webpack_require__(58)(THREE);
         renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true } );
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
         
 
         window.addEventListener('resize', onWindowResize, false);
@@ -65903,29 +65925,44 @@ THREE.OrbitControls = __webpack_require__(58)(THREE);
 
         var ambient = new THREE.AmbientLight( 0x444444 );
         scene1.add( ambient );
-
         scene2.add( ambient.clone() );
 
-        var directionalLight = new THREE.DirectionalLight( 0xffeedd );
-        directionalLight.position.set( 1, 1, 1 ).normalize();
-        scene1.add( directionalLight );
+        var light = new THREE.DirectionalLight( 0xffffff );
+        // light.position.set( 1, 1, 1 ).normalize();
+        light.position.set( 0, 30, 0 );
+        light.shadow.camera.left = -30; // or whatever value works for the scale of your scene
+        light.shadow.camera.right = 30;
+        light.shadow.camera.top = 30;
+        light.shadow.camera.bottom = -30;
+        light.shadow.camera.near = 0.01;
+        light.shadow.camera.far = 100;
+        light.castShadow = true;
         
-        scene2.add( directionalLight.clone() );
+        scene1.add( light );
+        scene2.add( light.clone() );
 
-        // outlineEffect = new THREE.OutlineEffect( renderer );
+        // var helper = new THREE.CameraHelper( light.shadow.camera );
+        // scene1.add( helper );
+
+
+        // ground plane for shadow effects
+        var FLOOR = - 20;
+        var geometry = new THREE.PlaneBufferGeometry( 100, 100 );
+        // var planeMaterial = new THREE.MeshLambertMaterial( { color: 0xdddddd } );
+        var planeMaterial = new THREE.ShadowMaterial();
+        planeMaterial.opacity = 0.05;
+        var ground = new THREE.Mesh( geometry, planeMaterial );
+        ground.position.set( 0, FLOOR, 0 );
+        ground.rotation.x = - Math.PI / 2;
+        ground.scale.set( 100, 100, 100 );
+        ground.castShadow = false;
+        ground.receiveShadow = true;
+        scene1.add( ground );
+        scene2.add( ground.clone() );
+        
 
         onWindowResize();
 
-
-        // var mesh2 = new THREE.Mesh( 
-        //     // new THREE.BoxGeometry( 2, 2, 2 ), 
-        //     new THREE.IcosahedronGeometry(1.5, 0), 
-        //     new THREE.MeshPhongMaterial( { color: 0x156289, shading: THREE.FlatShading } )
-        // );
-
-        // scene2.add( mesh2 );
-
-        // renderer.render(scene1, camera);
         render();
     };
 })();
