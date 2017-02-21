@@ -138,8 +138,8 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         visible.add( polyhedralDiagram.diagram.form.objects.exForceArrows, 'visible' ).name('form-ex-forces');
 
         visible.add( polyhedralDiagram.diagram.force.meshEdges, 'visible' ).name('force-edges');
-        // visible.add( polyhedralDiagram.diagram.force.meshFaces, 'visible' ).name('force-faces');
         visible.add( polyhedralDiagram.diagram.force.objects.faces, 'visible' ).name('force-faces');
+        visible.add( polyhedralDiagram.diagram.force.objects.exFaces, 'visible' ).name('force-ex-faces');
 
         // var materials = gui.addFolder( 'materials' );
         // materials.add( polyhedralDiagram.diagram.materials.forceFace, 'opacity', 0.0, 1.0 );

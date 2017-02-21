@@ -57563,6 +57563,9 @@ var PolyhedralDiagram = function (json) {
 
     this.json = json;
 
+    var exteriorGreen = 0x009600;
+
+
     this.diagram = {
         form: {
             // geometries: {},
@@ -57582,6 +57585,7 @@ var PolyhedralDiagram = function (json) {
                 edgeId2Object: {}
             }
         },
+
         force: {
             // geometries: {},
 
@@ -57589,13 +57593,21 @@ var PolyhedralDiagram = function (json) {
                 root: new THREE.Object3D(),
 
                 faces: new THREE.Object3D(),
+                exFaces: new THREE.Object3D(),
                 edges: new THREE.Object3D()
             },
 
             maps: {
                 faceId2Object: {},
-                edgeId2Object: {}
+                edgeId2Object: {},
+                exFaceId2Object: {}
             }
+
+            
+        },
+
+        colors: {
+            exteriorGreen: exteriorGreen
         },
 
         materials: {
@@ -57628,7 +57640,7 @@ var PolyhedralDiagram = function (json) {
             } ),
 
             arrowForce: new THREE.MeshBasicMaterial( {
-                color: 0x009600
+                color: exteriorGreen
             } ),
 
             // arrow: new THREE.LineBasicMaterial( { 
@@ -57676,7 +57688,8 @@ var PolyhedralDiagram = function (json) {
                 // blending: THREE.AdditiveBlending,
 
                 depthWrite: false
-            })
+            } )
+
             // forceFace: new THREE.MeshPhongMaterial( { 
             //     color: 0xffaa00, 
             //     shading: THREE.FlatShading,
@@ -57830,6 +57843,10 @@ var PolyhedralDiagram = function (json) {
 
                 arrow.diagramId = edge;
                 arrow.diagramForceFaceId = edgeInfo.force_face;
+
+                // temp label
+                // will be mapped to mesh object in build force
+                this.diagram.force.maps.exFaceId2Object[edgeInfo.force_face] = true;
                 
                 exForces.add( arrow );
             } else {
@@ -58136,7 +58153,15 @@ var PolyhedralDiagram = function (json) {
 
             // face_mesh.translateOnAxis( face_mesh.direction, 1 );
 
-            this.diagram.force.objects.faces.add( face_mesh );
+            if ( this.diagram.force.maps.exFaceId2Object[f] ) {
+                // ex faces, correspond to ex forces (arrows)
+                this.diagram.force.objects.exFaces.add( face_mesh );
+                this.diagram.force.maps.exFaceId2Object[f] = face_mesh;
+            } else {
+                this.diagram.force.objects.faces.add( face_mesh );
+                
+            }
+
             this.diagram.force.maps.faceId2Object[f] = face_mesh;
 
             
@@ -58156,11 +58181,12 @@ var PolyhedralDiagram = function (json) {
         );
 
 
-        this.diagram.force.meshEdges.visible = false;
+        // this.diagram.force.meshEdges.visible = false;
 
         var root = this.diagram.force.objects.root;
         root.add(this.diagram.force.meshEdges);
         root.add(this.diagram.force.objects.faces);
+        root.add(this.diagram.force.objects.exFaces);
 
     }
 })();
@@ -65365,8 +65391,8 @@ THREE.OrbitControls = __webpack_require__(58)(THREE);
         visible.add( polyhedralDiagram.diagram.form.objects.exForceArrows, 'visible' ).name('form-ex-forces');
 
         visible.add( polyhedralDiagram.diagram.force.meshEdges, 'visible' ).name('force-edges');
-        // visible.add( polyhedralDiagram.diagram.force.meshFaces, 'visible' ).name('force-faces');
         visible.add( polyhedralDiagram.diagram.force.objects.faces, 'visible' ).name('force-faces');
+        visible.add( polyhedralDiagram.diagram.force.objects.exFaces, 'visible' ).name('force-ex-faces');
 
         // var materials = gui.addFolder( 'materials' );
         // materials.add( polyhedralDiagram.diagram.materials.forceFace, 'opacity', 0.0, 1.0 );
