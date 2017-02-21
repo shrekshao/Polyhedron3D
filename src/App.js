@@ -104,6 +104,9 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         console.log('json file loaded');
 
         // guiList.vertex_face = false;
+        if (INTERSECTED) {
+            releaseHighlighted( INTERSECTED );
+        }
 
         if ( guiList.visible ) {
             gui.removeFolder('toggle-visibility');

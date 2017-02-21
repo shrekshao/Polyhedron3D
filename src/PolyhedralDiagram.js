@@ -240,23 +240,15 @@ PolyhedralDiagram.prototype.buildFormDiagram = function() {
             edgeInfo = this.json.form.edges[edge];
             strength = this.json.force_face_2_strength[edgeInfo.force_face];
             
-            strengthRadius = this.strengthRadiusScaler( strength );
-            // strengthRadius = 0.25;
+            // strengthRadius = this.strengthRadiusScaler( strength );
+            strengthRadius = 0.1;
 
-
-
-            // arrow = createCylinderArrowMesh( 
-            //     vec3[vertex[0]],
-            //     vec3[vertex[1]],
-            //     this.diagram.materials.arrowForce.clone(),
-            //     0.1
-            // );
 
             arrow = createCylinderArrowMesh( 
                 verticesOnlyGeometry.vertices[vid2vid_i[vertex[0]]], 
                 verticesOnlyGeometry.vertices[vid2vid_i[vertex[1]]], 
                 this.diagram.materials.arrowForce.clone(),
-                0.1
+                strengthRadius
             );
             
             // arrow.material.color = new THREE.Color( this.strengthColorScaler( strength ) );
