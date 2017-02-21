@@ -227,7 +227,9 @@ var PolyhedralDiagram = function (json) {
         for (f in this.diagram.force.maps.exFaceId2Object) {
             mesh = this.diagram.force.maps.exFaceId2Object[f];
 
-            mesh.material.color = new THREE.Color( this.diagram.colors.exteriorGreen );
+            mesh.colorOriginal = mesh.color;
+            mesh.color = new THREE.Color( this.diagram.colors.exteriorGreen );
+            mesh.material.color = mesh.color.clone();
         }
     };
 
@@ -236,7 +238,9 @@ var PolyhedralDiagram = function (json) {
         for (f in this.diagram.force.maps.exFaceId2Object) {
             mesh = this.diagram.force.maps.exFaceId2Object[f];
 
-            mesh.material.color = mesh.color;
+            mesh.color = mesh.colorOriginal;
+            mesh.colorOriginal = null;
+            mesh.material.color = mesh.color.clone();
         }
     };
 
