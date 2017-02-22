@@ -121,17 +121,14 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         }
 
         if (polyhedralDiagram) {
-            scene2.remove(polyhedralDiagram.diagram.form.objects.root);
-            scene1.remove(polyhedralDiagram.diagram.force.objects.root);
+            scene1.remove(polyhedralDiagram.diagram.form.objects.root);
+            scene2.remove(polyhedralDiagram.diagram.force.objects.root);
         }
 
         polyhedralDiagram = new PolyhedralDiagram(diagramJson);
 
-        scene2.add( polyhedralDiagram.diagram.form.objects.root );
-
-        // scene1.add( polyhedralDiagram.diagram.force.meshEdges );
-        // scene1.add( polyhedralDiagram.diagram.force.objects.faces );
-        scene1.add( polyhedralDiagram.diagram.force.objects.root );
+        scene1.add( polyhedralDiagram.diagram.form.objects.root );
+        scene2.add( polyhedralDiagram.diagram.force.objects.root );
 
 
         var view = guiList.view = gui.add(polyhedralDiagram, 'view', [ 'all', 'interior', 'exterior' ] );
@@ -176,7 +173,7 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         var files = e.target.files; // FileList object
 
         // files is a FileList of File objects. List some properties.
-        console.log('load json file');
+        // console.log('load json file');
         var reader = new FileReader();
 
 
@@ -232,7 +229,7 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
     }
 
     function onMouseClick( event ) {
-        console.log('clicked');
+        // console.log('clicked');
         clicked = true;
     }
 
@@ -289,8 +286,12 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         
             var intersects;
 
-            if ( mouseScene2.x > -1 ) {
-                raycaster.setFromCamera( mouseScene2, camera );
+            // if ( mouseScene2.x > -1 ) {
+            //     raycaster.setFromCamera( mouseScene2, camera );
+            // }
+
+            if ( mouseScene1.x < 1 ) {
+                raycaster.setFromCamera( mouseScene1, camera );
             }
 
             if ( polyhedralDiagram ) {
@@ -312,7 +313,7 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
                         
 
                         if (INTERSECTED.diagramType !== 'form_vertex') {
-                            console.log(INTERSECTED.diagramId, INTERSECTED.diagramForceFaceId);
+                            // console.log(INTERSECTED.diagramId, INTERSECTED.diagramForceFaceId);
                             currentColor = INTERSECTED.material.color.getHex();
                             INTERSECTED.material.color.setHex( highlightColor.form );
 
@@ -327,7 +328,7 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
                                 forceFace.material.opacity = 1.0;
                             }
                         } else {
-                            console.log(INTERSECTED.diagramId, INTERSECTED.digramForceFaceIdArray);
+                            // console.log(INTERSECTED.diagramId, INTERSECTED.digramForceFaceIdArray);
                             currentColor = INTERSECTED.material.uniforms.color.value.getHex();
                             INTERSECTED.material.uniforms.color.value.setHex( highlightColor.form );
 
@@ -552,7 +553,7 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
 
 
         // ground plane for shadow effects
-        var FLOOR = - 20;
+        var FLOOR = - 23;
         var geometry = new THREE.PlaneBufferGeometry( 100, 100 );
         // var planeMaterial = new THREE.MeshLambertMaterial( { color: 0xdddddd } );
         var planeMaterial = new THREE.ShadowMaterial();
