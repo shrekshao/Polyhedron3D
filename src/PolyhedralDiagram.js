@@ -638,18 +638,7 @@ var PolyhedralDiagram = function (json) {
         var exEdgeIndexArray = [];
 
 
-        for (var i = 0, len = geometry.vertices.length; i < len; i++) {
-            var tmpV = geometry.vertices[i];
-            edgePositionArray.push( tmpV.x, tmpV.y, tmpV.z );
-        }
-
-
-        // edgeGeometry.setIndex( new THREE.BufferAttribute( new Uint16Array( indices_array ), 1 ) );
-        // var float32Position = new Float32Array( edgePositionArray );
-        edgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( edgePositionArray ), 3 ) );
-        edgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( edgePositionArray ), 3 ) );
-        // edgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( float32Position, 3 ) );
-        // exEdgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( float32Position, 3 ) );
+        
 
 
         // face
@@ -698,9 +687,9 @@ var PolyhedralDiagram = function (json) {
                 v3 = geometry.vertices[ i3 ];
 
                 if ( isExternal ) {
-                    exEdgeIndexArray.push( i1, i2, i3 );
+                    exEdgeIndexArray.push( i1, i2, i2, i3, i3, i1 );
                 } else {
-                    edgeIndexArray.push( i1, i2, i3 );
+                    edgeIndexArray.push( i1, i2, i2, i3, i3, i1 );
                 }
 
                 face_geometry = new THREE.BufferGeometry();
@@ -746,9 +735,9 @@ var PolyhedralDiagram = function (json) {
                 v4 = geometry.vertices[ i4 ];
 
                 if ( isExternal ) {
-                    exEdgeIndexArray.push( i1, i2, i3, i4 );
+                    exEdgeIndexArray.push( i1, i2, i2, i3, i3, i4, i4, i1 );
                 } else {
-                    edgeIndexArray.push( i1, i2, i3, i4 );
+                    edgeIndexArray.push( i1, i2, i2, i3, i3, i4, i4, i1 );
                 }
 
                 face_geometry = new THREE.BufferGeometry();
@@ -812,7 +801,18 @@ var PolyhedralDiagram = function (json) {
         exEdgeGeometry.setIndex( new THREE.BufferAttribute( new Uint16Array( exEdgeIndexArray ), 1 ) );
 
 
+        for (var i = 0, len = geometry.vertices.length; i < len; i++) {
+            var tmpV = geometry.vertices[i];
+            edgePositionArray.push( tmpV.x, tmpV.y, tmpV.z );
+        }
 
+
+        // edgeGeometry.setIndex( new THREE.BufferAttribute( new Uint16Array( indices_array ), 1 ) );
+        // var float32Position = new Float32Array( edgePositionArray );
+        edgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( edgePositionArray ), 3 ) );
+        exEdgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( edgePositionArray ), 3 ) );
+        // edgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( float32Position, 3 ) );
+        // exEdgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( float32Position, 3 ) );
 
 
         // normal should read from txt files... (order)
