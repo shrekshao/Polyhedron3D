@@ -57622,6 +57622,8 @@ var PolyhedralDiagram = function (json) {
                 exFaces: new THREE.Object3D(),
                 edges: null,
                 exEdges: null       // edges for exFaces
+                // edges: new THREE.Object3D(),
+                // exEdges: new THREE.Object3D()       // edges for exFaces
             },
 
             maps: {
@@ -58142,12 +58144,15 @@ var PolyhedralDiagram = function (json) {
         var vec3 = {};
         var v;
 
-        var geometry = this.diagram.force.geometry = new THREE.Geometry();
-
+        var geometry = new THREE.Geometry();
+        // var geometry = new THREE.BufferGeometry();
+        
 
         var vid2vid = {};   // string id to geometry int id
 
         var exvid2v = {}; // string id to geometry vertex
+
+       
 
         var c = 0;
         for (v in json.force.vertices) {
@@ -58170,9 +58175,33 @@ var PolyhedralDiagram = function (json) {
             
         }
 
+        
         geometry.normalize();
         geometry.scale( this.diagram.normalizeUnit, this.diagram.normalizeUnit, this.diagram.normalizeUnit );
 
+
+
+
+        var edgeGeometry = new THREE.BufferGeometry();
+        var edgePositionArray = [];
+        var edgeIndexArray = [];
+        var exEdgeGeometry = new THREE.BufferGeometry();
+        var exEdgePositionArray = [];
+        var exEdgeIndexArray = [];
+
+
+        for (var i = 0, len = geometry.vertices.length; i < len; i++) {
+            var tmpV = geometry.vertices[i];
+            edgePositionArray.push( tmpV.x, tmpV.y, tmpV.z );
+        }
+
+
+        // edgeGeometry.setIndex( new THREE.BufferAttribute( new Uint16Array( indices_array ), 1 ) );
+        // var float32Position = new Float32Array( edgePositionArray );
+        edgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( edgePositionArray ), 3 ) );
+        edgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( edgePositionArray ), 3 ) );
+        // edgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( float32Position, 3 ) );
+        // exEdgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( float32Position, 3 ) );
 
 
         // face
@@ -58183,6 +58212,7 @@ var PolyhedralDiagram = function (json) {
         var face_v;
 
         var v1, v2, v3, v4;
+        var i1, i2, i3, i4;
         
         var face_geometry;
         var face_mesh;
@@ -58193,6 +58223,7 @@ var PolyhedralDiagram = function (json) {
 
         var isExternal = false;
 
+       
         for (f in json.force.faces_v) {
             face_v = json.force.faces_v[f];
             isExternal = this.diagram.force.maps.exFaceId2Object[f];
@@ -58201,17 +58232,28 @@ var PolyhedralDiagram = function (json) {
 
                 // separate mesh for each face
 
-                if ( isExternal ) {
-                    v1 = exvid2v[ face_v[0] ] = geometry.vertices[ vid2vid[ face_v[0] ] ];
-                    v2 = exvid2v[ face_v[1] ] = geometry.vertices[ vid2vid[ face_v[1] ] ];
-                    v3 = exvid2v[ face_v[2] ] = geometry.vertices[ vid2vid[ face_v[2] ] ];
-                } else {
-                    v1 = geometry.vertices[ vid2vid[ face_v[0] ] ];
-                    v2 = geometry.vertices[ vid2vid[ face_v[1] ] ];
-                    v3 = geometry.vertices[ vid2vid[ face_v[2] ] ];
-                }
+                // if ( isExternal ) {
+                //     v1 = exvid2v[ face_v[0] ] = geometry.vertices[ vid2vid[ face_v[0] ] ];
+                //     v2 = exvid2v[ face_v[1] ] = geometry.vertices[ vid2vid[ face_v[1] ] ];
+                //     v3 = exvid2v[ face_v[2] ] = geometry.vertices[ vid2vid[ face_v[2] ] ];
+                // } else {
+                //     v1 = geometry.vertices[ vid2vid[ face_v[0] ] ];
+                //     v2 = geometry.vertices[ vid2vid[ face_v[1] ] ];
+                //     v3 = geometry.vertices[ vid2vid[ face_v[2] ] ];
+                // }
 
-                
+                i1 = vid2vid[ face_v[0] ];
+                i2 = vid2vid[ face_v[1] ];
+                i3 = vid2vid[ face_v[2] ];
+                v1 = geometry.vertices[ i1 ];
+                v2 = geometry.vertices[ i2 ];
+                v3 = geometry.vertices[ i3 ];
+
+                if ( isExternal ) {
+                    exEdgeIndexArray.push( i1, i2, i3 );
+                } else {
+                    edgeIndexArray.push( i1, i2, i3 );
+                }
 
                 face_geometry = new THREE.BufferGeometry();
                 face_geometry.addAttribute(
@@ -58232,22 +58274,33 @@ var PolyhedralDiagram = function (json) {
                     (v1.z + v2.z + v3.z ) / 3
                 );
 
-                // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace );
-                // face_mesh.diagramId = f;
-                // this.diagram.force.objects.faces.add( face_mesh );
-
             } else if (face_v.length === 4) {
 
+                // if ( isExternal ) {
+                //     v1 = exvid2v[ face_v[0] ] = geometry.vertices[ vid2vid[ face_v[0] ] ];
+                //     v2 = exvid2v[ face_v[1] ] = geometry.vertices[ vid2vid[ face_v[1] ] ];
+                //     v3 = exvid2v[ face_v[2] ] = geometry.vertices[ vid2vid[ face_v[2] ] ];
+                //     v4 = exvid2v[ face_v[3] ] = geometry.vertices[ vid2vid[ face_v[3] ] ];
+                // } else {
+                //     v1 = geometry.vertices[ vid2vid[ face_v[0] ] ];
+                //     v2 = geometry.vertices[ vid2vid[ face_v[1] ] ];
+                //     v3 = geometry.vertices[ vid2vid[ face_v[2] ] ];
+                //     v4 = geometry.vertices[ vid2vid[ face_v[3] ] ];
+                // }
+
+                i1 = vid2vid[ face_v[0] ];
+                i2 = vid2vid[ face_v[1] ];
+                i3 = vid2vid[ face_v[2] ];
+                i4 = vid2vid[ face_v[3] ];
+                v1 = geometry.vertices[ i1 ];
+                v2 = geometry.vertices[ i2 ];
+                v3 = geometry.vertices[ i3 ];
+                v4 = geometry.vertices[ i4 ];
+
                 if ( isExternal ) {
-                    v1 = exvid2v[ face_v[0] ] = geometry.vertices[ vid2vid[ face_v[0] ] ];
-                    v2 = exvid2v[ face_v[1] ] = geometry.vertices[ vid2vid[ face_v[1] ] ];
-                    v3 = exvid2v[ face_v[2] ] = geometry.vertices[ vid2vid[ face_v[2] ] ];
-                    v4 = exvid2v[ face_v[3] ] = geometry.vertices[ vid2vid[ face_v[3] ] ];
+                    exEdgeIndexArray.push( i1, i2, i3, i4 );
                 } else {
-                    v1 = geometry.vertices[ vid2vid[ face_v[0] ] ];
-                    v2 = geometry.vertices[ vid2vid[ face_v[1] ] ];
-                    v3 = geometry.vertices[ vid2vid[ face_v[2] ] ];
-                    v4 = geometry.vertices[ vid2vid[ face_v[3] ] ];
+                    edgeIndexArray.push( i1, i2, i3, i4 );
                 }
 
                 face_geometry = new THREE.BufferGeometry();
@@ -58272,10 +58325,6 @@ var PolyhedralDiagram = function (json) {
                     (v1.z + v2.z + v3.z + v4.z ) / 4
                 );
 
-                // // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace );
-                // face_mesh = new THREE.Mesh( face_geometry, this.diagram.materials.forceFace.clone() );
-                // face_mesh.diagramId = f;
-                // this.diagram.force.objects.faces.add( face_mesh );
             } else {
                 console.warn("faces with more than 4 vertices");
             }
@@ -58289,30 +58338,21 @@ var PolyhedralDiagram = function (json) {
             face_mesh.diagramId = f;
             face_mesh.direction = direction;
 
-            // face_mesh.position.add(direction);
 
-            // face_mesh.castShadow = true;
-            // face_mesh.receiveShadow = false;
-
-
+            // edge
+            var curEdgeGeometry = new THREE.EdgesGeometry( face_geometry );
             
-            // face_mesh.translateOnAxis( face_mesh.direction, 1 );
-
-            // face_mesh.translateOnAxis( face_mesh.direction, -1 );
-
-            // face_mesh.geometry.translate( -face_mesh.direction.x, -face_mesh.direction.y, -face_mesh.direction.z );
-            // face_mesh.geometry.scale(0.8, 0.8, 0.8);
-            // face_mesh.geometry.translate( face_mesh.direction.x, face_mesh.direction.y, face_mesh.direction.z );
-
-            // face_mesh.translateOnAxis( face_mesh.direction, 1 );
 
             if ( isExternal ) {
                 // ex faces, correspond to ex forces (arrows)
                 this.diagram.force.objects.exFaces.add( face_mesh );
                 this.diagram.force.maps.exFaceId2Object[f] = face_mesh;
+
+                exEdgeGeometry.merge( curEdgeGeometry );
             } else {
                 this.diagram.force.objects.faces.add( face_mesh );
                 
+                edgeGeometry.merge( curEdgeGeometry );
             }
 
             this.diagram.force.maps.faceId2Object[f] = face_mesh;
@@ -58320,34 +58360,37 @@ var PolyhedralDiagram = function (json) {
             
         }
 
+        edgeGeometry.setIndex( new THREE.BufferAttribute( new Uint16Array( edgeIndexArray ), 1 ) );
+        exEdgeGeometry.setIndex( new THREE.BufferAttribute( new Uint16Array( exEdgeIndexArray ), 1 ) );
+
+
+
+
+
         // normal should read from txt files... (order)
         // geometry.computeFaceNormals();
         // geometry.computeVertexNormals();
 
 
 
-        // edges
-        var edgeGeometry = this.diagram.force.edges = new THREE.Geometry();
-        var exEdgeGeometry = this.diagram.force.edxEges = new THREE.Geometry();
-        var edge, vertex, arrow;
-        for (edge in json.force.edges) {
-            vertex = json.force.edges[edge];
+        // // edges
+        
+        // var edge, vertex, arrow;
+        // for (edge in json.force.edges) {
+        //     vertex = json.force.edges[edge];
 
-            v1 = exvid2v[ vertex[0] ];
-            v2 = exvid2v[ vertex[1] ];
+        //     v1 = exvid2v[ vertex[0] ];
+        //     v2 = exvid2v[ vertex[1] ];
 
-            if ( v1 && v2 ) {
-                exEdgeGeometry.vertices.push( v1.clone(), v2.clone() );
-                edgeGeometry.vertices.push( v1.clone(), v2.clone() );
-            } else {
-                edgeGeometry.vertices.push( geometry.vertices[vid2vid[vertex[0]]].clone(), geometry.vertices[vid2vid[vertex[1]]].clone() );
-            }
+        //     if ( v1 && v2 ) {
+        //         exEdgeGeometry.vertices.push( v1.clone(), v2.clone() );
+        //         edgeGeometry.vertices.push( v1.clone(), v2.clone() );
+        //     } else {
+        //         edgeGeometry.vertices.push( geometry.vertices[vid2vid[vertex[0]]].clone(), geometry.vertices[vid2vid[vertex[1]]].clone() );
+        //     }
 
             
-        }
-
-
-        
+        // }
 
         // build mesh
 
@@ -58371,6 +58414,11 @@ var PolyhedralDiagram = function (json) {
         this.diagram.force.objects.exEdges.receiveShadow = false;
 
         this.diagram.force.objects.exEdges.visible = true;
+
+
+
+
+
 
         var root = this.diagram.force.objects.root;
         root.add(this.diagram.force.objects.edges);
