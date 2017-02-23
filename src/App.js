@@ -144,7 +144,8 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
         visible.add( polyhedralDiagram.diagram.form.objects.exEdges, 'visible' ).name('form-ex-edges');
         visible.add( polyhedralDiagram.diagram.form.objects.exForceArrows, 'visible' ).name('form-ex-forces');
 
-        visible.add( polyhedralDiagram.diagram.force.meshEdges, 'visible' ).name('force-edges');
+        visible.add( polyhedralDiagram.diagram.force.objects.edges, 'visible' ).name('force-edges');
+        visible.add( polyhedralDiagram.diagram.force.objects.exEdges, 'visible' ).name('force-ex-edges');
         visible.add( polyhedralDiagram.diagram.force.objects.faces, 'visible' ).name('force-faces');
         visible.add( polyhedralDiagram.diagram.force.objects.exFaces, 'visible' ).name('force-ex-faces');
 
