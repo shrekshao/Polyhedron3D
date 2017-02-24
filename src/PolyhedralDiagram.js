@@ -808,37 +808,17 @@ var PolyhedralDiagram = function (json) {
 
 
         // edgeGeometry.setIndex( new THREE.BufferAttribute( new Uint16Array( indices_array ), 1 ) );
-        // var float32Position = new Float32Array( edgePositionArray );
-        edgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( edgePositionArray ), 3 ) );
-        exEdgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( edgePositionArray ), 3 ) );
-        // edgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( float32Position, 3 ) );
-        // exEdgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( float32Position, 3 ) );
+        var float32Position = new Float32Array( edgePositionArray );
+        // edgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( edgePositionArray ), 3 ) );
+        // exEdgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( edgePositionArray ), 3 ) );
+        edgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( float32Position, 3 ) );
+        exEdgeGeometry.addAttribute( 'position', new THREE.BufferAttribute( float32Position, 3 ) );
 
 
         // normal should read from txt files... (order)
         // geometry.computeFaceNormals();
         // geometry.computeVertexNormals();
 
-
-
-        // // edges
-        
-        // var edge, vertex, arrow;
-        // for (edge in json.force.edges) {
-        //     vertex = json.force.edges[edge];
-
-        //     v1 = exvid2v[ vertex[0] ];
-        //     v2 = exvid2v[ vertex[1] ];
-
-        //     if ( v1 && v2 ) {
-        //         exEdgeGeometry.vertices.push( v1.clone(), v2.clone() );
-        //         edgeGeometry.vertices.push( v1.clone(), v2.clone() );
-        //     } else {
-        //         edgeGeometry.vertices.push( geometry.vertices[vid2vid[vertex[0]]].clone(), geometry.vertices[vid2vid[vertex[1]]].clone() );
-        //     }
-
-            
-        // }
 
         // build mesh
 
