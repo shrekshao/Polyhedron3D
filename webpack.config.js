@@ -1,9 +1,12 @@
 var path = require('path');
 
 module.exports = {
-  entry: './src/App.js',
+  entry: {
+    app: './src/App.js',
+    interactive_test: './src/interactive_test.js'
+  },
   output: {
-    filename: 'bundle.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'dist')
   },
   module: {
