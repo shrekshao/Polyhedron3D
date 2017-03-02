@@ -3,6 +3,10 @@ var d3 = require('d3-scale');
 import { createCylinderMesh } from './utils/CylinderEdgeHelper'
 import { createCylinderArrowMesh } from './utils/CylinderArrowHelper'
 
+/**
+ * 
+ * @param {*} json JSON Object of the diagram
+ */
 var PolyhedralDiagram = function (json) {
     if (json === null) {
         console.log( ' no json object to init the polydral digram pair' );

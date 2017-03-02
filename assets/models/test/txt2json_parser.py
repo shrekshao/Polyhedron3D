@@ -15,7 +15,8 @@ def area (a, b, c):
     u = [ b[0] - a[0], b[1] - a[1], b[2] - a[2] ]
     v = [ c[0] - a[0], c[1] - a[1], c[2] - a[2] ]
 
-    cross2 = norm2(u) * norm2(v) - dot(u, v)
+    dot_uv = dot(u, v)
+    cross2 = norm2(u) * norm2(v) - dot_uv * dot_uv
     return math.sqrt(cross2) * 0.5
 
 
@@ -215,6 +216,11 @@ class Txt2JsonParser:
             elif len(face) == 5:
                 # quad
                 strength = area( v[face[1]], v[face[2]], v[face[3]] ) + area( v[face[1]], v[face[3]], v[face[4]] )
+            else:
+                print 'Error: face ', face[0], ' is not tri or quad!!'
+
+            # if face[0] == '17f' or face[0] == '19f':
+            #     print face[0], face[1:], map( lambda vid: v[vid], face[1:]  ), area(v[face[1]], v[face[2]], v[face[3]]), strength
 
             # e[ self.force_face_2_form_edge[face[0]] ]['strength'] = strength
             force_face_2_strength[ face[0] ] = strength
@@ -234,7 +240,10 @@ class Txt2JsonParser:
 
 if __name__ == "__main__":
     
-    foldername = "example_02"
+    # foldername = "example_01"
+    # foldername = "example_02"
+    # foldername = "example_03"
+    foldername = "example_04"
     
     parser = Txt2JsonParser()
 

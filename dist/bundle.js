@@ -57555,6 +57555,10 @@ var d3 = __webpack_require__(60);
 
 
 
+/**
+ * 
+ * @param {*} json JSON Object of the diagram
+ */
 var PolyhedralDiagram = function (json) {
     if (json === null) {
         console.log( ' no json object to init the polydral digram pair' );
@@ -65786,7 +65790,7 @@ THREE.OrbitControls = __webpack_require__(58)(THREE);
                         
 
                         if (INTERSECTED.diagramType !== 'form_vertex') {
-                            // console.log(INTERSECTED.diagramId, INTERSECTED.diagramForceFaceId);
+                            console.log(INTERSECTED.diagramId, INTERSECTED.diagramForceFaceId);
                             currentColor = INTERSECTED.material.color.getHex();
                             INTERSECTED.material.color.setHex( highlightColor.form );
 
@@ -65801,7 +65805,7 @@ THREE.OrbitControls = __webpack_require__(58)(THREE);
                                 forceFace.material.opacity = 1.0;
                             }
                         } else {
-                            // console.log(INTERSECTED.diagramId, INTERSECTED.digramForceFaceIdArray);
+                            console.log(INTERSECTED.diagramId, INTERSECTED.digramForceFaceIdArray);
                             currentColor = INTERSECTED.material.uniforms.color.value.getHex();
                             INTERSECTED.material.uniforms.color.value.setHex( highlightColor.form );
 

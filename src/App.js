@@ -314,7 +314,7 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
                         
 
                         if (INTERSECTED.diagramType !== 'form_vertex') {
-                            // console.log(INTERSECTED.diagramId, INTERSECTED.diagramForceFaceId);
+                            console.log(INTERSECTED.diagramId, INTERSECTED.diagramForceFaceId);
                             currentColor = INTERSECTED.material.color.getHex();
                             INTERSECTED.material.color.setHex( highlightColor.form );
 
@@ -329,7 +329,7 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
                                 forceFace.material.opacity = 1.0;
                             }
                         } else {
-                            // console.log(INTERSECTED.diagramId, INTERSECTED.digramForceFaceIdArray);
+                            console.log(INTERSECTED.diagramId, INTERSECTED.digramForceFaceIdArray);
                             currentColor = INTERSECTED.material.uniforms.color.value.getHex();
                             INTERSECTED.material.uniforms.color.value.setHex( highlightColor.form );
 
