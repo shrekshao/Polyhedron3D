@@ -1,6 +1,7 @@
 var $ = require("jquery");
 var THREE = require('three');
 THREE.OrbitControls = require('three-orbit-controls')(THREE);
+THREE.TransformControls = require('./lib/TransformControls.js')(THREE);
 // THREE.OutlineEffect = require('./lib/OutlineEffect.js')(THREE);
 import dat from 'dat-gui'
 
@@ -152,31 +153,26 @@ import dat from 'dat-gui'
         // console.log('clicked');
         clicked = true;
 
+        // tmpVec3.set( mouseScene1.x, mouseScene1.y, 0.5 )
 
-        // tmpVec3.set(
-        //     ( event.clientX / window.innerWidth ) * 2 - 1,
-        //     - ( event.clientY / window.innerHeight ) * 2 + 1,
-        //     0.5 );
-        tmpVec3.set( mouseScene1.x, mouseScene1.y, 0.5 )
+        // tmpVec3.unproject( camera );
 
-        tmpVec3.unproject( camera );
+        // var dir = tmpVec3.sub( camera.position ).normalize();
 
-        var dir = tmpVec3.sub( camera.position ).normalize();
+        // var distance = - camera.position.z / dir.z;
 
-        var distance = - camera.position.z / dir.z;
+        // var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
 
-        var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
-
-        var dis = pos.length();
-        pos.normalize();
+        // var dis = pos.length();
+        // pos.normalize();
 
 
-        var vertexShapeGeometry = new THREE.SphereBufferGeometry(0.25, 8, 6);
-        var vertexMesh = new THREE.Mesh( vertexShapeGeometry );
-        vertexMesh.translateOnAxis(pos, dis);
+        // var vertexShapeGeometry = new THREE.SphereBufferGeometry(0.25, 8, 6);
+        // var vertexMesh = new THREE.Mesh( vertexShapeGeometry );
+        // vertexMesh.translateOnAxis(pos, dis);
         
 
-        scene1.add( vertexMesh );
+        // scene1.add( vertexMesh );
     }
 
 
@@ -317,6 +313,22 @@ import dat from 'dat-gui'
         ground.receiveShadow = true;
         scene1.add( ground );
         scene2.add( ground.clone() );
+
+
+        // test objects
+        var vertexShapeGeometry = new THREE.SphereBufferGeometry(0.25, 8, 6);
+        var vertexMesh = new THREE.Mesh( vertexShapeGeometry );
+        
+        scene1.add( vertexMesh );
+
+        // var axisHelper = new THREE.AxisHelper( 5 );
+        // scene1.add( axisHelper );
+
+        // TODO: camera viewport
+        var control = new THREE.TransformControls( camera, renderer.domElement );
+        control.attach( vertexMesh );
+        scene1.add( control );
+
         
 
         onWindowResize();
