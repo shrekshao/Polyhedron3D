@@ -467,8 +467,13 @@ import { PolyhedralDiagram } from './PolyhedralDiagram'
 
         gui.add(guiList.loadJson, 'load_json_file');
 
-
-
+        guiList.switchMode = {
+            switch_mode: function () {
+                document.getElementById("switch-mode").click()
+            }
+        };
+        gui.add(guiList.switchMode, 'switch_mode');
+        
         guiList.examples = {
             diagram01: function() {
                 $.getJSON('assets/models/test/example_01/diagram.json', onloadJsonDiagram);

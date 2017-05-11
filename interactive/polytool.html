@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style>canvas { width: 100%; height: 100% }</style>
+
+    <script src="js/three.min.js"></script>
+    <script src="js/OBJLoader.js"></script>
+    <script src="js/jquery-3.1.1.min.js"></script>
+   
+  <script src="js/TrackballControls.js"></script>
+
+  <script src="js/math.min.js"></script>
+
+    <link rel="stylesheet" href="css/polytool.css">
+</head>
+<body>
+
+<div id="container">
+    <div id="debugContainer">
+        <canvas id="debugCanvas">
+        </canvas>
+    </div>
+    <div id="rendererContainer"></div>
+</div>
+  
+<script>
+
+        // vars used for rendering
+        var obj;
+        var mesh;
+        var eps = 0.01;
+        var forceFaceMats =  [
+            // regular material
+            new THREE.MeshBasicMaterial( { 
+                color: 0x156289, 
+                opacity: 0.1,
+                transparent: true,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            } ),
+            // highlighted material
+            new THREE.MeshBasicMaterial( { 
+                color: 0xd46a6a, 
+                opacity: 0.1,
+                transparent: true,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            } ),
+          new THREE.MeshBasicMaterial( { 
+                color: 0x00cc00, 
+
+                side: THREE.DoubleSide
+                
+            } )
+        ];
+        //var forceFaceMats = new THREE.MultiMaterial(materials);
+        var geometry;// = new THREE.Geometry();
+        var face3s;// = [];
+
+        // .obj model info
+        var vertices;// = [];
+        var edges;// = [];
+        var half_faces;// = [];
+var cells;// = [];
+var faces;
+
+        // half-face definition
+        function half_face() {
+            this.id = undefined;
+            this.indices = [];
+            this.adjacent = [];
+            // mesh_index is used to change the color
+            this.face3_indices = [];
+        }
+
+        // face defintion
+        function face() {
+            this.hfa = undefined;
+            this.hfb = undefined;
+        }
+
+        // edge definition
+        function edge() {
+            this.va = undefined;
+            this.vb = undefined;
+            this.faces = [];
+        }
+
+        // cells definition
+        function cell() {
+            this.hfs = [];
+        }
+
+        function message() {
+          this.data = undefined;
+          this.type = undefined;
+        }
+
+// used to switch back to the previous color
+var cell_pre_face3s_indices = [];
+var cell_pre_face3s_material = [];
+var face_pre_face3s_indices = [];
+var face_pre_face3s_material = [];
+
+// undefined if it's not uploading file
+var uploadData = undefined;
+
+window.onmessage = function(e){
+
+            if (e.data == 'hello') {
+                alert('It works!');
+                //console.log(e.origin);
+            }
+            
+            if (e.data.type == 'cell_idx') {
+            // unhighlight the previous highlighted cells
+                for (var i = 0; i < cell_pre_face3s_indices.length; i++) {
+                    face3s[cell_pre_face3s_indices[i]].materialIndex = cell_pre_face3s_material[i];
+                }
+
+              cell_pre_face3s_indices = [];
+              cell_pre_face3s_material = [];
+                var cell_idx = e.data.data;
+                for (var i = 0; i < cells[cell_idx].hfs.length; i++) {
+                    var face3_length = cells[cell_idx].hfs[i].face3_indices.length;
+                    for (var j = 0; j < face3_length; j++) {
+                      var index = cells[cell_idx].hfs[i].face3_indices[j];
+                      cell_pre_face3s_material.push(face3s[index].materialIndex);
+                      face3s[index].materialIndex = 1;
+                      cell_pre_face3s_indices.push(index);
+                    }
+                }
+
+                // generate new THREE.Geometry object because
+                // http://stackoverflow.com/questions/12468906/three-js-updating-geometry-face-materialindex
+                geometry = new THREE.Geometry();
+                geometry.vertices = vertices;
+                geometry.faces = face3s;
+                scene.remove(mesh);
+                mesh = new THREE.Mesh(geometry, forceFaceMats);
+                //mesh.rotation.y = targetRotation;
+                scene.add(mesh);
+                render();
+            }
+          else if (e.data.type == 'face_idx') {
+            for (var i = 0; i < face_pre_face3s_indices.length; i++) {
+              face3s[face_pre_face3s_indices[i]].materialIndex = face_pre_face3s_material[i];
+            }
+
+            face_pre_face3s_indices = [];
+            face_pre_face3s_material = [];
+            var face_idx = e.data.data;
+            for (var i = 0; i < faces[face_idx].hfa.face3_indices.length; i++) {
+              var index = faces[face_idx].hfa.face3_indices[i];
+              face_pre_face3s_material.push(face3s[index].materialIndex);
+              face3s[index].materialIndex= 2;
+              face_pre_face3s_indices.push(index);
+            }
+/*            
+            for (var i = 0; i < cells[cell_idx].hfs.length; i++) {
+              var face3_length = cells[cell_idx].hfs[i].face3_indices.length;
+              for (var j = 0; j < face3_length; j++) {
+                var index = cells[cell_idx].hfs[i].face3_indices[j];
+                face3s[index].materialIndex = 1;
+                pre_face3s_indices.push(index);
+              }
+            }
+*/
+
+            // generate new THREE.Geometry object because
+            // http://stackoverflow.com/questions/12468906/three-js-updating-geometry-face-materialindex
+            geometry = new THREE.Geometry();
+            geometry.vertices = vertices;
+            geometry.faces = face3s;
+            scene.remove(mesh);
+            mesh = new THREE.Mesh(geometry, forceFaceMats);
+            //mesh.rotation.y = targetRotation;
+            scene.add(mesh);
+            render();
+          }
+          else if (e.data.type == 'model_name') {
+            modelPath = 'model/' + e.data.data;
+            window.onload();
+          }
+          else if (e.data.type == 'upload') {
+            uploadData = e.data.data;
+            window.onload();
+            uploadData = undefined;
+          }
+        };
+        
+        //var modelPath = 'model/txt1/txt1_converted.obj'
+        var modelPath = 'model/txt2/txt2_converted.obj';
+        var targetRotation = 0;
+        var targetRotationOnMouseDown = 0;
+        var mouseX = 0;
+        var mouseXOnMouseDown = 0;
+        var windowHalfX = window.innerWidth / 2;
+        var windowHalfY = window.innerHeight / 2;
+        document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+
+        function onDocumentMouseDown( event ) {
+            event.preventDefault();
+            document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+            document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+            mouseXOnMouseDown = event.clientX ;
+            //console.log(event.clientX);
+            targetRotationOnMouseDown = targetRotation;
+        }
+
+        function onDocumentMouseMove( event ) {
+            mouseX = event.clientX ;
+            targetRotation = targetRotationOnMouseDown + ( mouseX - mouseXOnMouseDown ) * 0.02;
+            //console.log(targetRotation);
+        }
+
+        function onDocumentMouseUp( event ) {
+            document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+            document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+        }
+
+        var scene;// = new THREE.Scene();
+        //scene.background = new THREE.Color(0xffffff);
+
+        var camera;// = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        
+        var renderer;// = new THREE.WebGLRenderer();
+        
+        //renderer.setSize(window.innerWidth, window.innerHeight);
+
+        //var loader = new THREE.OBJLoader();
+
+
+      //   loader.load(modelPath, function ( object ) {
+      //     //scene.add( object );
+      //     obj = object;
+          
+      //     object.traverse( function ( child ) {
+      //       //console.log(child);
+
+      //       if ( child instanceof THREE.Mesh ) {
+      //           //console.log(child.geometry.attributes.position);
+      //           var forceFace =  new THREE.MeshBasicMaterial( { 
+      //               color: 0x156289, 
+      //           // shading: THREE.FlatShading,
+      //           // opacity: 0.05,
+      //           opacity: 0.1,
+      //           transparent: true,
+      //           side: THREE.DoubleSide,
+
+      //           // blending: THREE.AdditiveBlending,
+
+      //           depthWrite: false
+      //       } );
+
+      //           mesh = new THREE.Mesh(child.geometry, forceFace);
+      //           console.log(mesh);
+      //           scene.add(mesh);
+      //       }
+
+      //   } );
+      //     // read model from .obj files and then construct half-faces in the callback function
+
+      //     //console.log(object.geometry);
+      // } );
+window.onload = function() {
+            geometry = new THREE.Geometry();
+            face3s = [];
+            vertices = [];
+            edges = [];
+            half_faces = [];
+          cells = [];
+          faces = [];
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xffffff);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 10000);
+        
+            renderer = new THREE.WebGLRenderer();
+        
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            // var light = new THREE.PointLight( 0xff0000, 1, 100 );
+            // light.position.set( 30, 30, 30 );
+            // scene.add( light );
+                    //document.body.appendChild(renderer.domElement);
+
+        //scene.add(cube);
+        //camera.position.x = 20;
+  //       camera.position.y = 100;
+  //       camera.position.x = 10;
+  // camera.position.z = 0;
+
+  //console.log("asd" + objCenter);
+
+
+  //console.log('Center: ' + center.x);
+  
+canvas = document.getElementById("debugCanvas");
+ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+var container2 = document.getElementById("rendererContainer");
+if (container2.firstChild)
+    container2.removeChild(container2.firstChild);
+container2.appendChild(renderer.domElement);
+
+// var container1 = document.getElementById("container1");
+// container1.appendChild(canvas);
+    read_obj_model(vertices, half_faces, edges, camera, uploadData);
+
+        };
+
+
+        function animate() {
+            requestAnimationFrame(animate);
+            //controls.update();
+            //mesh.rotation.y += ( targetRotation - mesh.rotation.y ) * 0.05;
+            //obj.rotation.y += 0.5;
+
+    //console.log(textPos[i]);
+            controls.update();
+
+        }
+
+        function render() {
+            console.log("render");
+            //camera.lookAt(objCenter);
+            renderer.render(scene, camera);
+            //console.log(camera.position);
+            //console.log(mesh.rotation);
+            var length = vCounter; // vCounter but not vertices.length because we don't want to render intersection point for the self-intersecting faces
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (var i = 0; i < length; i++) {
+                var pos = new THREE.Vector3(vertices[i].x, vertices[i].y, vertices[i].z);
+                pos.applyMatrix4(mesh.matrixWorld);
+                pos.project(camera);
+
+                pos.x = (pos.x + 1) * 0.5 * canvas.width;
+                pos.y = (-pos.y + 1) * 0.5 * canvas.height;
+                ctx.font = "10px Arial";
+                ctx.strokeText(i, pos.x, pos.y);
+                console.log(pos);
+            }
+            //parent.postMessage('hi', '*');
+        }
+        //console.log(parent);
+
+        // helper function
+        function swap(a, b) {
+            var temp = a;
+            a = b;
+            b = temp;
+        }
+
+        function addFaceToEdge(f, edges) {
+            var length = f.hfa.indices.length;
+            
+            var ttt = [];
+            for (var i = 0; i < length; i++) {
+                var newFace = new face();
+                var a = f.hfa.indices[i];
+                var b = f.hfa.indices[(i + 1) % length];
+                //console.log(f);
+                if (a > b) {
+                    a = a ^ b;
+                    b = a ^ b;
+                    a = a ^ b;
+                    newFace.hfa = f.hfb;
+                    newFace.hfb = f.hfa;
+                }
+                else {
+                    newFace.hfa = f.hfa;
+                    newFace.hfb = f.hfb;
+                }
+
+                var edge_length = edges.length;
+                var isFound = false;
+                for (var j = 0; j < edge_length; j++) {
+                    if (a == edges[j].va && b == edges[j].vb) {
+                        edges[j].faces.push(newFace);
+                        isFound = true;
+                        break;
+                    }
+                }
+
+                if (!isFound) {
+                    var e = new edge();
+                    e.va = a;
+                    e.vb = b;
+                    e.faces.push(newFace);
+                    edges.push(e);
+                }
+                //return;
+            }
+            //console.log(ttt);
+            //console.log(edges);
+        }
+
+        // indices is faces[k].hfa.indices or faces[k].hfb.indices, which is the indices of the vertices of a face
+        function get_center(indices) {
+            var center = new THREE.Vector3();
+            var length = indices.length;
+            for (var i = 0; i < length; i++) {
+                var index = indices[i];
+                center.add(vertices[index]);
+            }
+            center.divideScalar(length);
+            return center;
+        }
+
+        // find the center of the face and find the vector perpendicular to the edge (v_b - v_a)
+        // face_indices contain the indices of the vertices, which represent a face
+        function get_perpendicular_vector(v_a, v_b, face_indices) {
+            //console.log(v_a);
+            var center = get_center(face_indices);
+
+            //console.log(v_a, v_b, center);
+            var e_vector = new THREE.Vector3();
+            e_vector.subVectors(v_b, v_a);
+            var v = center.sub(v_a);
+            //console.log(e_vector);
+            var r = v.sub(e_vector.multiplyScalar(v.dot(e_vector) / e_vector.lengthSq()));
+            //console.log(r);
+            return v.sub(e_vector.multiplyScalar(v.dot(e_vector) / e_vector.lengthSq()));
+        }
+        function get_angle(vertices, edge, index, ref_axis) {
+            // if (!(edge.va == 4 && edge.vb == 18))
+            //     return;
+            var vector_a = get_perpendicular_vector(vertices[edge.va], vertices[edge.vb], edge.faces[0].hfa.indices);
+            var vector_b = get_perpendicular_vector(vertices[edge.va], vertices[edge.vb], edge.faces[index].hfa.indices);
+            var axis = new THREE.Vector3();
+            // vector_a may be parallel to vector_b. Use eps to deal with this corner case.
+            axis.crossVectors(vector_a, vector_b);
+            var angle = vector_a.angleTo(vector_b);
+      
+            if (axis.length() > eps && axis.dot(ref_axis) < 0) {
+                // angle += Math.PI; // fuck this bug, spent me 2 hours
+                angle = Math.PI * 2 - angle;
+            }
+            // if (edge.va == 4 && edge.vb == 11) {
+            //     // console.log(vector_a);
+            //     // console.log(vector_b);
+            //     // //console.log(ref_axis);
+            //     // console.log(axis);
+            //     // console.log(axis.dot(ref_axis));
+            //     console.log(edge.faces[0]);
+            //     console.log(edge.faces[index]);
+            //     console.log(angle);
+            // }
+            return angle;
+        }
+        // function isValidNormal(index_a, index_b, v_index_a, v_index_b) {
+        //     var length = index_a.length;
+        //     var center_a = getCenter(index_a);
+        //     var center_b = getCenter(index_b);
+        //     var vec_a = getPerpendicularVector(vectices[v_index_a], vertices[v_index_b], center_a);
+        //     var vec_b = getPerpendicularVector(vectices[v_index_a], vertices[v_index_b], center_b);
+        // }
+
+        // function isAdjacent(extended_index_a, extended_index_b, index_a, index_b) {
+        //     var length = extended_index_a.length;
+        //     for (var i = 1; i < length - 1; i++) {
+        //         for (var j = 1; j < length - 1; j++) {
+        //             // find possible connected half-faces
+        //             if (extended_index_a[i] == extended_index_b[j]) {
+        //                 // judge if the normal is valid
+        //                 if (extended_index_a[i + 1] == extended_index_b[j - 1] && isValidNormal(index_a, index_b, extended_index_a[i], extended_index_a[i + 1]))
+        //                     return true;
+        //                 if (extended_index_a[i - 1] == extended_index_b[j + 1] && isValidNormal(index_a, index_b, extended_index_a[i - 1], extended_index_a[i]))
+        //                     return true;
+        //             }
+        //         }
+        //     }
+        //     return false;
+        // }
+// console.log(math.sqrt(4));
+// var test = 1;
+// function addCenter(v) {
+//     console.log(v);
+//     console.log(objCenter);
+    
+// }
+
+function loadModel(data) {
+  vCounter = 0;
+  math.config({number: 'number', precision: 64, epsilon: 0.1});
+
+  // used to place the camera
+  var objCenter = new THREE.Vector3(0, 0, 0);
+  // used to estimate a proper distance from the camera to the target(objCenter)
+  var x_min = 1000, x_max = -1000;
+  var y_min = 1000, y_max = -1000;
+  var z_min = 1000, z_max = -1000;
+
+    var lines = data.split("\n");
+    // var face3_index = 0;
+    var hf_index = 0;
+    $.each(lines, function(n, line) {
+        tokens = line.split(" ");
+        //console.log(tokens[0]);
+        if (tokens[0] == 'v') {
+            var t = tokens.slice(1, 4).map(function(item) {
+                return parseFloat(item);
+            });
+            var v = new THREE.Vector3(t[0], t[1], t[2]);
+          vertices.push(v);
+          //addCenter(v);
+          objCenter.add(v);
+            vCounter++;
+
+            // used for centering the camera
+            if (v.x < x_min) x_min = v.x;
+            if (v.x > x_max) x_max = v.x;
+            if (v.y < y_min) y_min = v.y;
+            if (v.y > y_max) y_max = v.y;
+            if (v.z < z_min) z_min = v.z;
+            if (v.z > z_max) z_max = v.z;
+             //geometry.vertices.push(v);                 
+        }
+        else if (tokens[0] == 'f') {
+            //console.log("HI");
+            // construct 2 half-faces and put them into one face
+            var hf = new half_face();
+            for (var i = 1; i < tokens.length; i++) {
+                var indices = tokens[i].split("/");
+                // minus 1 makes it start from 0
+                hf.indices.push(parseInt(indices[0]) - 1);
+                //console.log(face);
+            }
+            half_faces.push(hf);
+            var symhf = new half_face();
+            symhf.indices = hf.indices.slice(0).reverse();
+            half_faces.push(symhf);
+            var f = new face();
+            f.hfa = hf;
+          f.hfb = symhf;
+          faces.push(f);
+            addFaceToEdge(f, edges);
+            hf.id = hf_index;
+            symhf.id = hf_index + 1;
+            hf_index += 2;
+
+            // construct mesh for rendering
+          var length = hf.indices.length;
+          if (length == 4) {
+            // TODO: deal with self-intersecting faces
+
+            // calculate v to test intersection
+            var v = [];
+            var v_sub = [];
+            for (var i = 0; i < hf.indices.length; i++) {
+              v_sub = [];
+              var index = hf.indices[i];
+              v_sub.push(vertices[index].x);
+              v_sub.push(vertices[index].y);
+              v_sub.push(vertices[index].z);
+              v.push(v_sub);
+            }
+
+            //console.log(v);
+            //console.log(math.intersect(v[1], v[2], v[0], v[3]));
+            var intersection1 = math.intersect(v[1], v[2], v[0], v[3]);
+            var intersection2 = math.intersect(v[0], v[1], v[2], v[3]);
+            if (intersection1 != null) {
+              var newVertex = new THREE.Vector3(intersection1[0], intersection1[1], intersection1[2]);
+              vertices.push(newVertex);
+              var newVertexIndex = vertices.length - 1;
+              var face3_a = new THREE.Face3(hf.indices[0], hf.indices[1], newVertexIndex);
+              var face3_b = new THREE.Face3(hf.indices[2], hf.indices[3], newVertexIndex);
+              face3s.push(face3_a);
+              hf.face3_indices.push(face3s.length - 1);
+              symhf.face3_indices.push(face3s.length - 1);
+            
+              face3s.push(face3_b);
+              hf.face3_indices.push(face3s.length - 1);
+              symhf.face3_indices.push(face3s.length - 1);
+              console.log('self intersect1');
+            }
+            else if (intersection2 != null) {
+              var newVertex = new THREE.Vector3(intersection2[0], intersection2[1], intersection2[2]);
+              vertices.push(newVertex);
+              var newVertexIndex = vertices.length - 1;
+              var face3_a = new THREE.Face3(hf.indices[0], hf.indices[3], newVertexIndex);
+              var face3_b = new THREE.Face3(hf.indices[1], hf.indices[2], newVertexIndex);
+              face3s.push(face3_a);
+              hf.face3_indices.push(face3s.length - 1);
+              symhf.face3_indices.push(face3s.length - 1);
+            
+              face3s.push(face3_b);
+              hf.face3_indices.push(face3s.length - 1);
+              symhf.face3_indices.push(face3s.length - 1);
+              console.log('self intersect2');
+            }
+            // not self-intersecting face
+            else {
+              for (var i = 1; i < length - 1; i++) {
+                var face3 = new THREE.Face3(hf.indices[0], hf.indices[i], hf.indices[i + 1], undefined, undefined, 0);
+                face3s.push(face3);
+                //geometry.faces.push(face3);
+
+                // record mesh_index
+                hf.face3_indices.push(face3s.length - 1);
+                symhf.face3_indices.push(face3s.length - 1);
+                // face3_index++;
+                console.log('not self intersect');
+              }
+            }
+          }
+          else {
+              for (var i = 1; i < length - 1; i++) {
+                var face3 = new THREE.Face3(hf.indices[0], hf.indices[i], hf.indices[i + 1], undefined, undefined, 0);
+                face3s.push(face3);
+                //geometry.faces.push(face3);
+
+                // record mesh_index
+                hf.face3_indices.push(face3s.length - 1);
+                symhf.face3_indices.push(face3s.length - 1);
+                // face3_index++;
+              }
+            }
+            //console.log(edges);
+        }
+    });
+
+    geometry.vertices = vertices;
+    geometry.faces = face3s;
+    mesh = new THREE.Mesh(geometry, forceFaceMats);
+    scene.add(mesh);
+    console.log(vCounter);
+    console.log(vertices.length);
+    objCenter.divideScalar(vCounter);
+    console.log(objCenter);
+    //camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+    camera.position.x = objCenter.x + (x_max - x_min);
+    camera.position.y = objCenter.y + (y_max - y_min);
+    camera.position.z = objCenter.z + (z_max - z_min);
+
+    controls = new THREE.TrackballControls( camera, undefined, objCenter);
+    controls.rotateSpeed = 15.0;
+    controls.zoomSpeed = 1.2;
+    controls.panSpeed = 0.8;
+    controls.noZoom = false;
+    controls.noPan = false;
+    controls.staticMoving = false;
+    controls.dynamicDampingFactor = 0.3;
+    controls.keys = [ 65, 83, 68 ];
+    controls.addEventListener( 'change', render );
+
+    //addFaceCenter();
+
+    //console.log(mesh);
+    // var test = [];
+    // test.push(half_faces[0]);
+    // console.log(test);
+    // half_faces[0].indices[0] = 100;
+    // console.log(test);
+    // half_faces[0] = half_faces[1];
+    // console.log(half_faces[0]);
+    // console.log(test);
+    connect_half_faces(vertices, edges);
+    find_cells(cells, half_faces);
+    var msg = new message();
+    msg.data = cells.length;
+    msg.type = 'cellsLength';
+    parent.postMessage(msg, '*');
+
+    msg = new message();
+    msg.data = faces.length;
+    msg.type = 'facesLength';
+
+    parent.postMessage(msg, '*');
+    //console.log(vertices);
+    //var test = getCenter(half_faces[0].indices);
+    //console.log(test);
+    //console.log(vertices[0][0]);
+    //console.log(faces);
+    console.log(cells);
+    console.log(half_faces);
+    console.log(edges);
+    console.log(mesh);
+
+    render();
+    animate();
+}
+
+function read_obj_model(vertices, half_faces, edges, camera, data) {
+    if (data == undefined)
+        $.get(modelPath, loadModel);
+    else
+        loadModel(data);
+}
+
+        // function addFaceCenter() {
+        //     for (var i = 0; i < faces.length; i++) {
+
+        //         var geometry = new THREE.SphereGeometry( 0.1, 32, 32 );
+        //         var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+        //         var sphere = new THREE.Mesh( geometry, material );
+        //         sphere.positon = get_center(faces[i].hfa.indices);
+        //         scene.add(sphere);
+        //         console.log(sphere.position);
+        //     }
+        // }
+
+        function connect_around(vertices, edge) {
+            // Use simple selection sort
+            // total_face won't be very large. Selection sort won't be much slower than quick sort, even faster.
+            var total_face = edge.faces.length;
+            // if (total_face < 2)
+            //     return;
+            // var vector_a = get_perpendicular_vector(vertices[edge.va], vertices[edge.vb], edge.faces[0].hfa.indices);
+            // var vector_b = get_perpendicular_vector(vertices[edge.va], vertices[edge.vb], edge.faces[1].hfa.indices);
+            // var ref_axis = new THREE.Vector3();
+            // ref_axis.crossVectors(vector_a, vector_b);
+
+            var ref_axis = new THREE.Vector3();
+            ref_axis = ref_axis.subVectors(vertices[edge.vb], vertices[edge.va]);
+
+            for (var i = 1; i < total_face; i++) {
+                var min_angle = get_angle(vertices, edge, i, ref_axis);
+
+                var min_index = i;
+                for (var j = i + 1; j < total_face; j++) {
+                    var angle = get_angle(vertices, edge, j, ref_axis);
+                    if (angle < min_angle) {
+            //                         if (edge.va == 4 && edge.vb == 11) {
+            //     console.log("min:" + angle + " min_angle: " + min_angle);
+            //     console.log("i : " + i + " j : " + j);
+            // }
+                        min_angle = angle;
+                        min_index = j;
+                    }
+                }
+                if (min_index != i) {
+                    var temp = edge.faces[i];
+                    edge.faces[i] = edge.faces[min_index];
+                    edge.faces[min_index] = temp;
+                }
+            }
+
+            // connect
+            for (var i = 0; i < total_face; i++) {
+                var f0 = edge.faces[i];
+                var f1 = edge.faces[(i + 1) % total_face];
+                f0.hfa.adjacent.push(f1.hfb);
+                f1.hfb.adjacent.push(f0.hfa);
+            }
+            //console.log(edge);
+        }
+
+        function connect_half_faces(vertices, edges) {
+            var length = edges.length;
+            for (var i = 0; i < length; i++) {
+                connect_around(vertices, edges[i]);
+            }
+        }
+
+        function find_cells(cells, half_faces) {
+            var vstd = [];
+            var length = half_faces.length;
+            for (var i = 0; i < length; i++)
+                vstd.push(false);
+            for (var i = 0; i < length; i++) {
+                if (vstd[i] == false)
+                    bfs(cells, half_faces, vstd, i);
+            }
+        }
+
+        function bfs(cells, half_faces, vstd, start_index) {
+            var queue = [];
+            var new_cell = new cell();
+            queue.push(start_index);
+            vstd[start_index] = true;
+            while (queue.length != 0) {
+                var front = queue.shift();
+                new_cell.hfs.push(half_faces[front]);
+                var length = half_faces[front].adjacent.length;
+                for (var i = 0; i < length; i++) {
+                    var index = half_faces[front].adjacent[i].id;
+                    if (vstd[index] == false) {
+                        vstd[index] = true;
+                        queue.push(half_faces[index].id);
+                    }
+                }
+            }
+            cells.push(new_cell);
+        }
+
+        // function connect_half_faces(vertices, half_faces) {
+        //     for (var i = 0; i < half_faces.length; i++) {
+        //         var extended_index_a = half_faces[i].indices.concat(half_faces[i].indices.slice(0, 2));
+        //         for (var j = i + 1; j < half_faces.length; j++) {
+        //             var extended_index_b = half_faces[j].indices.concat(half_faces[j].indices.slice(0, 2));
+        //             if (isAdjacent(extended_index_a, extended_index_b, half_faces[i].indices, half_faces[j].indices)) {
+        //                 half_faces[i].adjacent.push(half_faces[j]);
+        //                 half_faces[j].adjacent.push(half_faces[i]);
+        //             }
+        //         }
+        //     }
+        // }
+        
+</script>
+  
+</body>
+</html>
