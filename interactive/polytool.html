@@ -52,8 +52,12 @@
 
                 side: THREE.DoubleSide
                 
-            } )
+            } ),
         ];
+        var lineMat = new THREE.LineBasicMaterial( {
+                color: 0xaaaaaa,
+                transparent: false
+            } );
         //var forceFaceMats = new THREE.MultiMaterial(materials);
         var geometry;// = new THREE.Geometry();
         var face3s;// = [];
@@ -81,6 +85,8 @@ var faces;
         }
 
         // edge definition
+        // va, vb are the indices of the vertices
+        // for example: vertices[va], vertices[vb]
         function edge() {
             this.va = undefined;
             this.vb = undefined;
@@ -277,7 +283,7 @@ window.onload = function() {
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 10000);
         
-            renderer = new THREE.WebGLRenderer();
+            renderer = new THREE.WebGLRenderer({antialias: true});
         
             renderer.setSize(window.innerWidth, window.innerHeight);
             // var light = new THREE.PointLight( 0xff0000, 1, 100 );
@@ -342,7 +348,7 @@ container2.appendChild(renderer.domElement);
                 pos.y = (-pos.y + 1) * 0.5 * canvas.height;
                 ctx.font = "10px Arial";
                 ctx.strokeText(i, pos.x, pos.y);
-                console.log(pos);
+                //console.log(pos);
             }
             //parent.postMessage('hi', '*');
         }
@@ -483,6 +489,16 @@ container2.appendChild(renderer.domElement);
 //     console.log(objCenter);
     
 // }
+
+function addEdgesToScene() {
+    var geometry = new THREE.Geometry();
+    for (var i = 0; i < edges.length; i++) {
+        geometry.vertices.push(vertices[edges[i].va]);
+        geometry.vertices.push(vertices[edges[i].vb]);
+    }
+    var lineSegments = new THREE.LineSegments(geometry, lineMat);
+    scene.add(lineSegments);
+}
 
 function loadModel(data) {
   vCounter = 0;
@@ -682,6 +698,8 @@ function loadModel(data) {
     console.log(half_faces);
     console.log(edges);
     console.log(mesh);
+
+    addEdgesToScene();
 
     render();
     animate();

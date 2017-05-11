@@ -66023,12 +66023,12 @@ THREE.OrbitControls = __webpack_require__(14)(THREE);
         gui.add(guiList.loadJson, 'load_json_file');
 
         guiList.switchMode = {
-            switch_mode: function () {
+            interactive_mode: function () {
                 document.getElementById("switch-mode").click()
             }
         };
-        gui.add(guiList.switchMode, 'switch_mode');
-        
+        gui.add(guiList.switchMode, 'interactive_mode');
+
         guiList.examples = {
             diagram01: function() {
                 $.getJSON('assets/models/test/example_01/diagram.json', onloadJsonDiagram);
