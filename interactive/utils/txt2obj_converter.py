@@ -14,6 +14,7 @@ def getKey(item):
 	return item[0]
 
 def readFile(inputDir):
+	# change the input file name
 	force_v_file = open(inputDir + '/force_v.txt')
 	force_f_v_file = open(inputDir + '/force_f_v.txt')
 
@@ -56,6 +57,8 @@ def writeToFile(filename):
 		file.write("\n")
 		
 if __name__ == "__main__":
+	# change the input directory
 	inputDir = "../model/txt3"
 	readFile(inputDir)
+	# change the output directory and file name
 	writeToFile(inputDir + "/txt3_converted.obj")
