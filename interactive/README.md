@@ -1,9 +1,3 @@
-# PolyTool
-
-Penn Design RA project - expand half-edge to half-face to find cells in a given .obj mesh.
-
-[Click here for the live demo](http://www.miaokaixiang.com/PolyTool/)
-
 # How to find cells
 
 1. construct half-faces first, each face will have 2 half-faces
