@@ -4,7 +4,8 @@ import { createCylinderMesh } from './utils/CylinderEdgeHelper'
 import { createCylinderArrowMesh } from './utils/CylinderArrowHelper'
 
 /**
- * 
+ * Constructor of the class of PolyhedralDiagram (loaded from json file)
+ * @constructor
  * @param {*} json JSON Object of the diagram
  */
 var PolyhedralDiagram = function (json) {
@@ -16,7 +17,6 @@ var PolyhedralDiagram = function (json) {
     this.json = json;
 
     var exteriorGreen = 0x009600;
-
 
     var self = this;
     
@@ -39,17 +39,8 @@ var PolyhedralDiagram = function (json) {
     this.view = 'all';
     this.curView = this.views.all;
 
-
-    // this.curViewValue = 'all';
-
-
-
     this.diagram = {
         form: {
-            // geometries: {},
-            // objects: {}
-            
-
             objects: {
                 root: new THREE.Object3D(),
 
@@ -65,8 +56,6 @@ var PolyhedralDiagram = function (json) {
         },
 
         force: {
-            // geometries: {},
-
             objects: {
                 root: new THREE.Object3D(),
 
@@ -91,13 +80,13 @@ var PolyhedralDiagram = function (json) {
             exteriorGreen: exteriorGreen
         },
 
+        // Three.js materials of all kind, including lines, vertices, highlighted/normal, interior/external etc.
         materials: {
             lineBasic: new THREE.LineBasicMaterial( { 
-                // color: 0xffffff, 
                 color: 0x000000,
                 opacity: 1, 
                 transparent: false
-                // linewidth: 3     // ANGLE limitation
+                // linewidth doesn't work on Windows due to ANGLE limitation
             } ),
 
             lineForce: new THREE.LineBasicMaterial( {
@@ -109,7 +98,7 @@ var PolyhedralDiagram = function (json) {
                 color: 0xcccccc, 
                 dashSize: 0.3,
                 gapSize: 0.1,
-                linewidth: 1        // ANGLE limitation
+                linewidth: 1        // linewidth doesn't work on Windows due to ANGLE limitation
             } ),
 
             cylinderBasic: new THREE.MeshBasicMaterial( {
@@ -209,7 +198,9 @@ var PolyhedralDiagram = function (json) {
 
     PolyhedralDiagram.prototype.constructor = PolyhedralDiagram;
 
-
+    /**
+     * Triggered when enter viewing state of viewing all
+     */
     PolyhedralDiagram.prototype.onEnterAll = function () {
         
         this.diagram.form.objects.edges.visible = true;
@@ -223,6 +214,9 @@ var PolyhedralDiagram = function (json) {
         this.diagram.force.objects.exFaces.visible = true;
     };
 
+    /**
+     * Triggered when enter viewing state of interior
+     */
     PolyhedralDiagram.prototype.onEnterInterior = function () {
         
         this.diagram.form.objects.edges.visible = true;
@@ -236,6 +230,9 @@ var PolyhedralDiagram = function (json) {
         this.diagram.force.objects.exFaces.visible = false;
     };
 
+    /**
+     * Triggered when enter viewing state of exterior
+     */
     PolyhedralDiagram.prototype.onEnterExterior = function () {
         
         this.diagram.form.objects.edges.visible = false;
@@ -258,6 +255,9 @@ var PolyhedralDiagram = function (json) {
         }
     };
 
+    /**
+     * Triggered when exit viewing state of exterior
+     */
     PolyhedralDiagram.prototype.onExitExterior = function () {
         var f, mesh;
         for (f in this.diagram.force.maps.exFaceId2Object) {
@@ -269,7 +269,9 @@ var PolyhedralDiagram = function (json) {
         }
     };
 
-
+    /**
+     * Stub function added event listener to on view state change
+     */
     PolyhedralDiagram.prototype.onChangeView = function (value) {
         if (this.curView.onExit) {
             this.curView.onExit();
@@ -307,7 +309,9 @@ var PolyhedralDiagram = function (json) {
 
 
 
-
+    /**
+     * init the form diagram when json get loaded
+     */
     PolyhedralDiagram.prototype.buildFormDiagram = function() {
         var json = this.json;
 
@@ -588,8 +592,9 @@ var PolyhedralDiagram = function (json) {
 
 
 
-
-
+    /**
+     * init the force diagram when json get loaded
+     */
     PolyhedralDiagram.prototype.buildForceDiagram = function() {
         var json = this.json;
 
